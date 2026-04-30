@@ -206,10 +206,10 @@ Fastify + TypeScript + Prisma
 Current preferred direction:
 
 ```text
-NestJS + TypeScript + Prisma
+Fastify + TypeScript + Prisma
 ```
 
-because it provides stronger modular structure for later productization.
+See ADR 0005 for the full technology stack decision. Fastify is the CE v0.1 implementation baseline; NestJS is not in scope for CE v0.1.
 
 ### 7.2 Database
 
@@ -549,6 +549,23 @@ Before implementing CE v0.1, read:
 
 ```text
 README.md
+08-decisions/README.md
+08-decisions/0001-ce-v01-implementation-baseline.md
+08-decisions/0002-api-namespace-convention.md
+08-decisions/0003-command-action-lifecycle.md
+08-decisions/0004-security-defaults.md
+08-decisions/0005-technology-stack-decision.md
+09-contracts/README.md
+09-contracts/openapi/opstage-ce-v0.1.yaml
+09-contracts/prisma/schema.prisma
+09-contracts/prisma/prisma.config.ts
+10-implementation/README.md
+10-implementation/00-monorepo-structure.md
+10-implementation/01-backend-scaffold-plan.md
+10-implementation/02-ui-scaffold-plan.md
+10-implementation/03-agent-sdk-scaffold-plan.md
+10-implementation/04-demo-service-plan.md
+10-implementation/05-implementation-sequence.md
 01-capsule/00-overview.md
 01-capsule/01-capsule-service-concept.md
 01-capsule/03-domain-model.md
@@ -563,11 +580,12 @@ README.md
 02-specs/07-command-spec.md
 02-specs/08-audit-event-spec.md
 02-specs/09-status-model-spec.md
-03-editions/01-ce/01-ce-scope.md
-03-editions/01-ce/02-ce-mvp.md
-03-editions/01-ce/03-ce-architecture.md
-03-editions/01-ce/04-ce-technology-stack.md
-03-editions/01-ce/12-ce-extension-points.md
+03-editions/ce/01-ce-scope.md
+03-editions/ce/02-ce-mvp.md
+03-editions/ce/03-ce-architecture.md
+03-editions/ce/04-ce-technology-stack.md
+03-editions/ce/12-ce-extension-points.md
+03-editions/ce/13-ce-v01-implementation-checklist.md
 ```
 
 ---

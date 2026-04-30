@@ -1,18 +1,5 @@
 # CE Roadmap
 
-- Status: Draft
-- Edition: Shared
-- Priority: Medium
-
-## Roadmap Principle
-
-- 先完成 CE v0.1：轻量、开源、单镜像、SQLite、Node Embedded Agent。
-- 再稳定 Capsule Spec 和 Agent Model。
-- 后续扩展 Sidecar/External Agent。
-- EE 和 Cloud 在 CE 稳定后作为商业化路线推进。
-
-# CE Roadmap
-
 - Status: Implementation Guidance
 - Edition: CE
 - Priority: High

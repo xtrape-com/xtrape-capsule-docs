@@ -1,17 +1,5 @@
 # Opstage Subsystem Overview
 
-- Status: Draft
-- Edition: Shared
-- Priority: Medium
-
-本文件属于 `xtrape-capsule` 文档集。`xtrape-capsule` 是面向轻服务 / Capsule Service 的领域体系；`xtrape-capsule-opstage` 是该体系下的统一运行态治理平台。
-
-当前实现重点是 CE 开源社区版。EE 私有化商业版与 Cloud SaaS 版属于未来规划，CE 需要保留扩展点，但不应在早期版本实现其完整能力。
-
-Opstage 是 xtrape-capsule 的统一运行态治理平台，由 UI、Backend 和 Agent 接入机制组成。CE 实现轻量闭环，EE/Cloud 在此基础上扩展规模化能力。
-
-# Opstage Subsystem Overview
-
 - Status: Implementation Guidance
 - Edition: Shared
 - Priority: High

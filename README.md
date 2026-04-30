@@ -1,503 +1,446 @@
 # xtrape-capsule Documentation
 
-- Status: Draft
+- Status: Implementation Guidance
 - Edition: Shared
 - Priority: High
-- Audience: product designers, architects, developers, AI coding agents
+- Audience: founders, architects, product designers, backend developers, frontend developers, agent SDK developers, AI coding agents
 
-`xtrape-capsule` is the lightweight service architecture domain of Xtrape. It defines the concept, specifications, runtime governance model, agent integration model, and edition strategy for Capsule Services.
+This repository contains the documentation set for the `xtrape-capsule` product family.
 
-This documentation set is for the whole `xtrape-capsule` domain. `xtrape-capsule-opstage` is only one core subsystem under this domain.
+`xtrape-capsule` defines the lightweight Capsule Service architecture domain in the Xtrape ecosystem. It covers the Capsule Service concept, shared specifications, edition boundaries, Opstage runtime governance, Agent integration, runtime support, and the CE/EE/Cloud roadmap.
 
-## Current Focus
+This documentation is for the whole `xtrape-capsule` domain, not only for `xtrape-capsule-opstage`. Opstage is the first major runtime governance subsystem under this domain.
 
-The current implementation focus is **CE / Community Edition**.
+---
 
-CE should be implemented as a lightweight, open-source, self-hosted prototype that proves the core Capsule Service governance model:
+## 1. Current Focus
 
-- Capsule Service concept
-- Agent-based registration
-- Backend-managed control plane
-- Web UI for human operation
-- Node.js embedded agent SDK
-- SQLite-first lightweight deployment
-- Single-image or simple Docker deployment
-- Basic health, status, command, action, config visibility, and audit capabilities
-
-EE and Cloud are future editions. They should guide extension-point design, but they must not make the CE implementation unnecessarily heavy.
-
-## Documentation Sections
-
-The recommended reading order is:
+The current implementation focus is:
 
 ```text
-docs/
+CE v0.1 / Community Edition Prototype
+```
+
+CE v0.1 should deliver a lightweight, open-source, self-hosted prototype that proves the core Capsule governance loop:
+
+```text
+Agent registration
+    ↓
+Service report
+    ↓
+Heartbeat and health
+    ↓
+Config visibility
+    ↓
+Predefined action request
+    ↓
+Command polling
+    ↓
+Command result
+    ↓
+Audit log
+```
+
+CE v0.1 should use:
+
+- Opstage Backend;
+- Opstage UI;
+- SQLite persistence;
+- local admin authentication;
+- Node.js Embedded Agent SDK;
+- Node.js demo Capsule Service;
+- simple Docker or Docker Compose deployment.
+
+EE and Cloud are future tracks. They should guide extension-point design, but they must not expand the CE v0.1 implementation scope.
+
+---
+
+## 2. Documentation Structure
+
+Recommended reading order:
+
+```text
+xtrape-capsule-docs/
 ├── README.md
 ├── 01-capsule/
 ├── 02-specs/
 ├── 03-editions/
-│   ├── 01-ce/
-│   ├── 02-ee/
-│   └── 03-cloud/
 ├── 04-opstage/
 ├── 05-agents/
 ├── 06-runtimes/
-└── 07-roadmap/
+├── 07-roadmap/
+├── 08-decisions/
+├── 09-contracts/
+└── 10-implementation/
 ```
 
-### `01-capsule/`
+Each directory has its own `README.md` that defines the local reading order and implementation relevance.
 
-Defines the overall domain:
+---
 
-- what a Capsule Service is;
-- why Capsule Services are different from traditional microservices;
-- the core domain model;
-- the design principles of the xtrape-capsule architecture.
+## 3. Directory Guide
 
-Read this section first before discussing implementation details.
+### 3.1 `01-capsule/`
 
-### `02-specs/`
+Defines the core domain concepts:
 
-Defines cross-edition specifications shared by CE, EE, and Cloud:
+- Capsule Service overview;
+- Capsule Service concept;
+- Capsule Service vs. microservice;
+- domain model;
+- design principles.
 
-- capsule manifest;
-- management contract;
-- agent registration;
-- health model;
-- action model;
-- config model;
-- command model;
-- audit event model;
-- status model.
+Read this first to understand what a Capsule Service is and why Opstage governs it through Agents.
 
-Specifications in this section should remain relatively stable. CE implementation may support only a subset at first, but it should not violate these long-term contracts.
+### 3.2 `02-specs/`
 
-### `03-editions/`
+Defines shared cross-edition specifications:
 
-Defines the boundaries between CE, EE, and Cloud.
+- Capsule Manifest;
+- Capsule Management Contract;
+- Agent Registration;
+- Health;
+- Action;
+- Config;
+- Command;
+- AuditEvent;
+- Status Model.
 
-- `03-editions/01-ce/`: current implementation target;
-- `03-editions/02-ee/`: future private-deployment commercial edition;
-- `03-editions/03-cloud/`: future SaaS cloud edition.
+These specifications should remain stable across CE, EE, and Cloud. CE v0.1 may implement only the required subset, but it should not introduce concepts that conflict with the long-term specs.
 
-Only CE documents marked as `Implementation Target` should be treated as current development requirements.
+### 3.3 `03-editions/`
 
-### `04-opstage/`
+Defines edition boundaries:
 
-Defines the Opstage subsystem.
+```text
+03-editions/ce/      current implementation target
+03-editions/ee/      future private enterprise edition
+03-editions/cloud/   future hosted SaaS edition
+```
 
-Opstage is the runtime governance platform for Capsule Services. It includes:
+Only CE documents marked as implementation target should be treated as current development requirements.
 
+### 3.4 `04-opstage/`
+
+Defines the Opstage runtime governance subsystem:
+
+- Opstage overview;
 - UI;
-- backend;
-- agent integration;
-- command and action management;
-- audit;
-- observability roadmap.
+- Backend;
+- Agent integration;
+- Command and Action model;
+- Audit model;
+- Observability roadmap.
 
-### `05-agents/`
+Opstage is the first concrete governance platform for Capsule Services.
 
-Defines the Agent system.
+### 3.5 `05-agents/`
 
-Agents connect Capsule Services to Opstage. The long-term model includes:
+Defines the Agent system:
 
-- embedded agents;
-- sidecar agents;
-- external agents;
-- Node.js agent SDK;
-- permission and token models.
+- Agent overview;
+- Embedded Agent;
+- future Sidecar Agent;
+- future External Agent;
+- Node Agent SDK;
+- Agent permission model.
 
-CE v0.1 focuses on the Node.js embedded agent SDK.
+CE v0.1 focuses only on the Node.js Embedded Agent SDK.
 
-### `06-runtimes/`
+### 3.6 `06-runtimes/`
 
-Defines runtime support plans.
+Defines runtime integration:
 
-CE v0.1 focuses on Node.js. Java and Python runtimes are planning targets.
+- runtime overview;
+- Node.js Runtime as the CE implementation target;
+- Java Runtime planning;
+- Python Runtime planning.
 
-### `07-roadmap/`
+CE v0.1 focuses only on Node.js. Java and Python are future planning tracks.
 
-Defines product and engineering roadmap across CE, EE, and Cloud.
+### 3.7 `07-roadmap/`
 
-## Development Rules
+Defines product and engineering sequencing:
 
-### 1. CE-first implementation
+- version roadmap;
+- CE roadmap;
+- EE roadmap;
+- Cloud roadmap.
 
-Current development should prioritize CE.
+Use this section to avoid mixing current CE requirements with future commercialization plans.
 
-Do not implement EE or Cloud features in CE v0.1 unless they are explicitly marked as CE requirements.
+### 3.8 `08-decisions/`
 
-### 2. Keep CE lightweight
+Defines accepted architecture and product decisions:
+
+- CE v0.1 implementation baseline;
+- API namespace convention;
+- Command and Action lifecycle;
+- security defaults;
+- technology stack decision.
+
+Accepted decision records should be treated as current implementation constraints when older documents still contain conflicting planning details.
+
+### 3.9 `09-contracts/`
+
+Defines CE v0.1 implementation contracts:
+
+- OpenAPI contract for Admin, Agent, and System APIs;
+- Prisma schema baseline for persistence;
+- contract priority rules for implementation.
+
+Use this section when building Backend, UI API clients, Agent SDK clients, tests, and database migrations.
+
+
+### 3.10 `10-implementation/`
+
+Defines CE v0.1 implementation planning:
+
+- monorepo structure;
+- Backend scaffold plan;
+- UI scaffold plan;
+- Node Agent SDK scaffold plan;
+- demo Capsule Service plan;
+- implementation sequence.
+
+Use this section after ADRs and contracts are accepted, when starting implementation work.
+
+---
+
+## 4. CE v0.1 Implementation Target
+
+CE v0.1 should include:
+
+```text
+Opstage Backend
+Opstage UI
+SQLite persistence
+local admin login
+registration token
+Agent token authentication
+Node.js Embedded Agent SDK
+Node.js demo Capsule Service
+Agent heartbeat
+service manifest report
+health report
+config metadata visibility
+predefined action metadata
+action request from UI
+Command creation
+command polling
+CommandResult reporting
+basic AuditEvents
+Dashboard summary
+System health endpoint
+Docker quick start
+```
+
+CE v0.1 should be useful as open source. It should not be an intentionally crippled trial.
+
+---
+
+## 5. CE v0.1 Non-Goals
+
+CE v0.1 should not implement:
+
+```text
+Tenant system
+Organization system
+billing
+subscription
+usage metering
+enterprise RBAC
+SSO / OIDC / LDAP / SAML
+PostgreSQL/MySQL requirement
+Redis requirement
+Queue requirement
+Kubernetes requirement
+Agent Gateway
+Sidecar Agent
+External Agent
+Java Agent SDK
+Python Agent SDK
+Go Agent SDK
+full observability platform
+alert rule engine
+secret vault
+license enforcement
+remote shell
+arbitrary script execution
+```
+
+These are future roadmap items or intentionally excluded from the first implementation.
+
+---
+
+## 6. Development Rules
+
+### 6.1 Build CE first
+
+Current development should serve CE v0.1 unless a document explicitly marks a feature as current scope.
+
+### 6.2 Keep CE lightweight
 
 CE v0.1 should prefer:
 
 - SQLite by default;
-- simple local admin authentication;
+- local admin authentication;
 - HTTP heartbeat;
 - command polling;
-- Node.js embedded agent SDK;
-- single workspace;
+- Node.js Embedded Agent SDK;
+- single default Workspace;
 - single-node deployment;
-- basic audit log.
+- basic AuditEvents;
+- basic governance visibility.
 
-Avoid introducing heavy dependencies such as Kubernetes, distributed queues, full observability stacks, enterprise RBAC, SSO, or multi-tenant billing into CE v0.1.
+Avoid Kubernetes, distributed queues, full observability stacks, enterprise RBAC, SSO, tenancy, and billing in CE v0.1.
 
-### 3. Preserve extension points
+### 6.3 Reserve extension points without implementing future systems
 
-Although CE should stay lightweight, it must keep room for EE and Cloud evolution.
-
-CE should reserve extension points for:
-
-- MySQL / PostgreSQL;
-- multiple workspaces;
-- RBAC;
-- sidecar and external agents;
-- WebSocket or streaming command channel;
-- centralized logs and metrics;
-- secret references;
-- hosted Cloud backend;
-- enterprise deployment.
-
-### 4. Use Agent-based registration
-
-Opstage must not directly assume access to arbitrary services.
-
-Capsule Services are managed through registered and authorized Agents.
-
-The core flow is:
+CE should reserve low-cost extension fields and concepts such as:
 
 ```text
-Capsule Service
-    ↓ embedded / sidecar / external agent
-Opstage Backend
-    ↓
-Opstage UI
+workspaceId
+agentMode
+runtime
+protocolVersion
+capabilities
+metadataJson
+secretRef
+CommandType
+AuditEvent actor/resource fields
 ```
 
-For CE v0.1, the implemented flow is:
+The rule is:
+
+```text
+Reserve shape, not scope.
+```
+
+### 6.4 Use Agent-based governance
+
+Opstage should not directly control arbitrary services.
+
+Capsule Services enter governance through registered, authenticated Agents.
+
+CE v0.1 actual flow:
 
 ```text
 Node.js Capsule Service
-    ↓ Node.js embedded agent SDK
+    ↓ Node.js Embedded Agent SDK
 Opstage Backend
-    ↓
+    ↓ Admin API
 Opstage UI
 ```
 
-### 5. Separate specification from implementation
+### 6.5 Execute only predefined actions
 
-Specifications describe long-term contracts.
+Operations must be modeled as predefined actions, durable Commands, CommandResults, and AuditEvents.
 
-CE implementation may implement only the minimum subset required by v0.1, but it should not introduce incompatible concepts that block future EE or Cloud editions.
+CE v0.1 must not provide remote shell or arbitrary script execution.
 
-### 6. Documentation is part of the development contract
+### 6.6 Protect secrets
 
-Before implementing a feature, check the corresponding document:
+Opstage should store governance metadata, not raw secrets by default.
 
-- concept: `01-capsule/`;
-- protocol or schema: `02-specs/`;
-- CE scope: `03-editions/01-ce/`;
-- Opstage behavior: `04-opstage/`;
-- Agent behavior: `05-agents/`.
-
-If a feature is not clearly described, update the documentation before or together with the implementation.
-
-## Suggested Reading Path for Developers
-
-For CE v0.1 implementation, read in this order:
+Use:
 
 ```text
-README.md
-01-capsule/00-overview.md
-01-capsule/01-capsule-service-concept.md
-02-specs/03-agent-registration-spec.md
-02-specs/02-capsule-management-contract.md
-03-editions/01-ce/README.md
-03-editions/01-ce/01-ce-scope.md
-03-editions/01-ce/02-ce-mvp.md
-03-editions/01-ce/03-ce-architecture.md
-03-editions/01-ce/04-ce-technology-stack.md
-03-editions/01-ce/12-ce-extension-points.md
-05-agents/04-node-agent-sdk.md
+secretRef
+masked values
+sanitized summaries
 ```
 
-## Edition Status
-
-| Edition | Status | Purpose |
-|---|---|---|
-| CE | Current implementation target | Open-source, lightweight, self-hosted edition |
-| EE | Future planning | Private-deployment commercial edition |
-| Cloud | Future planning | Hosted SaaS edition |
-
-## Current Development Target
-
-The first milestone is **CE v0.1 Prototype**.
-
-CE v0.1 should deliver:
-
-- backend service;
-- web UI;
-- SQLite persistence;
-- Node.js embedded agent SDK;
-- demo Capsule Service;
-- agent registration;
-- heartbeat;
-- service status display;
-- health report;
-- basic command/action execution;
-- basic audit log;
-- simple Docker-based deployment.
+Do not log or store raw registration tokens, Agent tokens, passwords, cookies, OAuth tokens, API keys, private keys, or browser sessions.
 
 ---
 
-# xtrape-capsule 文档集
+## 7. Recommended Reading Path for CE v0.1
 
-- 状态：草案
-- 版本范围：共享文档
-- 优先级：高
-- 面向对象：产品设计者、架构师、开发者、AI 编码代理
-
-`xtrape-capsule` 是 Xtrape 体系中的轻服务架构领域。它用于定义 Capsule Service 的核心概念、跨版本规范、运行态治理模型、Agent 接入模型，以及 CE / EE / Cloud 三个版本的产品策略。
-
-本文档集面向整个 `xtrape-capsule` 领域，而不是只面向 `xtrape-capsule-opstage`。`xtrape-capsule-opstage` 只是该领域下的一个核心子系统。
-
-## 当前重点
-
-当前实现重点是 **CE / Community Edition / 开源社区版**。
-
-CE 应该实现为一个轻量、开源、可私有化部署的原型版本，用于验证 Capsule Service 的核心治理模型：
-
-- Capsule Service 轻服务概念；
-- 基于 Agent 的注册机制；
-- Backend 管理的控制面；
-- 面向人工操作的 Web UI；
-- Node.js 嵌入式 Agent SDK；
-- SQLite 优先的轻量部署；
-- 单镜像或简单 Docker 部署；
-- 基础健康状态、服务状态、命令、动作、配置可见性和审计能力。
-
-EE 和 Cloud 是未来版本。它们应当指导 CE 的扩展点设计，但不能让 CE 的第一版实现变得过重。
-
-## 文档分区
-
-推荐阅读顺序如下：
-
-```text
-docs/
-├── README.md
-├── 01-capsule/
-├── 02-specs/
-├── 03-editions/
-│   ├── 01-ce/
-│   ├── 02-ee/
-│   └── 03-cloud/
-├── 04-opstage/
-├── 05-agents/
-├── 06-runtimes/
-└── 07-roadmap/
-```
-
-### `01-capsule/`
-
-定义整体领域，包括：
-
-- 什么是 Capsule Service；
-- Capsule Service 与传统微服务的区别；
-- 核心领域模型；
-- xtrape-capsule 架构的设计原则。
-
-在讨论实现细节之前，应先阅读这一部分。
-
-### `02-specs/`
-
-定义 CE、EE 和 Cloud 共享的跨版本规范，包括：
-
-- Capsule Manifest；
-- Management Contract；
-- Agent Registration；
-- Health Model；
-- Action Model；
-- Config Model；
-- Command Model；
-- Audit Event Model；
-- Status Model。
-
-该目录下的规范应尽量保持稳定。CE 第一版可以只实现其中的一个子集，但不应引入与长期规范冲突的概念。
-
-### `03-editions/`
-
-定义 CE、EE 和 Cloud 三个版本的边界。
-
-- `03-editions/01-ce/`：当前实现目标；
-- `03-editions/02-ee/`：未来私有化商业版；
-- `03-editions/03-cloud/`：未来 SaaS 云服务版。
-
-只有标记为 `Implementation Target` 的 CE 文档才应被视为当前开发需求。
-
-### `04-opstage/`
-
-定义 Opstage 子系统。
-
-Opstage 是 Capsule Service 的运行态治理平台，包括：
-
-- UI；
-- Backend；
-- Agent 集成；
-- 命令与动作管理；
-- 审计；
-- 可观测性路线。
-
-### `05-agents/`
-
-定义 Agent 系统。
-
-Agent 用于将 Capsule Service 接入 Opstage。长期模型包括：
-
-- 嵌入式 Agent；
-- Sidecar Agent；
-- External Agent；
-- Node.js Agent SDK；
-- 权限与令牌模型。
-
-CE v0.1 聚焦 Node.js 嵌入式 Agent SDK。
-
-### `06-runtimes/`
-
-定义运行时支持计划。
-
-CE v0.1 聚焦 Node.js。Java 和 Python Runtime 属于后续规划目标。
-
-### `07-roadmap/`
-
-定义 CE、EE 和 Cloud 的产品与工程路线图。
-
-## 开发规则
-
-### 1. CE 优先实现
-
-当前开发应优先服务于 CE。
-
-除非某项 EE 或 Cloud 能力被明确标记为 CE 需求，否则不要在 CE v0.1 中实现 EE 或 Cloud 功能。
-
-### 2. 保持 CE 轻量
-
-CE v0.1 应优先采用：
-
-- 默认 SQLite；
-- 简单本地管理员认证；
-- HTTP 心跳；
-- 命令轮询；
-- Node.js 嵌入式 Agent SDK；
-- 单 Workspace；
-- 单节点部署；
-- 基础审计日志。
-
-CE v0.1 中应避免引入 Kubernetes、分布式队列、完整可观测性栈、企业级 RBAC、SSO、多租户计费等重型依赖。
-
-### 3. 保留扩展点
-
-虽然 CE 应保持轻量，但必须为 EE 和 Cloud 的演进保留空间。
-
-CE 应为以下方向保留扩展点：
-
-- MySQL / PostgreSQL；
-- 多 Workspace；
-- RBAC；
-- Sidecar Agent 和 External Agent；
-- WebSocket 或流式命令通道；
-- 集中日志与指标；
-- Secret Reference；
-- 托管式 Cloud Backend；
-- 企业级部署。
-
-### 4. 使用基于 Agent 的注册机制
-
-Opstage 不应默认直接访问任意服务。
-
-Capsule Service 必须通过已注册、已授权的 Agent 被纳入治理。
-
-核心流程是：
-
-```text
-Capsule Service
-    ↓ embedded / sidecar / external agent
-Opstage Backend
-    ↓
-Opstage UI
-```
-
-对于 CE v0.1，实际实现流程是：
-
-```text
-Node.js Capsule Service
-    ↓ Node.js embedded agent SDK
-Opstage Backend
-    ↓
-Opstage UI
-```
-
-### 5. 区分规范与实现
-
-规范描述长期契约。
-
-CE 第一版可以只实现 v0.1 所需的最小子集，但不能引入会阻塞未来 EE 或 Cloud 演进的不兼容概念。
-
-### 6. 文档是开发契约的一部分
-
-实现某项功能前，应检查对应文档：
-
-- 概念：`01-capsule/`；
-- 协议或 Schema：`02-specs/`；
-- CE 范围：`03-editions/01-ce/`；
-- Opstage 行为：`04-opstage/`；
-- Agent 行为：`05-agents/`。
-
-如果某项功能没有被清晰描述，应在实现前或实现过程中同步更新文档。
-
-## 面向开发者的推荐阅读路径
-
-实现 CE v0.1 时，建议按以下顺序阅读：
+Recommended path for developers and AI coding agents:
 
 ```text
 README.md
-01-capsule/00-overview.md
+01-capsule/README.md if present, otherwise 01-capsule/00-overview.md
 01-capsule/01-capsule-service-concept.md
+08-decisions/README.md
+08-decisions/0001-ce-v01-implementation-baseline.md
+08-decisions/0002-api-namespace-convention.md
+08-decisions/0003-command-action-lifecycle.md
+08-decisions/0004-security-defaults.md
+08-decisions/0005-technology-stack-decision.md
+09-contracts/README.md
+09-contracts/openapi/opstage-ce-v0.1.yaml
+09-contracts/prisma/schema.prisma
+09-contracts/prisma/prisma.config.ts
+10-implementation/README.md
+10-implementation/00-monorepo-structure.md
+10-implementation/05-implementation-sequence.md
+02-specs/README.md
 02-specs/03-agent-registration-spec.md
-02-specs/02-capsule-management-contract.md
-03-editions/01-ce/README.md
-03-editions/01-ce/01-ce-scope.md
-03-editions/01-ce/02-ce-mvp.md
-03-editions/01-ce/03-ce-architecture.md
-03-editions/01-ce/04-ce-technology-stack.md
-03-editions/01-ce/12-ce-extension-points.md
+02-specs/07-command-spec.md
+03-editions/README.md
+03-editions/ce/README.md
+03-editions/ce/01-ce-scope.md
+03-editions/ce/02-ce-mvp.md
+03-editions/ce/03-ce-architecture.md
+03-editions/ce/13-ce-v01-implementation-checklist.md
+04-opstage/README.md
+04-opstage/02-opstage-backend.md
+04-opstage/01-opstage-ui.md
+04-opstage/04-command-and-action-model.md
+05-agents/README.md
 05-agents/04-node-agent-sdk.md
+05-agents/05-agent-permission-model.md
+06-runtimes/README.md
+06-runtimes/01-node-runtime.md
+07-roadmap/README.md
+07-roadmap/01-ce-roadmap.md
 ```
 
-## 版本状态
+---
 
-| 版本 | 状态 | 目标 |
+## 8. Edition Status
+
+| Edition | Status | Purpose |
 |---|---|---|
-| CE | 当前实现目标 | 开源、轻量、可私有化部署的社区版 |
-| EE | 未来规划 | 私有化部署的商业版 |
-| Cloud | 未来规划 | 托管式 SaaS 云服务版 |
+| CE | Current implementation target | Lightweight open-source self-hosted edition |
+| EE | Future planning | Private enterprise commercial edition |
+| Cloud | Future planning | Hosted SaaS edition |
 
-## 当前开发目标
+---
 
-第一个里程碑是 **CE v0.1 Prototype**。
+## 9. First Milestone
 
-CE v0.1 应交付：
+The first milestone is:
 
-- Backend 服务；
-- Web UI；
-- SQLite 持久化；
-- Node.js 嵌入式 Agent SDK；
-- Demo Capsule Service；
-- Agent 注册；
-- 心跳；
-- 服务状态展示；
-- 健康状态上报；
-- 基础命令 / 动作执行；
-- 基础审计日志；
-- 简单 Docker 部署。
+```text
+CE v0.1 Prototype
+```
 
+It should demonstrate:
 
+- local Opstage startup;
+- local admin login;
+- registration token creation;
+- Node.js demo service registration;
+- Agent heartbeat;
+- Capsule Service visibility;
+- health visibility;
+- config metadata visibility;
+- predefined action visibility;
+- `echo` action execution;
+- `runHealthCheck` action execution;
+- CommandResult visibility;
+- AuditEvent visibility;
+- Docker quick start.
+
+---
+
+## 10. Summary
+
+This documentation set should guide implementation toward a small, useful, safe, and extensible CE v0.1 first.
+
+The most important repository-level rule is:
+
+> Build the CE governance kernel first, keep future EE and Cloud as extension tracks, and preserve the Agent-based, predefined-action, secretRef-safe model across all editions.

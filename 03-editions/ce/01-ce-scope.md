@@ -621,17 +621,17 @@ CE v0.1 should include APIs in these groups.
 ### 7.1 Admin UI APIs
 
 ```text
-POST /api/auth/login
-POST /api/auth/logout
-GET  /api/dashboard
-GET  /api/agents
-GET  /api/agents/{agentId}
-GET  /api/capsule-services
-GET  /api/capsule-services/{serviceId}
-POST /api/capsule-services/{serviceId}/actions/{actionName}
-GET  /api/commands
-GET  /api/commands/{commandId}
-GET  /api/audit-events
+POST /api/admin/auth/login
+POST /api/admin/auth/logout
+GET  /api/admin/dashboard/summary
+GET  /api/admin/agents
+GET  /api/admin/agents/{agentId}
+GET  /api/admin/capsule-services
+GET  /api/admin/capsule-services/{serviceId}
+POST /api/admin/capsule-services/{serviceId}/actions/{actionName}
+GET  /api/admin/commands
+GET  /api/admin/commands/{commandId}
+GET  /api/admin/audit-events
 ```
 
 Exact paths may be adjusted, but the capability groups should exist.

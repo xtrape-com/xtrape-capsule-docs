@@ -1,6 +1,6 @@
 # Audit Event Specification
 
-- Status: Draft
+- Status: Specification
 - Edition: Shared
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, security reviewers, AI coding agents

@@ -1,6 +1,6 @@
 # Capsule Management Contract
 
-- Status: Draft
+- Status: Specification
 - Edition: Shared
 - Priority: High
 - Audience: backend developers, agent SDK developers, Capsule Service developers, AI coding agents

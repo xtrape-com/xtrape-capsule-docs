@@ -411,7 +411,7 @@ Fastify + TypeScript + Prisma + SQLite
 The final decision should be documented in:
 
 ```text
-03-editions/01-ce/04-ce-technology-stack.md
+03-editions/ce/04-ce-technology-stack.md
 ```
 
 ### 8.2 API groups
@@ -432,17 +432,17 @@ Agent APIs are called by Agents.
 Admin APIs include:
 
 ```text
-POST /api/auth/login
-POST /api/auth/logout
-GET  /api/dashboard
-GET  /api/agents
-GET  /api/agents/{agentId}
-GET  /api/capsule-services
-GET  /api/capsule-services/{serviceId}
-POST /api/capsule-services/{serviceId}/actions/{actionName}
-GET  /api/commands
-GET  /api/commands/{commandId}
-GET  /api/audit-events
+POST /api/admin/auth/login
+POST /api/admin/auth/logout
+GET  /api/admin/dashboard/summary
+GET  /api/admin/agents
+GET  /api/admin/agents/{agentId}
+GET  /api/admin/capsule-services
+GET  /api/admin/capsule-services/{serviceId}
+POST /api/admin/capsule-services/{serviceId}/actions/{actionName}
+GET  /api/admin/commands
+GET  /api/admin/commands/{commandId}
+GET  /api/admin/audit-events
 ```
 
 Exact paths may change, but these capability groups must exist.

@@ -1,6 +1,6 @@
 # Command Specification
 
-- Status: Draft
+- Status: Specification
 - Edition: Shared
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, AI coding agents

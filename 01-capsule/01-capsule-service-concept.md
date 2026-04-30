@@ -1,26 +1,6 @@
 # Capsule Service Concept
 
-- Status: Draft
-- Edition: Shared
-- Priority: High
-
-本文件属于 `xtrape-capsule` 文档集。`xtrape-capsule` 是面向轻服务 / Capsule Service 的领域体系；`xtrape-capsule-opstage` 是该体系下的统一运行态治理平台。
-
-当前实现重点是 CE 开源社区版。EE 私有化商业版与 Cloud SaaS 版属于未来规划，CE 需要保留扩展点，但不应在早期版本实现其完整能力。
-
-## Purpose
-
-定义轻服务 / Capsule Service：小型、自治、可注册、可观测、可配置、可审计的能力单元。
-
-## Key Points
-
-- Capsule Service 独立运行，不应强依赖 Opstage 才能启动。
-- Opstage 通过已注册、已授权的 Agent 管理 Capsule Service。
-- 领域规范应跨语言、跨部署模式、跨版本线保持稳定。
-
-# Capsule Service Concept
-
-- Status: Draft
+- Status: Conceptual Guidance
 - Edition: Shared
 - Priority: High
 - Audience: architects, developers, AI coding agents

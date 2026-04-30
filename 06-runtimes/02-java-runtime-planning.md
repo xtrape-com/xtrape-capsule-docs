@@ -1,18 +1,6 @@
 # Java Runtime Planning
 
 - Status: Planning
-- Edition: Shared
-- Priority: Future
-
-本文件属于 `xtrape-capsule` 文档集。`xtrape-capsule` 是面向轻服务 / Capsule Service 的领域体系；`xtrape-capsule-opstage` 是该体系下的统一运行态治理平台。
-
-当前实现重点是 CE 开源社区版。EE 私有化商业版与 Cloud SaaS 版属于未来规划，CE 需要保留扩展点，但不应在早期版本实现其完整能力。
-
-运行时文档定义不同语言生态下如何接入 Capsule 规范和 Agent 能力。当前优先 Node.js，Java/Python 作为后续规划。
-
-# Java Runtime Planning
-
-- Status: Planning
 - Edition: EE
 - Priority: Future
 - Audience: architects, Java developers, Spring Boot developers, agent SDK developers, backend developers, AI coding agents

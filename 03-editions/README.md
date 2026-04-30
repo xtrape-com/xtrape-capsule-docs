@@ -128,10 +128,13 @@ Cloud should be a hosted evolution of the same Capsule governance model.
 Current implementation should follow this priority:
 
 ```text
-1. CE Implementation Target documents
-2. Shared specifications used by CE
-3. CE extension-point documents
-4. EE / Cloud planning documents only as future context
+1. Accepted ADRs in 08-decisions/
+2. Implementation contracts in 09-contracts/
+3. Implementation plans in 10-implementation/
+4. CE Implementation Target documents
+5. Shared specifications used by CE
+6. CE extension-point documents
+7. EE / Cloud planning documents only as future context
 ```
 
 Implementation agents and developers must not treat EE or Cloud planning documents as required work for CE v0.1.

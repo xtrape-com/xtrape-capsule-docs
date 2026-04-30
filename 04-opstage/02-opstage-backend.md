@@ -1,17 +1,5 @@
 # Opstage Backend
 
-- Status: Draft
-- Edition: Shared
-- Priority: Medium
-
-本文件属于 `xtrape-capsule` 文档集。`xtrape-capsule` 是面向轻服务 / Capsule Service 的领域体系；`xtrape-capsule-opstage` 是该体系下的统一运行态治理平台。
-
-当前实现重点是 CE 开源社区版。EE 私有化商业版与 Cloud SaaS 版属于未来规划，CE 需要保留扩展点，但不应在早期版本实现其完整能力。
-
-Opstage 是 xtrape-capsule 的统一运行态治理平台，由 UI、Backend 和 Agent 接入机制组成。CE 实现轻量闭环，EE/Cloud 在此基础上扩展规模化能力。
-
-# Opstage Backend
-
 - Status: Implementation Guidance
 - Edition: Shared
 - Priority: High
@@ -207,10 +195,10 @@ Recommended CE Backend stack:
 
 ```text
 Node.js + TypeScript
-Fastify or NestJS
+Fastify
+Zod or similar schema validation
 Prisma
 SQLite
-Zod or similar schema validation
 ```
 
 Recommended baseline:
@@ -259,9 +247,9 @@ POST /api/admin/auth/logout
 GET  /api/admin/dashboard/summary
 GET  /api/admin/agents
 GET  /api/admin/agents/{agentId}
-GET  /api/admin/services
-GET  /api/admin/services/{serviceId}
-POST /api/admin/services/{serviceId}/actions/{actionName}/commands
+GET  /api/admin/capsule-services
+GET  /api/admin/capsule-services/{serviceId}
+POST /api/admin/capsule-services/{serviceId}/actions/{actionName}
 GET  /api/admin/commands
 GET  /api/admin/commands/{commandId}
 GET  /api/admin/audit-events
@@ -554,19 +542,15 @@ createdAt
 updatedAt
 ```
 
-Recommended uniqueness:
-
-```text
-workspaceId + code
-```
-
-or, if service identity is Agent-scoped in early CE:
+Required uniqueness (CE v0.1 decision):
 
 ```text
 workspaceId + agentId + code
 ```
 
-The decision should be consistent with service migration expectations.
+Rationale: in CE v0.1, service identity is Agent-scoped. Two different Agents can legitimately register services with the same code without conflict. Cross-Agent service migration is not supported in CE v0.1. When a service migrates to a new Agent in the future, that is a transfer operation, not an upsert.
+
+Conflict handling: if `POST /api/agents/{agentId}/services/report` is called with a service code that already exists for the same Agent and Workspace, the Backend MUST upsert (update) the existing record — not create a new one.
 
 ---
 

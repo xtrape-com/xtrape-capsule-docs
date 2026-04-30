@@ -1,26 +1,6 @@
 # Config Specification
 
-- Status: Draft
-- Edition: Shared
-- Priority: High
-
-本文件属于 `xtrape-capsule` 文档集。`xtrape-capsule` 是面向轻服务 / Capsule Service 的领域体系；`xtrape-capsule-opstage` 是该体系下的统一运行态治理平台。
-
-当前实现重点是 CE 开源社区版。EE 私有化商业版与 Cloud SaaS 版属于未来规划，CE 需要保留扩展点，但不应在早期版本实现其完整能力。
-
-## Scope
-
-本规范是 CE / EE / Cloud 共享的长期契约。CE 可以只实现最小子集，但命名、状态、接口和数据结构应尽量保持向后兼容。
-
-## Compatibility Rule
-
-- CE v0.x 可以标记实验字段。
-- 稳定字段不应随意破坏。
-- EE / Cloud 可以扩展能力，但不应反向污染 CE MVP。
-
-# Config Specification
-
-- Status: Draft
+- Status: Specification
 - Edition: Shared
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, Capsule Service developers, AI coding agents

@@ -3,27 +3,6 @@
 - Status: Planning
 - Edition: Cloud
 - Priority: Future
-
-## Position
-
-Cloud 是未来 SaaS 云服务版规划，不是 CE v0.1 的实现要求。
-
-## Planned Direction
-
-- 官方托管 Opstage Backend 和 UI。
-- 客户侧 Agent 主动 outbound 连接 Cloud。
-- 多租户、组织、团队、订阅计费。
-- 云端保存元数据、状态、审计、指标；敏感 secret 优先保留在客户侧或外部 Secret Store。
-
-## CE Reservation
-
-CE 的 Agent 注册、心跳、命令拉取模型应天然支持未来 Cloud：Backend 不主动扫描客户内网，Agent 主动连接控制面。
-
-# Cloud Agent Connectivity
-
-- Status: Planning
-- Edition: Cloud
-- Priority: Future
 - Audience: architects, cloud engineers, backend developers, agent SDK developers, security reviewers, AI coding agents
 
 This document defines the planned Agent connectivity model for **Opstage Cloud**.

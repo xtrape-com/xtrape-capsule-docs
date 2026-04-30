@@ -1,6 +1,6 @@
 # Health Specification
 
-- Status: Draft
+- Status: Specification
 - Edition: Shared
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, Capsule Service developers, AI coding agents
@@ -463,7 +463,7 @@ Agent OFFLINE                   -> service STALE
 
 Health reports become stale after a timeout.
 
-Recommended CE v0.1 defaults:
+Required CE v0.1 defaults:
 
 ```text
 heartbeatIntervalSeconds = 30
@@ -471,7 +471,17 @@ agentOfflineThresholdSeconds = 90
 healthStaleThresholdSeconds = 120
 ```
 
-If health is older than the stale threshold, UI should display it as stale.
+Threshold relationship:
+
+```text
+agentOfflineThresholdSeconds (90s) < healthStaleThresholdSeconds (120s)
+```
+
+This creates a deliberate 30-second grace window (90–120s): an Agent that has just gone OFFLINE will have its Agent status set to OFFLINE first, but its last health report is still considered FRESH until 120s passes. This avoids a race condition where a momentary Agent dropout causes the health display to show STALE immediately.
+
+During the 90–120s window, `effectiveStatus` is STALE (driven by Agent OFFLINE), but `freshness` is still FRESH. After 120s, both are STALE.
+
+If health is older than the stale threshold, UI MUST display it as stale.
 
 Example stale representation:
 

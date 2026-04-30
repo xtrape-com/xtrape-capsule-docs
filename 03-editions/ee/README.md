@@ -3,29 +3,6 @@
 - Status: Planning
 - Edition: EE
 - Priority: Future
-
-## Position
-
-EE 是未来私有化商业版规划，不是 CE v0.1 的实现要求。
-
-## Planned Direction
-
-- 企业级 RBAC、SSO、OIDC/LDAP。
-- 高可用、集群部署、更强数据库支持。
-- 集中日志、日志检索、指标监控、监控大屏。
-- Secret Vault、合规审计、商业 License。
-- Sidecar / External Agent、多语言 Agent SDK。
-- 企业安装包、升级迁移、技术支持。
-
-## CE Reservation
-
-CE 应保留 workspace、agent mode、database provider、command delivery、secretRef、audit event 等扩展点。
-
-# Opstage EE Overview
-
-- Status: Planning
-- Edition: EE
-- Priority: Future
 - Audience: founders, product designers, architects, enterprise engineers, backend developers, DevOps engineers, AI coding agents
 
 This document defines the planning overview for **Opstage EE / Enterprise Edition**.

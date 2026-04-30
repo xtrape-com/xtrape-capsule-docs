@@ -1,26 +1,6 @@
-# Design Principles
-
-- Status: Draft
-- Edition: Shared
-- Priority: High
-
-本文件属于 `xtrape-capsule` 文档集。`xtrape-capsule` 是面向轻服务 / Capsule Service 的领域体系；`xtrape-capsule-opstage` 是该体系下的统一运行态治理平台。
-
-当前实现重点是 CE 开源社区版。EE 私有化商业版与 Cloud SaaS 版属于未来规划，CE 需要保留扩展点，但不应在早期版本实现其完整能力。
-
-## Purpose
-
-定义轻量优先、Agent 注册制、服务独立运行、控制面解耦、CE 可演进等原则。
-
-## Key Points
-
-- Capsule Service 独立运行，不应强依赖 Opstage 才能启动。
-- Opstage 通过已注册、已授权的 Agent 管理 Capsule Service。
-- 领域规范应跨语言、跨部署模式、跨版本线保持稳定。
-
 # xtrape-capsule Design Principles
 
-- Status: Draft
+- Status: Conceptual Guidance
 - Edition: Shared
 - Priority: High
 - Audience: architects, developers, AI coding agents, reviewers
@@ -476,7 +456,7 @@ Before implementing a feature, check:
 
 - concept documents in `01-capsule/`;
 - shared specifications in `02-specs/`;
-- CE scope in `03-editions/01-ce/`;
+- CE scope in `03-editions/ce/`;
 - Opstage documents in `04-opstage/`;
 - Agent documents in `05-agents/`.
 

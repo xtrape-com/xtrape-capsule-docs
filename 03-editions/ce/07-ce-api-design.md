@@ -3,30 +3,6 @@
 - Status: Implementation Target
 - Edition: CE
 - Priority: Current
-
-## Position
-
-CE 是当前实现重点，目标是提供轻量、开源、可私有化部署的 Capsule Service 运行态治理平台。
-
-## Current Constraints
-
-- 默认 SQLite，后续预留 MySQL/PostgreSQL。
-- 单镜像/单进程优先，前后端一体发布。
-- Backend 使用 Node.js + TypeScript。
-- UI 使用 Vue 或 React，发布为 Web 并兼容移动端查看。
-- Agent 第一版只实现 Node.js Embedded Agent SDK。
-- 通信优先使用 HTTP heartbeat + command polling。
-- 不在 CE v0.1 实现 EE/Cloud 的复杂能力。
-
-## Extension Principle
-
-CE 要轻，但不能短视；EE/Cloud 要规划，但不能污染 CE 第一版实现。
-
-# CE API Design
-
-- Status: Implementation Target
-- Edition: CE
-- Priority: Current
 - Audience: architects, backend developers, frontend developers, agent SDK developers, AI coding agents
 
 This document defines the API design for **Opstage CE v0.1**.
@@ -111,7 +87,7 @@ They provide:
 Base path:
 
 ```text
-/api
+/api/admin
 ```
 
 ### 3.2 Agent APIs
@@ -308,7 +284,7 @@ Backend may store timestamps in database format, but APIs should return ISO-comp
 ### 9.1 Login
 
 ```http
-POST /api/auth/login
+POST /api/admin/auth/login
 ```
 
 Request:
@@ -351,7 +327,7 @@ user.login.failed
 ### 9.2 Logout
 
 ```http
-POST /api/auth/logout
+POST /api/admin/auth/logout
 ```
 
 Response:
@@ -366,7 +342,7 @@ Response:
 ### 9.3 Current user
 
 ```http
-GET /api/auth/me
+GET /api/admin/auth/me
 ```
 
 Response:
@@ -390,7 +366,7 @@ Response:
 ### 10.1 Dashboard summary
 
 ```http
-GET /api/dashboard
+GET /api/admin/dashboard/summary
 ```
 
 Response:
@@ -428,7 +404,7 @@ Response:
 ### 11.1 List Agents
 
 ```http
-GET /api/agents
+GET /api/admin/agents
 ```
 
 Query parameters:
@@ -469,7 +445,7 @@ Response:
 ### 11.2 Get Agent detail
 
 ```http
-GET /api/agents/{agentId}
+GET /api/admin/agents/{agentId}
 ```
 
 Response:
@@ -506,7 +482,7 @@ Response:
 Optional for CE v0.1 UI, but useful in data model.
 
 ```http
-POST /api/agents/{agentId}/disable
+POST /api/admin/agents/{agentId}/disable
 ```
 
 ### 11.4 Re-enable Agent
@@ -514,7 +490,7 @@ POST /api/agents/{agentId}/disable
 Optional for CE v0.1 UI.
 
 ```http
-POST /api/agents/{agentId}/enable
+POST /api/admin/agents/{agentId}/enable
 ```
 
 ### 11.5 Revoke Agent
@@ -522,7 +498,7 @@ POST /api/agents/{agentId}/enable
 Optional for CE v0.1 UI, but important for security.
 
 ```http
-POST /api/agents/{agentId}/revoke
+POST /api/admin/agents/{agentId}/revoke
 ```
 
 ---
@@ -534,7 +510,7 @@ CE v0.1 needs a way to create registration tokens.
 ### 12.1 Create registration token
 
 ```http
-POST /api/agent-registration-tokens
+POST /api/admin/registration-tokens
 ```
 
 Request:
@@ -568,7 +544,7 @@ Security rule:
 Optional for CE v0.1.
 
 ```http
-GET /api/agent-registration-tokens
+GET /api/admin/registration-tokens
 ```
 
 ### 12.3 Revoke registration token
@@ -576,7 +552,7 @@ GET /api/agent-registration-tokens
 Optional for CE v0.1.
 
 ```http
-POST /api/agent-registration-tokens/{tokenId}/revoke
+POST /api/admin/registration-tokens/{tokenId}/revoke
 ```
 
 ---
@@ -586,7 +562,7 @@ POST /api/agent-registration-tokens/{tokenId}/revoke
 ### 13.1 List Capsule Services
 
 ```http
-GET /api/capsule-services
+GET /api/admin/capsule-services
 ```
 
 Query parameters:
@@ -635,7 +611,7 @@ Response:
 ### 13.2 Get Capsule Service detail
 
 ```http
-GET /api/capsule-services/{serviceId}
+GET /api/admin/capsule-services/{serviceId}
 ```
 
 Response:
@@ -673,25 +649,25 @@ Response:
 ### 13.3 Get Capsule Service manifest
 
 ```http
-GET /api/capsule-services/{serviceId}/manifest
+GET /api/admin/capsule-services/{serviceId}/manifest
 ```
 
 ### 13.4 Get Capsule Service health
 
 ```http
-GET /api/capsule-services/{serviceId}/health
+GET /api/admin/capsule-services/{serviceId}/health
 ```
 
 ### 13.5 Get Capsule Service configs
 
 ```http
-GET /api/capsule-services/{serviceId}/configs
+GET /api/admin/capsule-services/{serviceId}/configs
 ```
 
 ### 13.6 Get Capsule Service actions
 
 ```http
-GET /api/capsule-services/{serviceId}/actions
+GET /api/admin/capsule-services/{serviceId}/actions
 ```
 
 These detail endpoints may be implemented separately or included in the main detail response.
@@ -703,7 +679,7 @@ These detail endpoints may be implemented separately or included in the main det
 ### 14.1 Request action execution
 
 ```http
-POST /api/capsule-services/{serviceId}/actions/{actionName}
+POST /api/admin/capsule-services/{serviceId}/actions/{actionName}
 ```
 
 Request:
@@ -751,7 +727,7 @@ Security rule:
 ### 15.1 List Commands
 
 ```http
-GET /api/commands
+GET /api/admin/commands
 ```
 
 Query parameters:
@@ -795,7 +771,7 @@ Response:
 ### 15.2 Get Command detail
 
 ```http
-GET /api/commands/{commandId}
+GET /api/admin/commands/{commandId}
 ```
 
 Response:
@@ -843,7 +819,7 @@ Response:
 ### 16.1 List Audit Events
 
 ```http
-GET /api/audit-events
+GET /api/admin/audit-events
 ```
 
 Query parameters:
@@ -890,7 +866,7 @@ Response:
 ### 16.2 Get Audit Event detail
 
 ```http
-GET /api/audit-events/{auditEventId}
+GET /api/admin/audit-events/{auditEventId}
 ```
 
 Response includes sanitized `requestJson` and `resultJson`.
@@ -1251,8 +1227,8 @@ CE v0.1 must not provide endpoints such as:
 
 ```http
 POST /api/agents/{agentId}/shell
-POST /api/capsule-services/{serviceId}/exec
-POST /api/commands/shell
+POST /api/admin/capsule-services/{serviceId}/exec
+POST /api/admin/commands/shell
 ```
 
 ### 20.2 Token safety
@@ -1296,20 +1272,19 @@ CE v0.1 must implement at least:
 ### Admin APIs
 
 ```text
-POST /api/auth/login
-POST /api/auth/logout
-GET  /api/auth/me
-GET  /api/dashboard
-GET  /api/agents
-GET  /api/agents/{agentId}
-POST /api/agent-registration-tokens
-GET  /api/capsule-services
-GET  /api/capsule-services/{serviceId}
-POST /api/capsule-services/{serviceId}/actions/{actionName}
-GET  /api/commands
-GET  /api/commands/{commandId}
-GET  /api/audit-events
-GET  /api/system/health
+POST /api/admin/auth/login
+POST /api/admin/auth/logout
+GET  /api/admin/auth/me
+GET  /api/admin/dashboard/summary
+GET  /api/admin/agents
+GET  /api/admin/agents/{agentId}
+POST /api/admin/registration-tokens
+GET  /api/admin/capsule-services
+GET  /api/admin/capsule-services/{serviceId}
+POST /api/admin/capsule-services/{serviceId}/actions/{actionName}
+GET  /api/admin/commands
+GET  /api/admin/commands/{commandId}
+GET  /api/admin/audit-events
 ```
 
 ### Agent APIs
@@ -1325,12 +1300,18 @@ POST /api/agents/{agentId}/commands/{commandId}/result
 Optional CE v0.1 endpoints:
 
 ```text
-GET  /api/capsule-services/{serviceId}/manifest
-GET  /api/capsule-services/{serviceId}/health
-GET  /api/capsule-services/{serviceId}/configs
-GET  /api/capsule-services/{serviceId}/actions
-GET  /api/audit-events/{auditEventId}
-GET  /api/system/settings
+GET  /api/admin/capsule-services/{serviceId}/manifest
+GET  /api/admin/capsule-services/{serviceId}/health
+GET  /api/admin/capsule-services/{serviceId}/configs
+GET  /api/admin/capsule-services/{serviceId}/actions
+GET  /api/admin/audit-events/{auditEventId}
+```
+
+### System APIs
+
+```text
+GET  /api/system/health
+GET  /api/system/version
 ```
 
 ---

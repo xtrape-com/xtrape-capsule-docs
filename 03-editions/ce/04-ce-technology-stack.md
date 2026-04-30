@@ -3,30 +3,6 @@
 - Status: Implementation Target
 - Edition: CE
 - Priority: Current
-
-## Position
-
-CE 是当前实现重点，目标是提供轻量、开源、可私有化部署的 Capsule Service 运行态治理平台。
-
-## Current Constraints
-
-- 默认 SQLite，后续预留 MySQL/PostgreSQL。
-- 单镜像/单进程优先，前后端一体发布。
-- Backend 使用 Node.js + TypeScript。
-- UI 使用 Vue 或 React，发布为 Web 并兼容移动端查看。
-- Agent 第一版只实现 Node.js Embedded Agent SDK。
-- 通信优先使用 HTTP heartbeat + command polling。
-- 不在 CE v0.1 实现 EE/Cloud 的复杂能力。
-
-## Extension Principle
-
-CE 要轻，但不能短视；EE/Cloud 要规划，但不能污染 CE 第一版实现。
-
-# CE Technology Stack
-
-- Status: Implementation Target
-- Edition: CE
-- Priority: Current
 - Audience: architects, backend developers, frontend developers, agent SDK developers, DevOps engineers, AI coding agents
 
 This document defines the recommended technology stack for **Opstage CE v0.1**.
@@ -41,7 +17,8 @@ Recommended CE v0.1 stack:
 
 ```text
 Language:        TypeScript
-Backend:         Node.js + NestJS
+Backend:         Fastify + TypeScript
+Validation:      Zod
 Database ORM:    Prisma
 Database:        SQLite by default
 UI:              React + TypeScript + Ant Design
@@ -56,7 +33,7 @@ Deployment:      single container first, Docker Compose optional
 This stack prioritizes:
 
 - TypeScript sharing across UI, Backend, and Agent SDK;
-- clear modular Backend structure;
+- lightweight Backend structure;
 - lightweight SQLite deployment;
 - future MySQL/PostgreSQL compatibility;
 - fast UI development;
@@ -124,19 +101,19 @@ Java runtime support may be planned later, but it is not part of the first CE im
 Use:
 
 ```text
-Node.js + TypeScript + NestJS
+Fastify + TypeScript + Zod
 ```
 
 ### 4.2 Rationale
 
-NestJS is recommended because:
+Fastify is recommended because:
 
-- it provides a clear modular structure;
-- it supports controllers, services, guards, interceptors, and dependency injection;
-- it helps maintain clean boundaries as the product grows;
-- it is familiar to many backend developers;
-- it can support both REST APIs and future WebSocket/gRPC extensions;
-- it fits well with Prisma and TypeScript.
+- it is lightweight and fast;
+- it keeps CE v0.1 packaging simple;
+- it works well with Zod, Prisma, and TypeScript;
+- it is sufficient for the first REST API surface;
+- it avoids unnecessary framework weight in the first open-source prototype;
+- it can still evolve toward WebSocket or other transports later.
 
 ### 4.3 Backend modules
 
@@ -158,23 +135,23 @@ system
 
 ### 4.4 Alternative backend stack
 
-A lighter alternative is:
+A heavier future/productization alternative is:
 
 ```text
-Fastify + TypeScript + Prisma
+NestJS + TypeScript + Prisma
 ```
 
-Fastify is lighter and faster, but NestJS provides a stronger application architecture for productization.
+NestJS may be useful later if the Backend needs stronger module conventions, dependency injection patterns, or enterprise-scale organization.
 
 ### 4.5 Decision
 
 For CE v0.1, choose:
 
 ```text
-NestJS + TypeScript
+Fastify + TypeScript + Zod + Prisma
 ```
 
-unless implementation speed or packaging simplicity becomes a major problem.
+This is the current implementation baseline. NestJS is not the CE v0.1 baseline.
 
 ---
 
@@ -419,7 +396,7 @@ Rationale:
 - can derive types;
 - lightweight enough for CE.
 
-NestJS class-validator is also possible, but Zod is better aligned with shared schema packages.
+Class-validator or framework-specific validators are possible later, but Zod is the CE v0.1 baseline because it is lightweight and can be shared across packages.
 
 ---
 
@@ -581,7 +558,7 @@ Recommended options:
 pino
 ```
 
-or NestJS built-in logger for the first version.
+for the first version.
 
 ### 12.2 Logging scope
 
@@ -610,9 +587,7 @@ Recommended:
 Vitest or Jest
 ```
 
-NestJS defaults often use Jest, but Vitest is faster and common in modern TypeScript projects.
-
-Decision can follow NestJS project defaults unless there is a strong reason to switch.
+Vitest is preferred for CE v0.1 because it is fast and common in modern TypeScript projects. Jest is acceptable if a package has a specific need.
 
 ### 13.2 UI tests
 
@@ -642,7 +617,7 @@ Automated Playwright smoke tests are useful but optional for v0.1.
 
 ### 14.1 Backend build
 
-NestJS build output should be packaged into a runtime container.
+Fastify Backend build output should be packaged into a runtime container.
 
 ### 14.2 UI build
 
@@ -790,7 +765,7 @@ future extensibility
 Recommended stack:
 
 ```text
-TypeScript + NestJS + Prisma + SQLite + React + Ant Design + pnpm + Docker
+TypeScript + Fastify + Zod + Prisma + SQLite + React + Ant Design + pnpm + Docker
 ```
 
 The most important technology rule is:

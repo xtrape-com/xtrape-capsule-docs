@@ -1,17 +1,5 @@
 # Agent Permission Model
 
-- Status: Draft
-- Edition: Shared
-- Priority: High
-
-本文件属于 `xtrape-capsule` 文档集。`xtrape-capsule` 是面向轻服务 / Capsule Service 的领域体系；`xtrape-capsule-opstage` 是该体系下的统一运行态治理平台。
-
-当前实现重点是 CE 开源社区版。EE 私有化商业版与 Cloud SaaS 版属于未来规划，CE 需要保留扩展点，但不应在早期版本实现其完整能力。
-
-Agent 是 Capsule Service 加入 Opstage 治理体系的授权入口。CE 第一版实现 Node.js Embedded Agent，Sidecar 和 External Agent 属于后续扩展。
-
-# Agent Permission Model
-
 - Status: Implementation Guidance
 - Edition: Shared
 - Priority: High

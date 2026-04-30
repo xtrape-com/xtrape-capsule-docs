@@ -1,6 +1,6 @@
 # xtrape-capsule Overview
 
-- Status: Draft
+- Status: Conceptual Guidance
 - Edition: Shared
 - Priority: High
 - Audience: architects, developers, AI coding agents
