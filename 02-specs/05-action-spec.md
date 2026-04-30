@@ -1,0 +1,842 @@
+# Action Specification
+
+- Status: Draft
+- Edition: Shared
+- Priority: High
+
+本文件属于 `xtrape-capsule` 文档集。`xtrape-capsule` 是面向轻服务 / Capsule Service 的领域体系；`xtrape-capsule-opstage` 是该体系下的统一运行态治理平台。
+
+当前实现重点是 CE 开源社区版。EE 私有化商业版与 Cloud SaaS 版属于未来规划，CE 需要保留扩展点，但不应在早期版本实现其完整能力。
+
+## Scope
+
+本规范是 CE / EE / Cloud 共享的长期契约。CE 可以只实现最小子集，但命名、状态、接口和数据结构应尽量保持向后兼容。
+
+## Compatibility Rule
+
+- CE v0.x 可以标记实验字段。
+- 稳定字段不应随意破坏。
+- EE / Cloud 可以扩展能力，但不应反向污染 CE MVP。
+
+# Action Specification
+
+- Status: Draft
+- Edition: Shared
+- Priority: High
+- Audience: backend developers, frontend developers, agent SDK developers, AI coding agents
+
+This document defines the shared Action model for the `xtrape-capsule` domain.
+
+An **Action** is a predefined operation exposed by a Capsule Service and executed through an authorized Agent under Opstage governance.
+
+Actions are the safe operational interface between Opstage and Capsule Services.
+
+---
+
+## 1. Purpose
+
+The Action Specification defines:
+
+- how Capsule Services describe executable actions;
+- how Opstage displays actions in the UI;
+- how Backend creates commands for action execution;
+- how Agents execute actions;
+- how action results are reported;
+- how actions are audited;
+- what CE v0.1 must implement;
+- what future EE and Cloud editions may extend.
+
+The Action model must prevent unsafe remote operation patterns, especially arbitrary shell execution in CE v0.1.
+
+---
+
+## 2. Core Rule
+
+Actions must be:
+
+- explicit;
+- predefined;
+- named;
+- typed;
+- permission-checkable;
+- auditable;
+- executed through an Agent;
+- associated with a Capsule Service.
+
+CE v0.1 must not expose arbitrary command execution from the UI.
+
+Correct model:
+
+```text
+User clicks predefined action in UI
+    ↓
+Backend creates Command
+    ↓
+Agent fetches Command
+    ↓
+Agent invokes predefined action handler
+    ↓
+Agent reports CommandResult
+    ↓
+Backend writes AuditEvent
+```
+
+Incorrect model:
+
+```text
+User types shell command in UI
+    ↓
+Backend sends arbitrary command to Agent
+    ↓
+Agent executes shell directly
+```
+
+---
+
+## 3. ActionDefinition
+
+An **ActionDefinition** describes an action that a Capsule Service supports.
+
+The ActionDefinition may be reported by:
+
+- the embedded Agent SDK;
+- the Capsule manifest;
+- a Capsule management endpoint;
+- future sidecar or external Agent configuration.
+
+### 3.1 Minimum CE v0.1 ActionDefinition
+
+```json
+{
+  "name": "runHealthCheck",
+  "label": "Run Health Check",
+  "description": "Run a manual health check for this Capsule Service.",
+  "dangerLevel": "LOW",
+  "enabled": true
+}
+```
+
+### 3.2 Recommended Full ActionDefinition
+
+```json
+{
+  "name": "refreshSession",
+  "label": "Refresh Session",
+  "description": "Refresh the selected account session.",
+  "dangerLevel": "MEDIUM",
+  "enabled": true,
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "sessionId": {
+        "type": "string",
+        "title": "Session ID"
+      }
+    },
+    "required": ["sessionId"]
+  },
+  "resultSchema": {
+    "type": "object",
+    "properties": {
+      "refreshed": { "type": "boolean" },
+      "expiresAt": { "type": "string" }
+    }
+  },
+  "confirmRequired": true,
+  "timeoutSeconds": 60,
+  "metadata": {
+    "category": "session",
+    "icon": "refresh"
+  }
+}
+```
+
+---
+
+## 4. ActionDefinition Fields
+
+### 4.1 `name`
+
+Stable technical name of the action.
+
+Rules:
+
+- required;
+- camelCase is recommended;
+- unique within one Capsule Service;
+- should be stable across versions;
+- should describe intent, not implementation.
+
+Good examples:
+
+```text
+runHealthCheck
+reloadConfig
+refreshSession
+clearExpiredSessions
+rotateProxy
+disableAccount
+```
+
+Bad examples:
+
+```text
+exec
+runShell
+bash
+cmd1
+doIt
+```
+
+### 4.2 `label`
+
+Human-readable label displayed in UI.
+
+Rules:
+
+- required for UI display;
+- may be localized in future versions;
+- should be short and action-oriented.
+
+Examples:
+
+```text
+Run Health Check
+Reload Config
+Refresh Session
+Clear Expired Sessions
+```
+
+### 4.3 `description`
+
+Optional human-readable explanation of the action.
+
+The description should help the operator understand:
+
+- what the action does;
+- whether it is safe;
+- when it should be used;
+- what resource it affects.
+
+### 4.4 `dangerLevel`
+
+The operational risk level of the action.
+
+Allowed values:
+
+```text
+LOW
+MEDIUM
+HIGH
+CRITICAL
+```
+
+Recommended meaning:
+
+| Level | Meaning | Examples |
+|---|---|---|
+| LOW | Read-only or low-risk operation | `runHealthCheck` |
+| MEDIUM | Changes local runtime state but is usually safe | `reloadConfig`, `refreshSession` |
+| HIGH | May disrupt service behavior or user resources | `clearExpiredSessions`, `rotateProxy` |
+| CRITICAL | May cause data loss, credential reset, account disablement, or large impact | `disableAccount`, `purgeData` |
+
+CE v0.1 should display `dangerLevel` in UI and require confirmation for `HIGH` and `CRITICAL` actions.
+
+### 4.5 `enabled`
+
+Whether this action is currently available.
+
+If `enabled` is false, UI should display the action as disabled or hide it.
+
+### 4.6 `inputSchema`
+
+Optional JSON-schema-like definition for action input.
+
+CE v0.1 may support only simple object input or no input.
+
+Future versions may use this schema to generate dynamic UI forms.
+
+### 4.7 `resultSchema`
+
+Optional JSON-schema-like definition for structured action result.
+
+CE v0.1 may store result as JSON without strict validation.
+
+### 4.8 `confirmRequired`
+
+Whether UI should ask for confirmation before creating a command.
+
+Recommended default:
+
+```text
+LOW      false
+MEDIUM   false or true depending on action
+HIGH     true
+CRITICAL true
+```
+
+### 4.9 `timeoutSeconds`
+
+Optional maximum expected execution duration.
+
+If omitted, Backend may use a default timeout.
+
+CE v0.1 may store this value but does not need advanced timeout enforcement.
+
+### 4.10 `metadata`
+
+Optional free-form metadata for UI or future extensions.
+
+Examples:
+
+```json
+{
+  "category": "session",
+  "icon": "refresh",
+  "uiOrder": 10
+}
+```
+
+---
+
+## 5. Action Execution Model
+
+Actions are not executed directly by Opstage Backend.
+
+Opstage Backend creates a Command, and the Agent executes the action.
+
+```text
+UI
+  ↓ request action execution
+Backend
+  ↓ create Command
+Agent
+  ↓ execute action handler
+Capsule Service
+  ↓ return result
+Agent
+  ↓ report CommandResult
+Backend
+  ↓ update status and audit
+UI
+  ↓ show result
+```
+
+---
+
+## 6. Command Mapping
+
+Every action execution request should create a Command.
+
+Recommended command fields:
+
+```json
+{
+  "commandType": "ACTION",
+  "actionName": "runHealthCheck",
+  "serviceId": "svc_001",
+  "agentId": "agt_001",
+  "payload": {},
+  "status": "PENDING",
+  "expiresAt": "2026-04-30T10:30:00Z"
+}
+```
+
+The Agent should fetch or receive this Command, map `actionName` to a local handler, execute it, and report a CommandResult.
+
+---
+
+## 7. Action Request
+
+The UI should not call Agent directly.
+
+The UI requests action execution from Backend.
+
+Example Admin API:
+
+```http
+POST /api/admin/capsule-services/{serviceId}/actions/{actionName}
+```
+
+Request body:
+
+```json
+{
+  "payload": {
+    "sessionId": "ses_001"
+  }
+}
+```
+
+Backend responsibilities:
+
+1. authenticate user;
+2. check service exists;
+3. check service is manageable;
+4. check action exists and is enabled;
+5. validate payload if schema exists;
+6. check action danger level and confirmation policy;
+7. create Command;
+8. write AuditEvent;
+9. return Command summary to UI.
+
+---
+
+## 8. Action Handler
+
+In embedded Agent mode, an action handler is registered inside the Capsule Service process.
+
+Example TypeScript shape:
+
+```ts
+export type CapsuleActionHandler = (payload: unknown, context: CapsuleActionContext) => Promise<CapsuleActionResult>;
+
+export interface CapsuleActionContext {
+  actionName: string;
+  commandId: string;
+  serviceCode: string;
+  agentId: string;
+  requestedAt: string;
+}
+
+export interface CapsuleActionResult {
+  success: boolean;
+  message?: string;
+  data?: unknown;
+}
+```
+
+Example registration:
+
+```ts
+agent.registerAction({
+  name: 'runHealthCheck',
+  label: 'Run Health Check',
+  dangerLevel: 'LOW',
+  handler: async () => {
+    const health = await checkHealth();
+    return {
+      success: true,
+      message: 'Health check completed.',
+      data: health,
+    };
+  },
+});
+```
+
+CE v0.1 does not need to finalize this exact TypeScript API, but the SDK design should follow this shape.
+
+---
+
+## 9. Action Result
+
+An **ActionResult** is the structured result returned by an action handler.
+
+Recommended shape:
+
+```json
+{
+  "success": true,
+  "message": "Session refreshed successfully.",
+  "data": {
+    "sessionId": "ses_001",
+    "expiresAt": "2026-05-01T10:00:00Z"
+  }
+}
+```
+
+If the action fails:
+
+```json
+{
+  "success": false,
+  "message": "Session refresh failed.",
+  "error": {
+    "code": "SESSION_EXPIRED",
+    "message": "The session is already expired and cannot be refreshed."
+  }
+}
+```
+
+The Agent should wrap ActionResult into CommandResult before reporting to Backend.
+
+---
+
+## 10. CommandResult Mapping
+
+A completed action should produce a CommandResult.
+
+Successful example:
+
+```json
+{
+  "commandId": "cmd_001",
+  "status": "SUCCESS",
+  "outputText": "Session refreshed successfully.",
+  "resultJson": {
+    "success": true,
+    "sessionId": "ses_001",
+    "expiresAt": "2026-05-01T10:00:00Z"
+  },
+  "startedAt": "2026-04-30T10:01:00Z",
+  "finishedAt": "2026-04-30T10:01:03Z"
+}
+```
+
+Failed example:
+
+```json
+{
+  "commandId": "cmd_001",
+  "status": "FAILED",
+  "outputText": "Session refresh failed.",
+  "errorMessage": "The session is already expired and cannot be refreshed.",
+  "resultJson": {
+    "success": false,
+    "errorCode": "SESSION_EXPIRED"
+  },
+  "startedAt": "2026-04-30T10:01:00Z",
+  "finishedAt": "2026-04-30T10:01:03Z"
+}
+```
+
+---
+
+## 11. Action Status
+
+Actions themselves are definitions. Execution status belongs to Command and CommandResult.
+
+Do not create separate long-running ActionExecution status unless future requirements justify it.
+
+Use Command statuses:
+
+```text
+PENDING
+DISPATCHED
+RUNNING
+SUCCESS
+FAILED
+EXPIRED
+CANCELLED
+```
+
+---
+
+## 12. Auditing
+
+Every action request and result should be auditable.
+
+Recommended audit events:
+
+```text
+service.action.requested
+service.action.dispatched
+service.action.completed
+service.action.failed
+```
+
+Minimum CE v0.1 audit fields:
+
+```text
+actorType
+actorId
+action
+resourceType
+resourceId
+description
+requestJson
+resultJson
+createdAt
+```
+
+Example:
+
+```json
+{
+  "actorType": "user",
+  "actorId": "usr_001",
+  "action": "service.action.requested",
+  "resourceType": "CapsuleService",
+  "resourceId": "svc_001",
+  "description": "Requested action runHealthCheck on demo-capsule-service.",
+  "requestJson": {
+    "actionName": "runHealthCheck",
+    "payload": {}
+  }
+}
+```
+
+---
+
+## 13. Permission Model
+
+CE v0.1 may implement a simple local admin model.
+
+However, ActionDefinition and Command should be designed so that future permission checks can be added.
+
+Future permission dimensions:
+
+- workspace;
+- service;
+- action name;
+- danger level;
+- user role;
+- Agent permission;
+- environment;
+- approval requirement.
+
+CE v0.1 minimum rule:
+
+> Only authenticated admin users can request action execution.
+
+---
+
+## 14. Safety Rules
+
+### 14.1 No arbitrary shell execution in CE v0.1
+
+CE v0.1 must not provide a generic shell execution feature from UI.
+
+### 14.2 Predefined handlers only
+
+The Agent should execute only registered action handlers.
+
+### 14.3 Validate action existence
+
+Backend must verify that the action exists in the latest known ActionDefinition list before creating a Command.
+
+### 14.4 Validate service manageability
+
+Backend must verify that:
+
+- the service exists;
+- the service has an associated Agent;
+- the Agent is not revoked or disabled;
+- the service is not disabled;
+- the command can be delivered or queued.
+
+### 14.5 Confirm dangerous actions
+
+UI should require confirmation for `HIGH` and `CRITICAL` actions.
+
+### 14.6 Audit every action
+
+Every action request should generate an AuditEvent.
+
+Every action result should update or create an AuditEvent or related audit record.
+
+---
+
+## 15. CE v0.1 Required Actions
+
+The demo Capsule Service should implement at least these actions:
+
+### 15.1 `runHealthCheck`
+
+Purpose:
+
+- manually trigger a health check;
+- return a health result.
+
+Danger level:
+
+```text
+LOW
+```
+
+Input:
+
+```json
+{}
+```
+
+Result:
+
+```json
+{
+  "status": "UP",
+  "details": {}
+}
+```
+
+### 15.2 `echo`
+
+Purpose:
+
+- verify command/action roundtrip;
+- useful for demo and testing.
+
+Danger level:
+
+```text
+LOW
+```
+
+Input:
+
+```json
+{
+  "message": "hello"
+}
+```
+
+Result:
+
+```json
+{
+  "message": "hello"
+}
+```
+
+`echo` may be removed from production examples later, but it is useful for CE v0.1 validation.
+
+---
+
+## 16. Optional Future Actions
+
+The following actions are examples for future Capsule Services.
+
+### 16.1 Session actions
+
+```text
+refreshSession
+clearExpiredSessions
+revokeSession
+```
+
+### 16.2 Config actions
+
+```text
+reloadConfig
+validateConfig
+```
+
+### 16.3 Account actions
+
+```text
+disableAccount
+markAccountRisky
+refreshAccountQuota
+```
+
+### 16.4 Worker actions
+
+```text
+pauseWorker
+resumeWorker
+retryFailedJob
+clearQueue
+```
+
+### 16.5 Connector actions
+
+```text
+testConnection
+refreshToken
+syncMetadata
+```
+
+---
+
+## 17. UI Requirements
+
+CE v0.1 UI should support:
+
+- listing available actions on service detail page;
+- showing action label and danger level;
+- disabling unavailable actions;
+- requesting confirmation for dangerous actions;
+- submitting action payload if simple input is needed;
+- showing created Command status;
+- showing final CommandResult.
+
+CE v0.1 UI may keep input handling simple. Dynamic schema-based forms can be added later.
+
+---
+
+## 18. Backend Requirements
+
+CE v0.1 Backend should support:
+
+- storing ActionDefinitions from service report or manifest;
+- exposing actions to UI;
+- creating Commands for action requests;
+- exposing pending commands to Agent;
+- receiving CommandResults;
+- updating Command status;
+- writing AuditEvents.
+
+---
+
+## 19. Agent SDK Requirements
+
+CE v0.1 Node.js embedded Agent SDK should support:
+
+- action registration;
+- action metadata reporting;
+- command polling;
+- action handler invocation;
+- error capture;
+- command result reporting.
+
+The SDK should not expose a default arbitrary shell execution action.
+
+---
+
+## 20. Compatibility Rules
+
+- New optional fields may be added to ActionDefinition.
+- Existing stable fields should not change meaning.
+- Unknown fields should be ignored by older clients where possible.
+- EE and Cloud may add permission, approval, scheduling, and workflow metadata.
+- CE should not be forced to implement advanced EE/Cloud fields.
+
+---
+
+## 21. Anti-Patterns
+
+Avoid these patterns:
+
+### 21.1 Generic shell action
+
+Do not define a generic `runShell` or `exec` action in CE v0.1.
+
+### 21.2 Hidden high-risk action
+
+Do not mark a destructive action as `LOW` risk.
+
+### 21.3 Backend-side business action implementation
+
+Do not implement Capsule-specific business logic directly in Backend.
+
+### 21.4 Untracked action execution
+
+Do not execute an action without Command and AuditEvent records.
+
+### 21.5 Agent executing unknown action
+
+The Agent must reject commands for unknown or unregistered actions.
+
+---
+
+## 22. Summary
+
+Actions are the safe operational interface between Opstage and Capsule Services.
+
+CE v0.1 should implement a small but complete Action loop:
+
+```text
+ActionDefinition
+    ↓
+UI Action Button
+    ↓
+Backend Command
+    ↓
+Agent Action Handler
+    ↓
+CommandResult
+    ↓
+AuditEvent
+```
+
+This loop proves that Capsule Services can be operated through Opstage without exposing arbitrary remote command execution.
