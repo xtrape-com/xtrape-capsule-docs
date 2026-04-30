@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: agent SDK developers, Capsule Service developers, backend developers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/openapi/opstage-ce-v0.1.yaml` disagree, the ADRs and OpenAPI contract win for CE v0.1.
+
 This document defines the **Node.js Embedded Agent** design for **Opstage CE v0.1**.
 
 The Node.js Embedded Agent is the first Agent implementation of `xtrape-capsule`. It runs inside a Node.js Capsule Service process and connects the service to Opstage Backend.
@@ -116,17 +118,16 @@ Recommended package name:
 @xtrape/capsule-agent-node
 ```
 
-Alternative package names:
+Alternative package names (not used in CE v0.1):
 
 ```text
 @xtrape/opstage-agent-node
-@xtrape/capsule-agent-sdk-node
 ```
 
-Recommended CE package location:
+CE v0.1 package location (matches `10-implementation/00-monorepo-structure.md`):
 
 ```text
-packages/agent-sdk-node
+packages/agent-node
 ```
 
 Recommended output:

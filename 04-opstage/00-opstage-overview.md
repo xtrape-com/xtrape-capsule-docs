@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: architects, backend developers, frontend developers, agent SDK developers, product designers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1.
+
 This document defines the subsystem overview for **Opstage**.
 
 Opstage is the runtime governance platform under the `xtrape-capsule` domain. It is responsible for making Capsule Services visible, manageable, and auditable through a Backend, UI, and Agent-based integration model.

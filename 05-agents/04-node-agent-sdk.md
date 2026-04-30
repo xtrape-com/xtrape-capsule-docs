@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: agent SDK developers, Capsule Service developers, backend developers, test engineers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/openapi/opstage-ce-v0.1.yaml` disagree, the ADRs and OpenAPI contract win for CE v0.1.
+
 This document defines the **Node.js Agent SDK** for Opstage CE.
 
 The Node.js Agent SDK is the first and reference implementation of the Embedded Agent model. It allows a Node.js Capsule Service to register with Opstage Backend, report its runtime metadata, expose health/config/action metadata, poll Commands, execute predefined actions, and report CommandResults.

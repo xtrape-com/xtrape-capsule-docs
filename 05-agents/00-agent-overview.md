@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: agent SDK developers, Capsule Service developers, backend developers, architects, security reviewers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/openapi/opstage-ce-v0.1.yaml` disagree, the ADRs and OpenAPI contract win for CE v0.1.
+
 This document defines the overall Agent concept for the `xtrape-capsule` product family.
 
 An Agent is the authorized governance bridge that allows a Capsule Service to join the Opstage runtime governance system.

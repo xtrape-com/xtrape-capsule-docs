@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, Capsule Service developers, architects, security reviewers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1. In particular: CE v0.1 Command states are `PENDING | RUNNING | SUCCEEDED | FAILED | EXPIRED | CANCELLED` (no `DISPATCHED`), CommandResult uses `success / message / data / error`, ActionDefinition uses `requiresConfirmation`, and `dangerLevel` is `LOW | MEDIUM | HIGH` (no `CRITICAL`). Sections that still mention older terminology are kept for historical context but should not be implemented.
+
 This document defines the **Command and Action Model** for Opstage.
 
 Commands and Actions are the core operation mechanism that allows Opstage UI users to request safe, predefined operations on Capsule Services through Agents.
@@ -722,6 +724,223 @@ Backend creates AuditEvent
     ↓
 UI displays result
 ```
+
+### 23.1 Sequence Diagram (CE v0.1)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Admin User
+    participant UI as Opstage UI
+    participant BE as Opstage Backend
+    participant DB as SQLite (Prisma)
+    participant AG as Agent (in Capsule Service)
+    participant SVC as Capsule Service handler
+
+    U->>UI: Click "Restart" on service detail
+    UI->>BE: POST /api/admin/capsule-services/{serviceId}/actions/restart\ncookie + X-CSRF-Token + body
+    BE->>DB: Tx start
+    BE->>DB: Lookup service, action, agent
+    BE->>BE: Validate session, CSRF, payload (Zod + JSON Schema)
+    BE->>DB: INSERT Command (PENDING)
+    BE->>DB: INSERT AuditEvent (action=COMMAND.CREATE, result=SUCCESS)
+    BE->>DB: Tx commit
+    BE-->>UI: 200 { data: Command(PENDING) }
+
+    loop heartbeat / poll loop
+        AG->>BE: GET /api/agents/{agentId}/commands (Bearer)
+        BE->>DB: SELECT pending commands for agent\n(LIMIT N, FOR UPDATE in MySQL; SQLite uses BEGIN IMMEDIATE)
+        BE->>DB: UPDATE Command SET status=RUNNING, dispatchedAt=now
+        BE-->>AG: 200 { data: [Command...] }
+    end
+
+    AG->>SVC: Invoke local handler(payload)
+    SVC-->>AG: success | failure
+    AG->>BE: POST /api/agents/{agentId}/commands/{commandId}/result\n{ success, message, data, error, startedAt, finishedAt }
+    BE->>DB: Tx start
+    BE->>DB: UPDATE Command SET status=SUCCEEDED|FAILED, finishedAt
+    BE->>DB: INSERT CommandResult
+    BE->>DB: INSERT AuditEvent (action=COMMAND.COMPLETE, result=SUCCESS|FAILURE)
+    BE->>DB: Tx commit
+    BE-->>AG: 200 OK
+
+    UI->>BE: GET /api/admin/commands/{commandId} (poll or SSE in EE)
+    BE-->>UI: 200 { data: CommandDetail }
+```
+
+### 23.2 Backend Pseudocode (`createActionCommand`)
+
+```ts
+// modules/capsule-services/actions.controller.ts (pseudo-code)
+async function createActionCommand(req, res) {
+  const { serviceId, actionName } = req.params;
+  const session = req.session.get("admin");          // 401 if absent
+  const body = CreateActionCommandRequest.parse(req.body); // 422 on shape error
+
+  return prisma.$transaction(async (tx) => {
+    const service = await tx.capsuleService.findUnique({ where: { id: serviceId }, include: { agent: true } });
+    if (!service)                  throw new HttpError(404, "SERVICE_NOT_FOUND",  "Capsule service not found.");
+    if (!service.agent)            throw new HttpError(409, "SERVICE_HAS_NO_AGENT","Service is not bound to an agent.");
+    if (service.agent.status === "DISABLED" || service.agent.status === "REVOKED")
+                                   throw new HttpError(409, "AGENT_NOT_ACTIVE",   `Agent status is ${service.agent.status}.`);
+
+    const action = await tx.actionDefinition.findUnique({
+      where: { serviceId_name: { serviceId, name: actionName } },
+    });
+    if (!action)                   throw new HttpError(404, "ACTION_NOT_FOUND",   "Action not declared by service.");
+    if (!action.enabled)           throw new HttpError(409, "ACTION_DISABLED",    "Action currently disabled.");
+
+    if (action.requiresConfirmation && body.confirmation !== true) {
+      throw new HttpError(409, "ACTION_REQUIRES_CONFIRMATION", "Action requires explicit confirmation.");
+    }
+
+    if (action.inputSchemaJson) {
+      const validate = ajv.compile(JSON.parse(action.inputSchemaJson));
+      if (!validate(body.payload ?? {})) {
+        throw new HttpError(422, "VALIDATION_FAILED", "Action payload failed schema validation.", validate.errors);
+      }
+    }
+
+    const command = await tx.command.create({
+      data: {
+        id: newId("cmd_"),
+        workspaceId: service.workspaceId,
+        agentId:     service.agentId,
+        serviceId:   service.id,
+        type:        "ACTION",
+        actionName:  action.name,
+        payloadJson: JSON.stringify(body.payload ?? {}),
+        status:      "PENDING",
+        expiresAt:   new Date(now().getTime() + defaults.commandTtlSeconds * 1000),
+        createdByUserId: session.userId,
+        createdAt:   now(),
+      },
+    });
+
+    await tx.auditEvent.create({
+      data: {
+        id: newId("aud_"),
+        workspaceId: service.workspaceId,
+        actorType: "USER",
+        actorId:   session.userId,
+        action:    "service.action.requested",
+        targetType:"Command",
+        targetId:  command.id,
+        result:    "SUCCESS",
+        message:   `Requested action ${actionName} for service ${service.code}.`,
+        metadataJson: JSON.stringify({ serviceId, agentId: service.agentId, actionName, dangerLevel: action.dangerLevel }),
+        createdAt: now(),
+      },
+    });
+
+    return res.status(200).send({ success: true, data: serializeCommand(command) });
+  });
+}
+```
+
+Failure rules (these MUST also produce a `COMMAND.CREATE` AuditEvent with `result: FAILURE` and the same target/metadata, except the AuditEvent is written from the error handler so the transaction can roll back the half-built Command):
+
+| Condition                                     | HTTP | error.code                       |
+|-----------------------------------------------|------|----------------------------------|
+| service missing                               | 404  | `SERVICE_NOT_FOUND`              |
+| service has no Agent                          | 409  | `SERVICE_HAS_NO_AGENT`           |
+| Agent disabled / revoked                      | 409  | `AGENT_NOT_ACTIVE`               |
+| action missing                                | 404  | `ACTION_NOT_FOUND`               |
+| action disabled                               | 409  | `ACTION_DISABLED`                |
+| `requiresConfirmation: true` and not provided | 409  | `ACTION_REQUIRES_CONFIRMATION`   |
+| payload fails JSON Schema                     | 422  | `VALIDATION_FAILED`              |
+| body shape invalid (Zod)                      | 422  | `VALIDATION_FAILED`              |
+| CSRF header missing/wrong                     | 403  | `CSRF_INVALID`                   |
+| session missing/expired                       | 401  | `AUTH_REQUIRED`                  |
+
+### 23.3 Backend Pseudocode (`pollCommands`)
+
+```ts
+async function pollCommands(req, res) {
+  const agent = await authenticateAgent(req);   // 401 / 403
+  const limit = clamp(req.query.limit ?? 10, 1, 50);
+
+  const commands = await prisma.$transaction(async (tx) => {
+    const pending = await tx.command.findMany({
+      where: { agentId: agent.id, status: "PENDING" },
+      orderBy: { createdAt: "asc" },
+      take: limit,
+    });
+    if (pending.length === 0) return [];
+
+    await tx.command.updateMany({
+      where: { id: { in: pending.map((c) => c.id) }, status: "PENDING" },
+      data:  { status: "RUNNING", startedAt: now() },
+    });
+
+    return pending.map((c) => ({ ...c, status: "RUNNING" }));
+  });
+
+  return res.send({ success: true, data: commands.map(serializeCommand) });
+}
+```
+
+### 23.4 Backend Pseudocode (`reportCommandResult`)
+
+```ts
+async function reportCommandResult(req, res) {
+  const agent = await authenticateAgent(req);
+  const { commandId } = req.params;
+  const body = ReportCommandResultRequest.parse(req.body);
+
+  return prisma.$transaction(async (tx) => {
+    const cmd = await tx.command.findUnique({ where: { id: commandId } });
+    if (!cmd)                              throw new HttpError(404, "COMMAND_NOT_FOUND",     "Command not found.");
+    if (cmd.agentId !== agent.id)          throw new HttpError(403, "COMMAND_NOT_OWNED",     "Command not owned by this agent.");
+    if (cmd.status === "EXPIRED")          throw new HttpError(410, "COMMAND_EXPIRED",       "Command already expired.");
+    if (cmd.status === "SUCCEEDED" || cmd.status === "FAILED" || cmd.status === "CANCELLED")
+                                           throw new HttpError(409, "COMMAND_TERMINAL",      `Command already ${cmd.status}.`);
+
+    const finalStatus = body.success ? "SUCCEEDED" : "FAILED";
+
+    await tx.command.update({
+      where: { id: commandId },
+      data:  { status: finalStatus, completedAt: now() },
+    });
+
+    await tx.commandResult.create({
+      data: {
+        id: newId("crs_"),
+        commandId,
+        agentId:   agent.id,
+        success:   body.success,
+        message:   body.message ?? null,
+        dataJson:  body.data  != null ? JSON.stringify(body.data)  : null,
+        errorJson: body.error != null ? JSON.stringify(body.error) : null,
+        reportedAt: now(),
+      },
+    });
+
+    await tx.auditEvent.create({
+      data: {
+        id: newId("aud_"),
+        workspaceId: cmd.workspaceId,
+        actorType: "AGENT",
+        actorId:   agent.id,
+        action:    body.success ? "command.completed" : "command.failed",
+        targetType:"Command",
+        targetId:  cmd.id,
+        result:    body.success ? "SUCCESS" : "FAILURE",
+        message:   body.message ?? null,
+        createdAt: now(),
+      },
+    });
+
+    return res.send({ success: true });
+  });
+}
+```
+
+### 23.5 Ordering Guarantees
+
+- Command creation is committed BEFORE the response, so a failed AuditEvent insert MUST roll back the Command (single transaction).
+- Status transitions are linear and persisted (no optimistic in-memory state). The Backend MUST never expose `RUNNING → PENDING` transitions.
+- Once `SUCCEEDED`, `FAILED`, `EXPIRED`, or `CANCELLED`, a Command is terminal. Retries create a NEW Command.
 
 ---
 

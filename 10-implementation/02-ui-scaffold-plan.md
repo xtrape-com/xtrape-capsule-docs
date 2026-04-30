@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: frontend developers, product designers, backend developers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/openapi/opstage-ce-v0.1.yaml` disagree, the ADRs and OpenAPI contract win for CE v0.1.
+
 ## 1. Goal
 
 Build the Opstage CE UI as a simple, useful governance console for the CE v0.1 loop.
@@ -25,15 +27,29 @@ apps/opstage-ui
 
 ## 3. Stack
 
+Per ADR 0007:
+
 ```text
-React
-TypeScript
-Vite
-Ant Design
-TanStack Query or equivalent
-OpenAPI-generated or typed API client
-Vitest
-Playwright optional
+React            18.x
+TypeScript       5.x
+Vite             5.x
+Ant Design       5.x
+TanStack Query   5.x      (server state)
+Zustand          4.x      (small client state slice)
+React Router     6.x
+React Hook Form  7.x
+Zod              3.x      (shared with backend via packages/contracts)
+Vitest           2.x
+Playwright              optional, for happy-path E2E
+```
+
+State boundaries:
+
+```text
+Server state    → TanStack Query
+Form state      → React Hook Form
+Client UI state → Zustand   (session, csrfToken, theme — see ADR 0007)
+URL state       → React Router (page/pageSize/sort/filter)
 ```
 
 ## 4. Page Structure
@@ -215,6 +231,28 @@ Avoid EE/Cloud settings such as tenant, billing, SSO, license, and RBAC.
 - Require confirmation for dangerous actions.
 - Do not treat stale/offline services as healthy.
 - Do not call Agent endpoints directly from browser.
+
+## 7.1 API Client Rules
+
+A single fetch wrapper at `apps/opstage-ui/src/lib/api-client.ts` is the only allowed `fetch` caller (enforced by ESLint).
+
+- always sends `credentials: "include"`;
+- adds `X-CSRF-Token` from the Zustand store on every non-GET request;
+- on `401`: clears session, redirects to `/login`;
+- on `403 CSRF_INVALID`: refreshes the token via `GET /api/admin/auth/csrf` and retries once;
+- maps `ErrorEnvelope` to a typed `ApiError` instance with `httpStatus`, `code`, `message`, `details`.
+
+## 7.2 TanStack Query Conventions
+
+```text
+queryKey         [<resource>, <id?>, <params?>]
+staleTime        30_000 ms (matches heartbeat cadence)
+gcTime           300_000 ms
+refetchOnWindowFocus  true
+retry            1 (only on 5xx and NETWORK_ERROR)
+```
+
+Mutations MUST invalidate the relevant list query on success. CE v0.1 does NOT use optimistic updates.
 
 ## 8. Test Plan
 

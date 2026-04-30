@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: agent SDK developers, Capsule Service developers, backend developers, test engineers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/openapi/opstage-ce-v0.1.yaml` disagree, the ADRs and OpenAPI contract win for CE v0.1.
+
 ## 1. Goal
 
 Build the Node Embedded Agent SDK for CE v0.1.

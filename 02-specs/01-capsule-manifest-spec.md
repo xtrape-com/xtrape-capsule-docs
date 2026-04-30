@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, Capsule Service developers, AI coding agents
 
+> **Precedence rule**: When this document and `09-contracts/openapi/opstage-ce-v0.1.yaml` `CapsuleManifest` schema disagree, the OpenAPI contract wins for CE v0.1.
+
 This document defines the **Capsule Manifest** specification for the `xtrape-capsule` domain.
 
 A Capsule Manifest is the structured metadata document that describes a Capsule Service's identity, runtime, capabilities, resources, actions, configuration surface, and governance metadata.

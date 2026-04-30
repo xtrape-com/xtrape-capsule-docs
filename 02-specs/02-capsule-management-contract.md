@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: backend developers, agent SDK developers, Capsule Service developers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/openapi/opstage-ce-v0.1.yaml` disagree, the ADRs and OpenAPI contract win for CE v0.1.
+
 This document defines the **Capsule Management Contract** for the `xtrape-capsule` domain.
 
 The Capsule Management Contract is the service-side governance interface that describes how a Capsule Service can expose or provide its manifest, health, configuration metadata, actions, resources, events, and metrics to an Agent or to Opstage.

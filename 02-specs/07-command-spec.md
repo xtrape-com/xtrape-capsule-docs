@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1. This document captures the long-term shared concept; the contracts capture the CE v0.1 wire format.
+
 This document defines the **Command** specification for the `xtrape-capsule` domain.
 
 A Command is an instruction created by Opstage Backend and executed by an authorized Agent. Commands are the delivery mechanism for operational requests such as predefined Capsule Service actions.
@@ -136,7 +138,7 @@ Example:
 
 ```json
 {
-  "commandType": "ACTION",
+  "type": "ACTION",
   "actionName": "runHealthCheck"
 }
 ```
@@ -167,198 +169,107 @@ Reserved for future controlled extension.
 
 ## 5. Command Object
 
-### 5.1 Minimum CE v0.1 Command
+### 5.1 CE v0.1 Command (must match OpenAPI `Command`)
 
 ```json
 {
   "id": "cmd_001",
   "agentId": "agt_001",
   "serviceId": "svc_001",
-  "serviceCode": "demo-capsule-service",
-  "commandType": "ACTION",
+  "type": "ACTION",
   "actionName": "runHealthCheck",
   "payload": {},
   "status": "PENDING",
+  "createdByUserId": "usr_001",
   "createdAt": "2026-04-30T10:22:00Z",
+  "startedAt": null,
+  "completedAt": null,
   "expiresAt": "2026-04-30T10:27:00Z"
 }
 ```
 
-### 5.2 Recommended Command
+### 5.2 Future Command Fields
 
-```json
-{
-  "id": "cmd_001",
-  "workspaceId": "wks_default",
-  "agentId": "agt_001",
-  "serviceId": "svc_001",
-  "serviceCode": "demo-capsule-service",
-  "commandType": "ACTION",
-  "actionName": "refreshSession",
-  "payload": {
-    "sessionId": "ses_001"
-  },
-  "status": "PENDING",
-  "createdBy": "usr_001",
-  "createdAt": "2026-04-30T10:22:00Z",
-  "expiresAt": "2026-04-30T10:27:00Z",
-  "dispatchedAt": null,
-  "startedAt": null,
-  "finishedAt": null,
-  "idempotencyKey": "cmd-refresh-session-ses-001-20260430",
-  "metadata": {
-    "source": "ui",
-    "dangerLevel": "MEDIUM"
-  }
-}
+The following fields may be added in EE/Cloud:
+
+```text
+idempotencyKey
+metadata
+priority
+concurrencyKey
+resourceLockKey
 ```
+
+CE v0.1 does not require these.
 
 ---
 
 ## 6. Command Fields
 
+CE v0.1 fields match OpenAPI `Command` schema. Field names are normative.
+
 ### 6.1 `id`
 
-Unique Command identifier.
+Unique Command identifier. Required. Prefix: `cmd_`.
 
-Required.
+### 6.2 `agentId`
 
-Recommended prefix:
+Target Agent that must execute the Command. Required. Prefix: `agt_`.
 
-```text
-cmd_
-```
+### 6.3 `serviceId`
 
-### 6.2 `workspaceId`
+Target Capsule Service. Required. Prefix: `svc_`.
 
-Workspace boundary.
+### 6.4 `type`
 
-Required in data model where Workspaces are present.
+Type of Command. Required. CE v0.1 supports only `ACTION`. Other types (`CONFIG_UPDATE`, `CONFIG_RELOAD`, `SERVICE_REFRESH`, `AGENT_CONTROL`, `CUSTOM`) are reserved for future EE/Cloud.
 
-CE v0.1 may use a default Workspace.
+### 6.5 `actionName`
 
-### 6.3 `agentId`
+Name of the action to execute. Required when `type = ACTION`.
 
-Target Agent that should execute the Command.
+### 6.6 `payload`
 
-Required.
+Command input payload. Optional. Must be JSON-serializable. Passed to the action handler as-is.
 
-### 6.4 `serviceId`
+### 6.7 `status`
 
-Target Capsule Service.
+Current Command status. Required. Values defined in §7.
 
-Required for service-level commands.
+### 6.8 `createdByUserId`
 
-### 6.5 `serviceCode`
+User who created the Command. Optional (may be null for system-initiated commands). Prefix: `usr_`.
 
-Stable service code.
+### 6.9 `createdAt`
 
-Recommended in Agent-facing payload because it is easier for Agent SDK to route to local service handlers.
+Command creation timestamp. Required.
 
-### 6.6 `commandType`
+### 6.10 `startedAt`
 
-Type of Command.
+Timestamp when Backend transitioned the Command to RUNNING (set during Agent polling). Nullable.
 
-Required.
+### 6.11 `completedAt`
 
-CE v0.1 supports:
-
-```text
-ACTION
-```
-
-### 6.7 `actionName`
-
-Name of the action to execute.
-
-Required when `commandType = ACTION`.
-
-### 6.8 `payload`
-
-Command input payload.
-
-Optional.
-
-For action commands, this is passed to the action handler.
-
-Must be JSON-serializable.
-
-### 6.9 `status`
-
-Current Command status.
-
-Required.
-
-Allowed values are defined in the status lifecycle section.
-
-### 6.10 `createdBy`
-
-User or system actor that created the Command.
-
-CE v0.1 may store a user id or `system`.
-
-### 6.11 `createdAt`
-
-Command creation timestamp.
-
-Required.
+Timestamp when Command reached a terminal state (SUCCEEDED / FAILED / EXPIRED / CANCELLED). Nullable.
 
 ### 6.12 `expiresAt`
 
-Expiration timestamp.
+Expiration timestamp. Recommended. Expired Commands must not be delivered to Agents.
 
-Required or recommended.
+### 6.13 Workspace boundary
 
-Expired Commands should not be delivered to Agents.
-
-### 6.13 `dispatchedAt`
-
-Timestamp when Backend delivered the Command to Agent.
-
-Optional.
-
-### 6.14 `startedAt`
-
-Timestamp when execution started.
-
-May be reported by Agent.
-
-### 6.15 `finishedAt`
-
-Timestamp when execution finished.
-
-May be reported by Agent.
-
-### 6.16 `idempotencyKey`
-
-Optional key used to avoid duplicate command creation or duplicate execution.
-
-CE v0.1 may store this field but does not need a full idempotency engine.
-
-### 6.17 `metadata`
-
-Optional free-form metadata.
-
-Examples:
-
-```json
-{
-  "source": "ui",
-  "dangerLevel": "LOW"
-}
-```
+`workspaceId` is stored on the database row but is not exposed in the CE v0.1 API surface (single default Workspace).
 
 ---
 
 ## 7. Command Status Lifecycle
 
-Allowed Command statuses:
+Allowed Command statuses (CE v0.1 baseline, must match `09-contracts/openapi` `CommandStatus`):
 
 ```text
 PENDING
-DISPATCHED
 RUNNING
-SUCCESS
+SUCCEEDED
 FAILED
 EXPIRED
 CANCELLED
@@ -368,74 +279,65 @@ CANCELLED
 
 Command has been created and is waiting for Agent delivery.
 
-### 7.2 `DISPATCHED`
+### 7.2 `RUNNING`
 
-Command has been delivered to Agent through polling or another channel.
+Agent has polled the Command and is executing it.
 
-### 7.3 `RUNNING`
+Backend transitions `PENDING -> RUNNING` when the Agent fetches the Command via `GET /api/agents/{agentId}/commands`.
 
-Agent has started executing the Command.
+### 7.3 `SUCCEEDED`
 
-CE v0.1 may skip this state if execution is short and the Agent reports only final result.
+Command completed successfully (Agent reported `success = true`).
 
-### 7.4 `SUCCESS`
+### 7.4 `FAILED`
 
-Command completed successfully.
-
-### 7.5 `FAILED`
-
-Command execution failed.
+Command execution failed (Agent reported `success = false`).
 
 Failure should include an error message or structured error in CommandResult.
 
-### 7.6 `EXPIRED`
+### 7.5 `EXPIRED`
 
 Command expired before completion.
 
-### 7.7 `CANCELLED`
+### 7.6 `CANCELLED`
 
 Command was cancelled before completion.
 
-CE v0.1 does not need to implement cancellation UI.
+CE v0.1 does not need to implement cancellation UI, but the state must be reserved for future use.
 
 ---
 
 ## 8. Status Transitions
 
-Recommended transitions:
+Allowed transitions (CE v0.1 baseline):
 
 ```text
-PENDING -> DISPATCHED
-PENDING -> EXPIRED
-PENDING -> CANCELLED
+PENDING   -> RUNNING       (Agent polled the Command)
+PENDING   -> EXPIRED       (timeout reached before delivery)
+PENDING   -> CANCELLED     (admin cancelled, future)
 
-DISPATCHED -> RUNNING
-DISPATCHED -> SUCCESS
-DISPATCHED -> FAILED
-DISPATCHED -> EXPIRED
-
-RUNNING -> SUCCESS
-RUNNING -> FAILED
-RUNNING -> EXPIRED
-RUNNING -> CANCELLED
+RUNNING   -> SUCCEEDED     (Agent reported success)
+RUNNING   -> FAILED        (Agent reported failure)
+RUNNING   -> EXPIRED       (timeout reached during execution)
+RUNNING   -> CANCELLED     (future)
 ```
 
-Invalid transitions should be rejected or ignored.
+Invalid transitions must be rejected.
 
 Examples of invalid transitions:
 
 ```text
-SUCCESS -> RUNNING
-FAILED -> SUCCESS
-EXPIRED -> SUCCESS
-CANCELLED -> SUCCESS
+SUCCEEDED -> RUNNING
+FAILED    -> SUCCEEDED
+EXPIRED   -> SUCCEEDED
+CANCELLED -> SUCCEEDED
 ```
 
-CE v0.1 may implement a simplified lifecycle:
+CE v0.1 minimum lifecycle:
 
 ```text
-PENDING -> DISPATCHED -> SUCCESS
-PENDING -> DISPATCHED -> FAILED
+PENDING -> RUNNING -> SUCCEEDED
+PENDING -> RUNNING -> FAILED
 PENDING -> EXPIRED
 ```
 
@@ -477,19 +379,22 @@ GET /api/agents/{agentId}/commands
 Authorization: Bearer <agentToken>
 ```
 
-Response:
+Response (matches OpenAPI `SuccessEnvelope` with `data: Command[]`):
 
 ```json
 {
-  "commands": [
+  "success": true,
+  "data": [
     {
-      "commandId": "cmd_001",
+      "id": "cmd_001",
+      "agentId": "agt_001",
       "serviceId": "svc_001",
-      "serviceCode": "demo-capsule-service",
-      "commandType": "ACTION",
+      "type": "ACTION",
       "actionName": "runHealthCheck",
       "payload": {},
-      "issuedAt": "2026-04-30T10:22:00Z",
+      "status": "RUNNING",
+      "createdAt": "2026-04-30T10:22:00Z",
+      "startedAt": "2026-04-30T10:22:01Z",
       "expiresAt": "2026-04-30T10:27:00Z"
     }
   ]
@@ -499,10 +404,10 @@ Response:
 Backend responsibilities:
 
 1. authenticate Agent token;
-2. verify Agent is active;
-3. fetch pending Commands assigned to Agent;
+2. verify Agent is not disabled or revoked;
+3. fetch `PENDING` Commands assigned to Agent;
 4. exclude expired Commands;
-5. mark delivered Commands as `DISPATCHED` if appropriate;
+5. transition returned Commands from `PENDING` to `RUNNING` and set `startedAt`;
 6. return Commands in stable order, usually by `createdAt`.
 
 ---
@@ -522,14 +427,15 @@ For `ACTION` commands:
 
 Agent must reject unknown actions.
 
-Unknown action result example:
+Unknown action result example (CommandResult report body, see §13):
 
 ```json
 {
-  "status": "FAILED",
-  "errorMessage": "Action not found: refreshSession",
-  "resultJson": {
-    "errorCode": "ACTION_NOT_FOUND"
+  "success": false,
+  "message": "Action not found: refreshSession",
+  "error": {
+    "code": "ACTION_NOT_FOUND",
+    "message": "Action not found: refreshSession"
   }
 }
 ```
@@ -538,48 +444,47 @@ Unknown action result example:
 
 ## 12. CommandResult Object
 
-### 12.1 Minimum CommandResult
+CE v0.1 CommandResult uses the OpenAPI shape. The Agent reports `success` (boolean) plus optional `message`, `data`, and `error`. Backend persists these along with timing metadata.
+
+### 12.1 CommandResult report body (Agent → Backend)
+
+Matches OpenAPI `ReportCommandResultRequest`:
 
 ```json
 {
-  "commandId": "cmd_001",
-  "status": "SUCCESS",
-  "outputText": "Health check completed.",
-  "resultJson": {
-    "status": "UP"
-  },
-  "startedAt": "2026-04-30T10:22:01Z",
-  "finishedAt": "2026-04-30T10:22:02Z"
+  "success": true,
+  "message": "Health check completed.",
+  "data": {
+    "status": "UP",
+    "details": {}
+  }
 }
 ```
 
-### 12.2 Recommended CommandResult Fields
+### 12.2 Persisted CommandResult fields (matches Prisma `CommandResult`)
 
 ```text
-id
-workspaceId
-commandId
-agentId
-serviceId
-status
-outputText
-errorMessage
-resultJson
-startedAt
-finishedAt
-createdAt
+id            crs_xxx
+commandId     cmd_xxx (unique 1:1)
+agentId       agt_xxx
+success       boolean
+message       string nullable
+dataJson      JSON text nullable        (serialized from `data`)
+errorJson     JSON text nullable        (serialized from `error`)
+reportedAt    datetime
+createdAt     datetime
 ```
+
+The Command row separately tracks `startedAt` (set during polling) and `completedAt` (set when the result is received).
 
 ### 12.3 Success Result
 
 ```json
 {
-  "status": "SUCCESS",
-  "outputText": "Action completed.",
-  "resultJson": {
-    "success": true,
-    "message": "Action completed.",
-    "data": {}
+  "success": true,
+  "message": "Action completed.",
+  "data": {
+    "status": "UP"
   }
 }
 ```
@@ -588,18 +493,18 @@ createdAt
 
 ```json
 {
-  "status": "FAILED",
-  "outputText": "Action failed.",
-  "errorMessage": "Action handler threw an error.",
-  "resultJson": {
-    "success": false,
-    "error": {
-      "code": "ACTION_FAILED",
-      "message": "Action handler threw an error."
-    }
+  "success": false,
+  "message": "Action handler threw an error.",
+  "error": {
+    "code": "ACTION_FAILED",
+    "message": "Action handler threw an error."
   }
 }
 ```
+
+### 12.5 Optional timing fields
+
+The Agent MAY include `startedAt` and `finishedAt` (ISO-8601). Backend uses them only to refine `Command.startedAt` / `Command.completedAt` if the Agent's clock is trustworthy; Backend's own clock is authoritative.
 
 ---
 
@@ -612,29 +517,27 @@ POST /api/agents/{agentId}/commands/{commandId}/result
 Authorization: Bearer <agentToken>
 ```
 
-Request:
+Request body (matches OpenAPI `ReportCommandResultRequest`):
 
 ```json
 {
-  "status": "SUCCESS",
-  "outputText": "Health check completed.",
-  "resultJson": {
+  "success": true,
+  "message": "Health check completed.",
+  "data": {
     "status": "UP",
     "details": {}
-  },
-  "startedAt": "2026-04-30T10:22:01Z",
-  "finishedAt": "2026-04-30T10:22:02Z"
+  }
 }
 ```
 
 Backend responsibilities:
 
 1. authenticate Agent token;
-2. verify Command belongs to Agent;
-3. verify Command is not terminal if strict transition is enforced;
-4. store CommandResult;
-5. update Command status;
-6. set `finishedAt` if provided;
+2. verify Command belongs to authenticated Agent;
+3. reject reports for Commands already in a terminal state (`SUCCEEDED` / `FAILED` / `EXPIRED` / `CANCELLED`);
+4. create `CommandResult` row;
+5. transition Command status: `RUNNING -> SUCCEEDED` if `success = true`, otherwise `RUNNING -> FAILED`;
+6. set `Command.completedAt` to the server clock;
 7. write AuditEvent;
 8. expose result to UI.
 
@@ -661,10 +564,10 @@ Recommended simple CE rule:
 
 ```text
 If command is PENDING and now > expiresAt:
-    mark EXPIRED and do not dispatch
+    mark EXPIRED and do not deliver to Agent
 
-If command is DISPATCHED and result arrives late:
-    accept result but keep audit metadata
+If command is RUNNING and result arrives after expiresAt:
+    accept result, but record actual finishedAt and keep audit metadata
 ```
 
 ---
@@ -865,18 +768,15 @@ AGENT_REVOKED
 INTERNAL_ERROR
 ```
 
-Error result shape:
+Error result shape (CommandResult report body):
 
 ```json
 {
-  "status": "FAILED",
-  "errorMessage": "Action not found: refreshSession",
-  "resultJson": {
-    "success": false,
-    "error": {
-      "code": "ACTION_NOT_FOUND",
-      "message": "Action not found: refreshSession"
-    }
+  "success": false,
+  "message": "Action not found: refreshSession",
+  "error": {
+    "code": "ACTION_NOT_FOUND",
+    "message": "Action not found: refreshSession"
   }
 }
 ```
@@ -919,9 +819,10 @@ CE v0.1 must implement:
 
 - `ACTION` command type;
 - Command creation from UI action request;
-- Command polling by Agent;
-- CommandResult reporting;
-- statuses: `PENDING`, `DISPATCHED`, `SUCCESS`, `FAILED`, `EXPIRED`;
+- Command polling by Agent (transitions `PENDING -> RUNNING`);
+- CommandResult reporting (transitions `RUNNING -> SUCCEEDED|FAILED`);
+- statuses: `PENDING`, `RUNNING`, `SUCCEEDED`, `FAILED`, `EXPIRED`;
+- `CANCELLED` reserved (no UI required);
 - basic expiration;
 - basic audit;
 - command list/detail UI;

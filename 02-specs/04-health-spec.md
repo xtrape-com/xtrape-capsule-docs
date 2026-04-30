@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, Capsule Service developers, AI coding agents
 
+> **Precedence rule**: When this document and `09-contracts/openapi/opstage-ce-v0.1.yaml` (`HealthStatus`, `HealthReport`, `HealthReportInput`) disagree, the OpenAPI contract wins for CE v0.1.
+
 This document defines the **Health** specification for the `xtrape-capsule` domain.
 
 Health describes the current operational condition of an Agent, a Capsule Service, or a dependency reported by a Capsule Service.

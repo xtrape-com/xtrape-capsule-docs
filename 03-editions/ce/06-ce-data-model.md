@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: architects, backend developers, database designers, agent SDK developers, AI coding agents
 
+> **Precedence rule**: When this document and `09-contracts/prisma/schema.prisma` disagree, the Prisma schema wins for CE v0.1. This document captures rationale and design intent; the schema is the normative source of truth.
+
 This document defines the data model for **Opstage CE v0.1**.
 
 The CE data model should be simple enough for SQLite and the first MVP, while preserving a clean path toward MySQL/PostgreSQL, EE, and Cloud.
@@ -57,13 +59,14 @@ CE v0.1 data model should follow these principles:
 
 ## 3. Required Data Objects
 
-CE v0.1 should implement these objects:
+CE v0.1 should implement these objects (matches Prisma `schema.prisma`):
 
 ```text
-User
 Workspace
+User
+RegistrationToken      (separate table from AgentToken)
 Agent
-AgentToken
+AgentToken             (one row per active session token)
 CapsuleService
 HealthReport
 ConfigItem
@@ -98,10 +101,12 @@ Recommended logical relationships:
 ```text
 Workspace 1 --- n User
 Workspace 1 --- n Agent
+Workspace 1 --- n RegistrationToken
 Workspace 1 --- n CapsuleService
 Workspace 1 --- n Command
 Workspace 1 --- n AuditEvent
 
+RegistrationToken 1 --- 0..1 Agent      (consumed at registration)
 Agent 1 --- n AgentToken
 Agent 1 --- n CapsuleService
 Agent 1 --- n Command
@@ -243,27 +248,24 @@ DISABLED
 
 An Agent is the governance bridge between Opstage Backend and Capsule Services.
 
-### 8.1 Fields
+### 8.1 Fields (matches Prisma `Agent`)
 
 ```text
-id                  string primary key
-workspaceId         string
+id                  agt_xxx
+workspaceId         wks_xxx
 code                string
-name                string
-mode                string
-runtime             string
-version             string nullable
-status              string
-hostname            string nullable
-os                  string nullable
-arch                string nullable
+name                string nullable
+mode                string                  embedded | sidecar | external
+runtime             string                  nodejs | java | python | go | other
+status              string                  PENDING | ONLINE | OFFLINE | DISABLED | REVOKED
 lastHeartbeatAt     datetime nullable
-registeredAt        datetime nullable
 disabledAt          datetime nullable
 revokedAt           datetime nullable
 createdAt           datetime
 updatedAt           datetime
 ```
+
+CE v0.1 does NOT persist `version`, `hostname`, `os`, `arch`, `registeredAt`, or `metadataJson`. EE/Cloud may add these later.
 
 ### 8.2 Unique constraints
 
@@ -319,51 +321,61 @@ Do not show an Agent as `ONLINE` if `lastHeartbeatAt` is beyond the offline thre
 
 ---
 
-## 9. AgentToken
+## 9. Tokens (RegistrationToken + AgentToken)
 
-AgentToken stores registration tokens and Agent tokens.
+CE v0.1 splits tokens into **two tables**:
 
-Raw tokens must never be stored.
+- `RegistrationToken` — one-time tokens used to enroll an Agent;
+- `AgentToken` — long-lived bearer tokens issued after successful registration.
 
-### 9.1 Fields
+Raw tokens must never be stored. Only `tokenHash` (sha256 hex) is persisted.
 
-```text
-id              string primary key
-workspaceId     string
-agentId         string nullable
-tokenHash       string unique
-type            string
-status          string
-name            string nullable
-expiresAt       datetime nullable
-createdAt       datetime
-usedAt          datetime nullable
-revokedAt       datetime nullable
-```
-
-### 9.2 Type values
+### 9.1 RegistrationToken fields (matches Prisma)
 
 ```text
-registration
-agent
+id            tok_xxx
+workspaceId   wks_xxx
+tokenHash     string unique
+prefix        opstage_reg_
+status        ACTIVE | USED | REVOKED | EXPIRED
+agentCodeHint string nullable        (suggested Agent code)
+expiresAt     datetime nullable
+createdAt     datetime
+usedAt        datetime nullable      (set when consumed)
+usedByAgentId agt_xxx nullable       (Agent created from this token)
+revokedAt     datetime nullable
 ```
 
-### 9.3 Status values
+### 9.2 AgentToken fields (matches Prisma)
+
+```text
+id            tok_xxx
+agentId       agt_xxx
+tokenHash     string unique
+prefix        opstage_agent_
+status        ACTIVE | REVOKED | EXPIRED
+expiresAt     datetime nullable
+createdAt     datetime
+lastUsedAt    datetime nullable
+revokedAt     datetime nullable
+```
+
+### 9.3 Status values (must match OpenAPI `TokenStatus`)
 
 ```text
 ACTIVE
-USED
+USED         (RegistrationToken only)
 REVOKED
 EXPIRED
 ```
 
 ### 9.4 Rules
 
-- Registration tokens may have `agentId = null` before use.
-- Agent tokens must be associated with an Agent.
-- One-time registration tokens should become `USED` after successful registration.
-- Revoked Agent tokens must not be accepted.
-- Raw token should be shown only once at creation time.
+- A `RegistrationToken` is single-use: it transitions `ACTIVE -> USED` exactly once at registration, then is no longer accepted.
+- An `AgentToken` is created at registration and presented on every Agent API request.
+- Revoking an Agent must revoke its `AgentToken` rows (cascade `REVOKED`).
+- Raw tokens are returned to the caller only once (creation time / registration response). They are not retrievable later.
+- Token prefixes (`opstage_reg_`, `opstage_agent_`) are part of ADR 0004; the `id` row prefix is `tok_` for both tables.
 
 ---
 
@@ -375,41 +387,43 @@ CapsuleService is the main managed unit.
 
 ```text
 id                  string primary key
-workspaceId         string
-agentId             string
+workspaceId         wks_xxx
+agentId             agt_xxx
 code                string
 name                string
 description         string nullable
 version             string nullable
 runtime             string
-agentMode           string
-reportedStatus      string nullable
-effectiveStatus     string
-healthStatus        string nullable
-manifestJson        text
+status              string              UNKNOWN | HEALTHY | UNHEALTHY | STALE | OFFLINE  (effective)
+healthStatus        string nullable     UP | DOWN | DEGRADED | UNKNOWN                   (latest reported)
+manifestJson        TEXT (JSON)
+metadataJson        TEXT (JSON) nullable
 lastReportedAt      datetime nullable
-disabledAt          datetime nullable
+lastHealthAt        datetime nullable
 createdAt           datetime
 updatedAt           datetime
 ```
 
-### 10.2 Unique constraints
+CE v0.1 stores **only the effective `status`**. The "last reported" view is reconstructed from `lastReportedAt`, `lastHealthAt`, and the latest `HealthReport` row — there is no separate `reportedStatus` column. EE/Cloud may add one later.
+
+### 10.2 Unique constraints (matches Prisma `@@unique([workspaceId, code])`)
 
 ```text
-workspaceId + code unique
+(workspaceId, code) unique
 ```
+
+`agentId` is NOT part of the uniqueness key — see `04-opstage/02-opstage-backend.md` §17 for migration semantics.
 
 ### 10.3 Status values
 
-`effectiveStatus` uses CapsuleServiceStatus:
+`status` uses CapsuleServiceStatus (must match OpenAPI):
 
 ```text
 UNKNOWN
-ONLINE
+HEALTHY
 UNHEALTHY
-OFFLINE
 STALE
-DISABLED
+OFFLINE
 ```
 
 `healthStatus` uses HealthStatus:
@@ -424,10 +438,10 @@ UNKNOWN
 ### 10.4 Rules
 
 - `code` is stable and unique within Workspace.
-- `manifestJson` stores full manifest.
-- Key fields are extracted for list and query.
-- `effectiveStatus` is calculated by Backend.
-- Do not treat `reportedStatus` as current truth without freshness calculation.
+- `manifestJson` stores the full manifest as the Agent reported it.
+- Key fields (`name`, `description`, `version`, `runtime`) are denormalized from manifest for list and query.
+- `status` is the **effective** status calculated by Backend on every heartbeat / health report and via a periodic sweep.
+- Never display `healthStatus` as the service's current state without checking Agent freshness — see `02-specs/09-status-model-spec.md`.
 
 ---
 
@@ -484,32 +498,33 @@ ConfigItem stores configuration metadata reported by a Capsule Service.
 
 CE v0.1 focuses on config visibility, not editing.
 
-### 12.1 Fields
+### 12.1 Fields (matches Prisma `ConfigItem`)
 
 ```text
-id                  string primary key
-workspaceId         string
-serviceId           string
-configKey           string
+id                  cfg_xxx
+workspaceId         wks_xxx
+serviceId           svc_xxx
+configKey           string                  (exposed as `key` in OpenAPI — see 09-contracts/README.md)
 label               string
 description         string nullable
 valueType           string
-currentValueJson    text nullable
-defaultValueJson    text nullable
+currentValueJson    TEXT (JSON) nullable
+defaultValueJson    TEXT (JSON) nullable
 editable            boolean
 sensitive           boolean
 required            boolean
-sourceJson          text nullable
-validationJson      text nullable
-metadataJson        text nullable
+sourceJson          TEXT (JSON) nullable
+validationJson      TEXT (JSON) nullable
 createdAt           datetime
 updatedAt           datetime
 ```
 
-### 12.2 Unique constraints
+The Prisma column is `configKey` (avoiding the SQL reserved word `key`); the OpenAPI surface exposes the same field as `key`. Backend serializers map `configKey` ↔ `key` in both directions.
+
+### 12.2 Unique constraints (matches Prisma)
 
 ```text
-serviceId + configKey unique
+(serviceId, configKey) unique
 ```
 
 ### 12.3 Value types
@@ -538,43 +553,43 @@ ActionDefinition stores predefined action metadata reported by a Capsule Service
 ### 13.1 Fields
 
 ```text
-id                  string primary key
-workspaceId         string
-serviceId           string
-name                string
-label               string
-description         string nullable
-dangerLevel         string
-enabled             boolean
-inputSchemaJson     text nullable
-resultSchemaJson    text nullable
-confirmRequired     boolean nullable
-timeoutSeconds      integer nullable
-metadataJson        text nullable
-createdAt           datetime
-updatedAt           datetime
+id                      act_xxx
+workspaceId             wks_xxx
+serviceId               svc_xxx
+name                    string
+label                   string
+description             string nullable
+dangerLevel             string                 LOW | MEDIUM | HIGH
+enabled                 boolean
+inputSchemaJson         TEXT (JSON) nullable
+outputSchemaJson        TEXT (JSON) nullable
+requiresConfirmation    boolean
+timeoutSeconds          integer nullable
+createdAt               datetime
+updatedAt               datetime
 ```
 
-### 13.2 Unique constraints
+### 13.2 Unique constraints (matches Prisma)
 
 ```text
-serviceId + name unique
+(serviceId, name) unique
 ```
 
-### 13.3 Danger levels
+### 13.3 Danger levels (must match OpenAPI `DangerLevel`)
 
 ```text
 LOW
 MEDIUM
 HIGH
-CRITICAL
 ```
+
+`CRITICAL` is reserved for future EE/Cloud editions.
 
 ### 13.4 Rules
 
 - Actions must be predefined.
 - CE v0.1 must not support arbitrary shell execution.
-- UI should require confirmation for `HIGH` and `CRITICAL` actions if present.
+- UI should require confirmation when `requiresConfirmation = true` (typically for `HIGH` actions).
 
 ---
 
@@ -584,27 +599,25 @@ Command stores an instruction created by Backend and executed by Agent.
 
 CE v0.1 uses Command mainly for predefined action execution.
 
-### 14.1 Fields
+### 14.1 Fields (matches Prisma `Command`)
 
 ```text
-id                  string primary key
-workspaceId         string
-agentId             string
-serviceId           string
-serviceCode         string
-commandType         string
+id                  cmd_xxx
+workspaceId         wks_xxx
+agentId             agt_xxx
+serviceId           svc_xxx
+type                ACTION                  (only value in CE v0.1)
 actionName          string nullable
-payloadJson         text nullable
-status              string
-createdBy           string nullable
+payloadJson         TEXT (JSON) nullable
+status              PENDING | RUNNING | SUCCEEDED | FAILED | EXPIRED | CANCELLED
+createdByUserId     usr_xxx nullable
 createdAt           datetime
+startedAt           datetime nullable        set when Agent polls (PENDING -> RUNNING)
+completedAt         datetime nullable        set on terminal transition
 expiresAt           datetime nullable
-dispatchedAt        datetime nullable
-startedAt           datetime nullable
-finishedAt          datetime nullable
-idempotencyKey      string nullable
-metadataJson        text nullable
 ```
+
+CE v0.1 does NOT persist `serviceCode`, `idempotencyKey`, or `metadataJson` on Command. EE/Cloud may add them.
 
 ### 14.2 Command types
 
@@ -622,30 +635,26 @@ AGENT_CONTROL
 CUSTOM
 ```
 
-### 14.3 Status values
+### 14.3 Status values (must match OpenAPI `CommandStatus`)
 
 ```text
 PENDING
-DISPATCHED
-SUCCESS
+RUNNING
+SUCCEEDED
 FAILED
 EXPIRED
+CANCELLED   (reserved, no UI in CE v0.1)
 ```
 
-Reserved future values:
-
-```text
-RUNNING
-CANCELLED
-```
+CE v0.1 has no `DISPATCHED` state — polling transitions Commands directly from `PENDING` to `RUNNING`.
 
 ### 14.4 Rules
 
 - Commands must target an Agent.
 - Action commands must target a Capsule Service.
-- Expired pending commands should not be dispatched.
-- Commands should be audited.
-- Command payloads should not contain raw secrets.
+- Expired pending commands must not be delivered to Agents.
+- Commands should be audited (`command.created`, `command.completed`, `command.failed`, `command.expired`).
+- Command payloads must not contain raw secrets.
 
 ---
 
@@ -653,36 +662,28 @@ CANCELLED
 
 CommandResult stores the result reported by Agent after executing a Command.
 
-### 15.1 Fields
+### 15.1 Fields (matches Prisma `CommandResult`)
 
 ```text
-id                  string primary key
-workspaceId         string
-commandId           string unique
-agentId             string
-serviceId           string
-status              string
-outputText          string nullable
-errorMessage        string nullable
-resultJson          text nullable
-startedAt           datetime nullable
-finishedAt          datetime nullable
-createdAt           datetime
+id            crs_xxx
+commandId     cmd_xxx unique (1:1 with Command)
+agentId       agt_xxx
+success       boolean
+message       string nullable
+dataJson      TEXT (JSON) nullable     (serialized from `data`)
+errorJson     TEXT (JSON) nullable     (serialized from `error`)
+reportedAt    datetime
+createdAt     datetime
 ```
 
-### 15.2 Status values
+### 15.2 Mapping
 
-```text
-SUCCESS
-FAILED
-```
-
-CE may also use `EXPIRED` if Backend creates result-like records for expired commands, but it is not required.
+The Agent reports `success` / `message` / `data` / `error` (matches OpenAPI `ReportCommandResultRequest`). Backend stores them on this row and transitions the Command (`RUNNING -> SUCCEEDED|FAILED`).
 
 ### 15.3 Rules
 
-- One Command should have at most one final CommandResult.
-- Failed result should include `errorMessage` where possible.
+- One Command has at most one CommandResult.
+- Failed result should include `errorJson` with `code` + `message`.
 - Result JSON should be concise and not used as log storage.
 
 ---
@@ -691,45 +692,40 @@ CE may also use `EXPIRED` if Backend creates result-like records for expired com
 
 AuditEvent stores trace records for important operations.
 
-### 16.1 Fields
+### 16.1 Fields (matches Prisma `AuditEvent`)
 
 ```text
-id                  string primary key
-workspaceId         string
-actorType           string
-actorId             string nullable
-actorName           string nullable
-action              string
-resourceType        string nullable
-resourceId          string nullable
-resourceCode        string nullable
-description         string nullable
-requestJson         text nullable
-result              string
-resultJson          text nullable
-ip                  string nullable
-userAgent           string nullable
-metadataJson        text nullable
-createdAt           datetime
+id            aud_xxx
+workspaceId   wks_xxx
+actorType     USER | AGENT | SYSTEM
+actorId       string nullable
+action        string
+targetType    string nullable          (formerly resourceType)
+targetId      string nullable          (formerly resourceId)
+result        SUCCESS | FAILURE
+message       string nullable          (formerly description)
+metadataJson  TEXT (JSON) nullable
+createdAt     datetime
 ```
 
-### 16.2 Actor types
+CE v0.1 does NOT persist `actorName`, `targetCode`, `requestJson`, `resultJson`, `ip`, or `userAgent`. Sanitized request/result fragments and any contextual data go inside `metadataJson`.
+
+### 16.2 Actor types (must match OpenAPI `AuditActorType`)
 
 ```text
-user
-agent
-system
+USER
+AGENT
+SYSTEM
 ```
 
-### 16.3 Result values
+### 16.3 Result values (must match OpenAPI `AuditResult`)
 
 ```text
 SUCCESS
-FAILED
-DENIED
-ERROR
-PENDING
+FAILURE
 ```
+
+`DENIED`, `ERROR`, and `PENDING` are reserved for future EE/Cloud editions. Map authorization rejections, validation failures, and unexpected errors to `FAILURE` with `metadata.errorCode`.
 
 ### 16.4 Required CE audit events
 
@@ -883,7 +879,7 @@ Command.agentId + Command.status
 Command.serviceId + Command.createdAt
 Command.createdAt
 AuditEvent.workspaceId + AuditEvent.createdAt
-AuditEvent.resourceType + AuditEvent.resourceId
+AuditEvent.targetType + AuditEvent.targetId
 AuditEvent.actorType + AuditEvent.actorId
 ```
 
@@ -895,25 +891,22 @@ SQLite should handle this scale for CE.
 
 Use JSON text fields for flexible metadata in CE v0.1.
 
-Recommended JSON fields:
+Recommended JSON fields (CE v0.1, matches Prisma):
 
 ```text
-manifestJson
+CapsuleService.manifestJson
+CapsuleService.metadataJson
 HealthReport.detailsJson
 HealthReport.dependenciesJson
 ConfigItem.currentValueJson
 ConfigItem.defaultValueJson
 ConfigItem.sourceJson
 ConfigItem.validationJson
-ConfigItem.metadataJson
 ActionDefinition.inputSchemaJson
-ActionDefinition.resultSchemaJson
-ActionDefinition.metadataJson
+ActionDefinition.outputSchemaJson
 Command.payloadJson
-Command.metadataJson
-CommandResult.resultJson
-AuditEvent.requestJson
-AuditEvent.resultJson
+CommandResult.dataJson
+CommandResult.errorJson
 AuditEvent.metadataJson
 SystemSetting.valueJson
 ```
@@ -935,20 +928,24 @@ Agent status should be stored but also recalculated from heartbeat when queried 
 
 ### 21.2 Capsule Service status
 
-Store both:
+CE v0.1 stores **only one** column: `status` (the effective status).
+
+The "last reported" view is reconstructed from:
 
 ```text
-reportedStatus
-effectiveStatus
+CapsuleService.lastReportedAt
+CapsuleService.lastHealthAt
+CapsuleService.healthStatus       (denormalized from latest HealthReport)
+HealthReport (latest row, joined when needed)
 ```
 
-Do not show `reportedStatus` as current truth without freshness calculation.
+Do not display `healthStatus` as the service's current state without checking Agent freshness — see `02-specs/09-status-model-spec.md` §11.
 
 ### 21.3 Health status
 
-Store latest HealthStatus on CapsuleService for list performance.
+`CapsuleService.healthStatus` denormalizes the latest `HealthReport.status` for list performance.
 
-Store detailed health in HealthReport.
+Store full health detail (message, details, dependencies, checkedAt) in `HealthReport`.
 
 ---
 

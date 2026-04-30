@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: product designers, architects, backend developers, frontend developers, agent SDK developers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1.
+
 This document defines the implementation scope of **Opstage CE / Community Edition**.
 
 CE v0.1 should deliver the smallest useful version of Opstage that proves the Capsule Service governance model through a Node.js embedded Agent, a Backend control plane, and a Web UI.

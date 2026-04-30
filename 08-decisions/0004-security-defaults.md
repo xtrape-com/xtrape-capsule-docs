@@ -22,11 +22,93 @@ SameSite=Lax
 Password hashing:
 
 ```text
-argon2 preferred
+argon2id preferred
 bcrypt acceptable fallback
 ```
 
-No default `admin/admin` credential is allowed.
+No default credential is allowed. There is no built-in `admin/admin` or `change-me` value. Backend MUST refuse to start when `OPSTAGE_ADMIN_PASSWORD` is missing or empty (see "Admin Bootstrap").
+
+## Session Cookie Rules
+
+The Backend session cookie has these properties:
+
+```text
+Name:        opstage_session
+HttpOnly:    true
+SameSite:    Lax
+Secure:      true when X-Forwarded-Proto=https or NODE_ENV=production; false in local dev
+Path:        /
+Max-Age:     28800   (8 hours, must match Session TTL)
+```
+
+The cookie value is opaque to the client (signed/encrypted server-side; CE v0.1 uses Fastify `@fastify/secure-session` or equivalent backed by `OPSTAGE_SESSION_SECRET`).
+
+`SameSite=Lax` is sufficient for CE v0.1 because:
+
+- the Admin UI is served from the same origin as the Admin API (single-container deployment);
+- there is no cross-origin GET that mutates state;
+- all state-changing requests use POST/PUT/PATCH/DELETE.
+
+CE v0.1 does NOT issue CORS headers for cross-origin browsers. If a future deployment needs to host the UI on a different origin, the operator must front the deployment with a reverse proxy that re-attaches the cookie.
+
+## CSRF Protection
+
+CE v0.1 uses a header-based double-submit token. The Backend keeps the canonical CSRF value bound to the session record server-side; the UI receives a copy in the JSON body and echoes it in a header on every state-changing call.
+
+```text
+1. The CSRF token is generated as crypto.randomBytes(32).toString("hex").
+   Backend stores it on the session row:
+     session.csrfToken = <value>
+     session.csrfRotatedAt = now
+
+2. The token is delivered to the UI in JSON, NOT as a cookie:
+     POST /api/admin/auth/login    → 200 { data: { user, csrfToken, expiresAt } }
+     GET  /api/admin/auth/me       → 200 { data: { user, csrfToken, expiresAt } }
+     GET  /api/admin/auth/csrf     → 200 { data: { csrfToken } }   (rotates)
+
+3. UI stores the token in memory (not localStorage, not a cookie) and sends
+   it on every state-changing request as:
+     X-CSRF-Token: <value>
+
+4. Backend rejects state-changing requests where the header is missing or
+   does not equal session.csrfToken with HTTP 403 and code CSRF_INVALID
+   (see 09-contracts/errors.md). UI MUST then call /api/admin/auth/csrf to
+   obtain a fresh token before retrying.
+
+5. The token MUST be rotated on /api/admin/auth/csrf and on logout. Old
+   values stop validating immediately.
+```
+
+The Agent API (`/api/agents/*`) does not use cookies and is not subject to CSRF — it is authenticated via `Authorization: Bearer <agentToken>` only.
+
+The System API (`/api/system/*`) is read-only and unauthenticated; CSRF does not apply.
+
+## Authentication Flow
+
+End-to-end flow as the Backend MUST implement it:
+
+```text
+1. UI loads → calls GET /api/admin/auth/me
+   - 200: session valid, render dashboard, store csrfToken in memory.
+   - 401: redirect to /login.
+
+2. UI POST /api/admin/auth/login { username, password }
+   - 200: Set-Cookie: opstage_session=...; HttpOnly; Secure; SameSite=Lax; Max-Age=28800
+          Body:       { data: { user, csrfToken, expiresAt } }
+   - 401: AUTH_INVALID — bad username or password.
+   - 422: VALIDATION_FAILED — body shape wrong.
+
+3. UI calls protected endpoints with:
+     Cookie:        opstage_session=...
+     X-CSRF-Token:  <stored csrfToken>
+   - 401: session expired → re-login.
+   - 403 with code CSRF_INVALID: rotate token via /api/admin/auth/csrf
+     and retry once.
+
+4. UI POST /api/admin/auth/logout (with X-CSRF-Token)
+   - 200: Set-Cookie: opstage_session=; Max-Age=0  (clears cookie).
+          Backend invalidates session row server-side.
+```
 
 ## Admin Bootstrap
 
@@ -102,19 +184,25 @@ All entity IDs use a prefixed random identifier:
 <prefix> + nanoid(21)
 ```
 
-Required prefixes:
+Required prefixes (must match `09-contracts/openapi/opstage-ce-v0.1.yaml`):
 
 ```text
-agt_   — Agent
-svc_   — CapsuleService
-cmd_   — Command
-evt_   — AuditEvent
-reg_   — RegistrationToken
 wks_   — Workspace
 usr_   — User
+agt_   — Agent
+tok_   — RegistrationToken            (also AgentToken row id)
+svc_   — CapsuleService
+hlr_   — HealthReport
+cfg_   — ConfigItem
+act_   — ActionDefinition
+cmd_   — Command
+crs_   — CommandResult
+aud_   — AuditEvent
 ```
 
 Example: `agt_V1StGXR8_Z5jdHi6B-myT`
+
+Recommended helper: a single `newId(prefix)` utility in `packages/shared` should be the only ID generator. See `10-implementation/01-backend-scaffold-plan.md`.
 
 ## Agent Authorization
 

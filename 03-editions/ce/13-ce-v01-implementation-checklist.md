@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: product designers, architects, backend developers, frontend developers, agent SDK developers, test engineers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1.
+
 This checklist defines the minimum implementation acceptance criteria for Opstage CE v0.1.
 
 ## 0. Planning Contracts
@@ -59,8 +61,8 @@ This checklist defines the minimum implementation acceptance criteria for Opstag
 
 ## 4. Command and Action
 
-- [ ] ActionDefinition supports `name`, `label`, `description`, `dangerLevel`, `confirmRequired`, `inputSchemaJson`, and `timeoutSeconds`.
-- [ ] Command supports `PENDING`, `DISPATCHED`, `SUCCESS`, `FAILED`, and `EXPIRED` states. (`RUNNING` and `CANCELLED` are reserved for future use.)
+- [ ] ActionDefinition supports `name`, `label`, `description`, `dangerLevel` (LOW/MEDIUM/HIGH), `requiresConfirmation`, `inputSchemaJson`, and `timeoutSeconds`.
+- [ ] Command supports `PENDING`, `RUNNING`, `SUCCEEDED`, `FAILED`, and `EXPIRED` states. (`CANCELLED` is reserved; no UI required in CE v0.1.)
 - [ ] Backend validates action existence before Command creation.
 - [ ] Backend validates Agent ownership before Command polling and result submission.
 - [ ] Backend prevents terminal Command states from being overwritten incorrectly.

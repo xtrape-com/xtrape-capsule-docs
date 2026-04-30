@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, architects, security reviewers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1. Field names below should match Prisma; if they ever drift, follow Prisma `schema.prisma`.
+
 This document defines the Backend subsystem of **Opstage**.
 
 Opstage Backend is the control-plane service that coordinates UI users, Agents, Capsule Services, Commands, CommandResults, AuditEvents, and persistence.
@@ -480,38 +482,36 @@ RegistrationToken
 
 Agent represents the governance bridge between Backend and Capsule Services.
 
-Recommended fields:
+CE v0.1 fields (matches Prisma `Agent`):
 
 ```text
-id
-workspaceId
-code
-name
-status
-mode
-runtime
-version
-hostname
-os
-arch
-lastHeartbeatAt
-registeredAt
-metadataJson
-createdAt
-updatedAt
+id              agt_xxx
+workspaceId     wks_xxx
+code            stable identifier (kebab-case, unique within workspace)
+name            human-readable name nullable
+mode            embedded | sidecar | external (CE v0.1: embedded only)
+runtime         nodejs | java | python | go | other (CE v0.1: nodejs)
+status          PENDING | ONLINE | OFFLINE | DISABLED | REVOKED
+lastHeartbeatAt datetime nullable
+disabledAt      datetime nullable
+revokedAt       datetime nullable
+createdAt       datetime
+updatedAt       datetime
 ```
 
-Recommended status values:
+CE v0.1 does NOT persist `version`, `hostname`, `os`, `arch`, `registeredAt`, or `metadataJson`. EE/Cloud may add them later.
+
+Status values (must match OpenAPI `AgentStatus`):
 
 ```text
-ONLINE
-OFFLINE
-DISABLED
-REVOKED
-UNKNOWN
+PENDING      Agent record exists, has not yet sent successful heartbeat
+ONLINE       within heartbeat freshness window
+OFFLINE      missed heartbeat threshold (default 90s)
+DISABLED     administratively disabled
+REVOKED      token trust revoked
 ```
 
-Agent status may be calculated from heartbeat freshness and stored disabled/revoked state.
+Agent status is calculated from heartbeat freshness and stored disabled/revoked state.
 
 ---
 
@@ -519,38 +519,41 @@ Agent status may be calculated from heartbeat freshness and stored disabled/revo
 
 CapsuleService represents a lightweight service reported by an Agent.
 
-Recommended fields:
+CE v0.1 fields (matches Prisma `CapsuleService`):
 
 ```text
-id
-workspaceId
-agentId
-code
-name
-description
-runtime
-version
-agentMode
-reportedStatus
-effectiveStatus
-healthStatus
-lastReportedAt
-lastHealthAt
-manifestJson
-metadataJson
+id              svc_xxx
+workspaceId     wks_xxx
+agentId         agt_xxx
+code            stable identifier (kebab-case)
+name            human-readable name
+description     nullable
+version         from manifest
+runtime         from manifest
+status          UNKNOWN | HEALTHY | UNHEALTHY | STALE | OFFLINE   (effective)
+healthStatus    UP | DOWN | DEGRADED | UNKNOWN | nullable          (latest reported)
+lastReportedAt  datetime nullable
+lastHealthAt    datetime nullable
+manifestJson    TEXT (JSON) - the full reported manifest
+metadataJson    TEXT (JSON) nullable
 createdAt
 updatedAt
 ```
 
-Required uniqueness (CE v0.1 decision):
+Reported vs. effective status (CE v0.1 decision): the database persists only the **effective** `status`. The "last reported" view is derived from `lastReportedAt`, `lastHealthAt`, and the latest `HealthReport` row — there is no separate `reportedStatus` column. EE/Cloud may add one later.
+
+Required uniqueness (CE v0.1 decision, matches Prisma `@@unique([workspaceId, code])`):
 
 ```text
-workspaceId + agentId + code
+(workspaceId, code)
 ```
 
-Rationale: in CE v0.1, service identity is Agent-scoped. Two different Agents can legitimately register services with the same code without conflict. Cross-Agent service migration is not supported in CE v0.1. When a service migrates to a new Agent in the future, that is a transfer operation, not an upsert.
+Rationale: in CE v0.1, service code is globally unique within a workspace. The Agent is recorded via `agentId` but is not part of the uniqueness key. If the same service migrates between Agents, the row's `agentId` is updated in-place. EE/Cloud may revisit this if cross-Agent service multiplicity is needed.
 
-Conflict handling: if `POST /api/agents/{agentId}/services/report` is called with a service code that already exists for the same Agent and Workspace, the Backend MUST upsert (update) the existing record — not create a new one.
+Conflict handling: when `POST /api/agents/{agentId}/services/report` is called with a service code that already exists in the same workspace:
+
+- if the existing row has the same `agentId`, upsert (update) in place;
+- if the existing row has a different `agentId`, update `agentId` to the calling Agent and write an audit event `capsuleService.reassigned`.
 
 ---
 
@@ -638,16 +641,17 @@ metadataJson
 updatedAt
 ```
 
-Recommended danger values:
+CE v0.1 danger values (must match OpenAPI `DangerLevel`):
 
 ```text
 LOW
 MEDIUM
 HIGH
-CRITICAL
 ```
 
-Backend must validate requested actions against stored ActionDefinitions.
+`CRITICAL` is reserved for future EE/Cloud editions.
+
+Backend must validate requested actions against stored ActionDefinitions and enforce confirmation when `requiresConfirmation = true`.
 
 ---
 
@@ -655,79 +659,67 @@ Backend must validate requested actions against stored ActionDefinitions.
 
 Command represents a requested operation to be executed by an Agent.
 
-Recommended fields:
+CE v0.1 fields (matches Prisma `Command`):
 
 ```text
-id
-workspaceId
-agentId
-serviceId
-commandType
-actionName
-status
-payloadJson
-createdByActorType
-createdByActorId
+id                cmd_xxx
+workspaceId       wks_xxx
+agentId           agt_xxx
+serviceId         svc_xxx
+type              ACTION (CE v0.1 only)
+actionName        string
+status            PENDING | RUNNING | SUCCEEDED | FAILED | EXPIRED | CANCELLED
+payloadJson       TEXT (JSON) nullable
+createdByUserId   usr_xxx nullable
 createdAt
-dispatchedAt
-startedAt
-finishedAt
+startedAt         set when Agent polls (PENDING -> RUNNING)
+completedAt       set when terminal (SUCCEEDED | FAILED | EXPIRED | CANCELLED)
 expiresAt
-metadataJson
 ```
 
-CE v0.1 supports only:
+CE v0.1 supports only `ACTION` as command type.
+
+Status values (must match OpenAPI `CommandStatus`):
 
 ```text
-ACTION
+PENDING       waiting for Agent poll
+RUNNING       Agent has polled; execution started
+SUCCEEDED     Agent reported success
+FAILED        Agent reported failure
+EXPIRED       not delivered or completed before expiresAt
+CANCELLED     reserved for future use (no UI in CE v0.1)
 ```
 
-as command type.
-
-Recommended status values:
-
-```text
-PENDING
-DISPATCHED
-RUNNING
-SUCCESS
-FAILED
-EXPIRED
-CANCELLED
-```
-
-CE may not need all statuses, but should avoid a design that blocks them later.
+There is no separate `DISPATCHED` state in CE v0.1 — polling transitions Commands directly from `PENDING` to `RUNNING`.
 
 ---
 
 ## 22. CommandResult Model
 
-CommandResult stores execution result reported by Agent.
+CommandResult stores the execution result reported by Agent.
 
-Recommended fields:
+CE v0.1 fields (matches Prisma `CommandResult`):
 
 ```text
-id
-workspaceId
-commandId
-agentId
-serviceId
-status
-outputText
-errorMessage
-resultJson
-startedAt
-finishedAt
-reportedAt
-metadataJson
+id           crs_xxx
+commandId    cmd_xxx (unique 1:1 with Command)
+agentId      agt_xxx
+success      boolean
+message      string nullable
+dataJson     TEXT (JSON) nullable    (serialized from `data`)
+errorJson    TEXT (JSON) nullable    (serialized from `error`)
+reportedAt   datetime
+createdAt
 ```
+
+The Agent's report body (`success` / `message` / `data` / `error`) maps directly to these columns. Backend records `Command.completedAt` separately (server clock).
 
 Rules:
 
 - result must belong to the authenticated Agent;
-- result should be sanitized;
+- result must be sanitized before persistence;
 - raw secrets must not be stored;
-- duplicate final result reports should be handled safely.
+- duplicate result reports MUST be rejected (Command already in terminal state).
 
 ---
 
@@ -735,21 +727,19 @@ Rules:
 
 AuditEvent records important operations.
 
-Recommended fields:
+CE v0.1 fields (matches Prisma `AuditEvent`):
 
 ```text
-id
-workspaceId
-actorType
-actorId
-action
-resourceType
-resourceId
-result
-description
-requestJson
-resultJson
-metadataJson
+id            aud_xxx
+workspaceId   wks_xxx
+actorType     USER | AGENT | SYSTEM
+actorId       string nullable
+action        string
+targetType    string nullable
+targetId      string nullable
+result        SUCCESS | FAILURE
+message       string nullable
+metadataJson  TEXT (JSON) nullable
 createdAt
 ```
 
@@ -761,13 +751,14 @@ AGENT
 SYSTEM
 ```
 
-Recommended results:
+CE v0.1 result values (must match OpenAPI `AuditResult`):
 
 ```text
 SUCCESS
-FAILED
-DENIED
+FAILURE
 ```
+
+`DENIED`, `ERROR`, and `PENDING` are reserved for future EE/Cloud editions. Map authorization rejections, validation failures, and runtime errors to `FAILURE` with `metadata.errorCode`.
 
 AuditEvents should be sanitized and should not contain raw secrets.
 
@@ -868,8 +859,7 @@ offline threshold
 Capsule Service effective status depends on:
 
 ```text
-reportedStatus
-healthStatus
+healthStatus      (latest reported HealthStatus)
 lastReportedAt
 lastHealthAt
 Agent status
@@ -879,6 +869,88 @@ freshness thresholds
 Important rule:
 
 > A stale service must not be shown as fresh online only because its last reported status was online.
+
+### 27.1 Background Sweep Jobs (CE v0.1)
+
+CE v0.1 runs three small in-process sweep jobs from a single scheduler. Defaults come from ADR 0001 §10. The scheduler MUST be:
+
+- single-leader (no two backend instances may sweep concurrently — CE is single-process so a per-process `setInterval` is sufficient);
+- idempotent (re-running the same sweep produces the same final state);
+- bounded (each sweep MUST process at most `BACKGROUND_SWEEP_BATCH_SIZE` rows per tick, default 500, to avoid long transactions on SQLite);
+- cancel-aware (the scheduler MUST stop the next tick when `app.close()` is called).
+
+| Sweep                  | Trigger                                                  | Action                                                                                                | AuditEvent                                                |
+|------------------------|----------------------------------------------------------|-------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
+| `agent-offline-sweep`  | every `BACKGROUND_SWEEP_INTERVAL_SECONDS` (default 30 s) | Mark Agents in `PENDING`/`ONLINE` whose `lastHeartbeatAt < now − AGENT_OFFLINE_THRESHOLD_SECONDS` (default 90 s) as `OFFLINE`. | `system.agent.offline` (actorType=`SYSTEM`, result=`SUCCESS`) |
+| `service-stale-sweep`  | every `BACKGROUND_SWEEP_INTERVAL_SECONDS`                | Mark CapsuleServices whose `lastReportedAt < now − HEALTH_STALE_THRESHOLD_SECONDS` (default 120 s) as `STALE` (or `OFFLINE` if their Agent is `OFFLINE`). | `system.service.stale` / `system.service.offline`         |
+| `command-ttl-sweep`    | every `BACKGROUND_SWEEP_INTERVAL_SECONDS`                | Transition Commands in `PENDING` or `RUNNING` whose `expiresAt < now` to `EXPIRED`, then write a synthetic `CommandResult` with `success=false`, `error.code=COMMAND_EXPIRED`. | `command.expired` (actorType=`SYSTEM`)                    |
+
+Pseudocode for the scheduler:
+
+```ts
+// modules/system/sweeper.ts (pseudo-code)
+export function startSweeper(app: FastifyInstance, deps: { prisma: PrismaClient; clock: () => Date; cfg: AppConfig }) {
+  const tick = async () => {
+    try {
+      await runAgentOfflineSweep(deps);
+      await runServiceStaleSweep(deps);
+      await runCommandTtlSweep(deps);
+    } catch (err) {
+      app.log.error({ err }, "background sweep failed");
+    }
+  };
+  const handle = setInterval(tick, deps.cfg.backgroundSweepIntervalSeconds * 1000);
+  app.addHook("onClose", async () => clearInterval(handle));
+  void tick(); // warmup tick on boot
+}
+```
+
+```ts
+async function runAgentOfflineSweep({ prisma, clock, cfg }: Deps) {
+  const cutoff = new Date(clock().getTime() - cfg.agentOfflineThresholdSeconds * 1000);
+  const stale = await prisma.agent.findMany({
+    where: {
+      status: { in: ["PENDING", "ONLINE"] },
+      lastHeartbeatAt: { lt: cutoff },
+    },
+    take: cfg.backgroundSweepBatchSize,
+    select: { id: true, workspaceId: true },
+  });
+  for (const agent of stale) {
+    await prisma.$transaction([
+      prisma.agent.update({ where: { id: agent.id }, data: { status: "OFFLINE" } }),
+      prisma.auditEvent.create({
+        data: {
+          id: newId("aud_"),
+          workspaceId: agent.workspaceId,
+          actorType: "SYSTEM",
+          actorId:   null,
+          action:    "system.agent.offline",
+          targetType:"Agent",
+          targetId:  agent.id,
+          result:    "SUCCESS",
+          message:   "Agent crossed offline threshold.",
+          createdAt: clock(),
+        },
+      }),
+    ]);
+  }
+}
+```
+
+The other two sweeps follow the same shape, swapping table and audit action. `command-ttl-sweep` MUST also insert a synthetic `CommandResult` with `success=false`, `error: { code: "COMMAND_EXPIRED", message: "TTL elapsed before completion." }` so the UI sees a uniform terminal state.
+
+CE v0.1 does NOT broadcast SSE/WebSocket from sweeps; UI polls. Push delivery is reserved for EE.
+
+### 27.2 Effective Status Derivation
+
+Read paths (`GET /api/admin/agents`, `GET /api/admin/capsule-services`) MUST return the persisted `effectiveStatus`/`status` column, not recompute on every request. This guarantees:
+
+- consistent values across UI tabs and API consumers;
+- a single audit trail for status transitions (sweeper-driven only);
+- monotonic transitions (no flicker between requests).
+
+If the persisted column is older than `2 × BACKGROUND_SWEEP_INTERVAL_SECONDS` (i.e. the sweeper hasn't run), Backend logs a warning at WARN level — this is the signal that the sweeper has crashed or fallen behind.
 
 ---
 

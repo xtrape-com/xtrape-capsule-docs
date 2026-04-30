@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, Capsule Service developers, AI coding agents
 
+> **Precedence rule**: When this document and `09-contracts/` (OpenAPI / Prisma) disagree, the contracts win for CE v0.1. Note: the Prisma column is `configKey` while the OpenAPI field is `key` — see `09-contracts/README.md` §6 for the mapping.
+
 This document defines the **Config** specification for the `xtrape-capsule` domain.
 
 Config describes the manageable configuration metadata of a Capsule Service.

@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: Capsule Service developers, Node.js developers, agent SDK developers, backend developers, test engineers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1.
+
 This document defines the **Node.js Runtime** integration for Opstage CE.
 
 Node.js is the first and reference runtime for `xtrape-capsule`. CE v0.1 uses Node.js to prove the complete Capsule governance loop through a Node.js Capsule Service and the Node.js Embedded Agent SDK.

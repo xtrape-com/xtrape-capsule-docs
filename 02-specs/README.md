@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: architects, backend developers, frontend developers, agent SDK developers, AI coding agents
 
+> **Precedence rule**: When this directory and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1. The contracts are normative; this directory captures shared concepts and rationale.
+
 This directory contains the shared specifications for the `xtrape-capsule` domain.
 
 These specifications define the long-term contracts shared by CE, EE, and Cloud editions. CE v0.1 may implement only a subset of each specification, but it should not introduce incompatible names, status values, data structures, or protocol concepts.
@@ -250,13 +252,14 @@ versioning
 
 ### 4.6 Command
 
-Required:
+Required (must match OpenAPI `CommandStatus` and ADR 0003):
 
 ```text
 ACTION command type
-PENDING / DISPATCHED / SUCCESS / FAILED / EXPIRED
-polling delivery
-result reporting
+PENDING / RUNNING / SUCCEEDED / FAILED / EXPIRED
+CANCELLED reserved (no UI)
+polling delivery (transitions PENDING -> RUNNING)
+result reporting (transitions RUNNING -> SUCCEEDED|FAILED)
 basic expiration
 ```
 

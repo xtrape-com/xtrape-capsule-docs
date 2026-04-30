@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1.
+
 This document defines the shared **Status Model** for the `xtrape-capsule` domain.
 
 Status values are used by Opstage Backend, Opstage UI, Agents, and Capsule Services to describe current state, reported state, effective state, health state, command state, token state, and freshness.
@@ -40,35 +42,27 @@ This document should be used by:
 
 ## 2. Core Concepts
 
-### 2.1 Reported Status
+### 2.1 Reported State
 
-**Reported status** is the status reported by an Agent or Capsule Service.
-
-Example:
-
-```json
-{
-  "reportedStatus": "ONLINE"
-}
-```
-
-Reported status may become stale if the Agent stops sending heartbeat.
+**Reported state** is what an Agent last sent: `HealthStatus` from the latest `HealthReport`, plus `lastReportedAt` and `lastHealthAt` timestamps. CE v0.1 does not persist a separate `reportedStatus` column; reported state is derived from the latest stored `HealthReport` row.
 
 ### 2.2 Effective Status
 
-**Effective status** is the status calculated by Opstage Backend based on reported status, Agent heartbeat freshness, disabled state, token state, and health report freshness.
+**Effective status** is the status calculated by Opstage Backend based on Agent heartbeat freshness, Agent disabled/revoked state, and the latest health report. CE v0.1 stores this on `CapsuleService.status`.
 
-Example:
+Example response (matches OpenAPI `CapsuleService` + `HealthReport`):
 
 ```json
 {
-  "reportedStatus": "ONLINE",
-  "effectiveStatus": "STALE",
-  "reason": "Agent has not sent heartbeat for 15 minutes."
+  "id": "svc_001",
+  "status": "STALE",
+  "healthStatus": "UP",
+  "lastReportedAt": "2026-04-30T10:21:00Z",
+  "lastHealthAt": "2026-04-30T10:21:00Z"
 }
 ```
 
-UI should primarily show effective status, while still making last reported status visible when useful.
+UI should primarily show `status` (effective), while still surfacing `healthStatus` and timestamps so the operator can see the last known reported state.
 
 ### 2.3 Health Status
 
@@ -136,19 +130,7 @@ UI may localize labels, but stored and API values should remain stable English u
 
 AgentStatus describes the governance and connectivity state of an Agent.
 
-Recommended full values:
-
-```text
-PENDING
-REGISTERED
-ONLINE
-OFFLINE
-DISABLED
-REVOKED
-ERROR
-```
-
-CE v0.1 required values:
+CE v0.1 required values (must match OpenAPI `AgentStatus`):
 
 ```text
 PENDING
@@ -157,42 +139,28 @@ OFFLINE
 DISABLED
 REVOKED
 ```
+
+`REGISTERED` and `ERROR` are reserved for future EE/Cloud editions and are not part of CE v0.1.
 
 ### 4.1 `PENDING`
 
 A registration token or Agent record exists, but the Agent has not successfully registered yet.
 
-### 4.2 `REGISTERED`
+### 4.2 `ONLINE`
 
-The Agent has registered before, but it is not currently known to be online.
+The Agent has sent a valid heartbeat within the offline threshold.
 
-CE v0.1 may skip this value and use `OFFLINE` after heartbeat timeout.
+### 4.3 `OFFLINE`
 
-### 4.3 `ONLINE`
+The Agent has not sent a heartbeat within the offline threshold (default 90s — see ADR 0001 §Defaults).
 
-The Agent has sent a valid heartbeat within the online freshness window.
+### 4.4 `DISABLED`
 
-### 4.4 `OFFLINE`
+The Agent has been disabled by an administrator. A disabled Agent may be re-enabled.
 
-The Agent has not sent a heartbeat within the offline threshold.
+### 4.5 `REVOKED`
 
-### 4.5 `DISABLED`
-
-The Agent has been disabled by an administrator.
-
-A disabled Agent may be re-enabled.
-
-### 4.6 `REVOKED`
-
-The Agent token is no longer trusted.
-
-A revoked Agent must not communicate unless re-enrolled or issued a new trusted token.
-
-### 4.7 `ERROR`
-
-The Agent is in an error state reported by itself or detected by Backend.
-
-CE v0.1 may not need this status.
+The Agent token is no longer trusted. A revoked Agent must not communicate unless re-enrolled with a new registration token.
 
 ---
 
@@ -200,28 +168,17 @@ CE v0.1 may not need this status.
 
 CapsuleServiceStatus describes the governance-facing status of a Capsule Service.
 
-Recommended values:
+CE v0.1 required values (must match OpenAPI `CapsuleServiceStatus`):
 
 ```text
 UNKNOWN
-ONLINE
+HEALTHY
 UNHEALTHY
-OFFLINE
 STALE
-DISABLED
-REMOVED
+OFFLINE
 ```
 
-CE v0.1 required values:
-
-```text
-UNKNOWN
-ONLINE
-UNHEALTHY
-OFFLINE
-STALE
-DISABLED
-```
+`DISABLED` and `REMOVED` are reserved for future EE/Cloud editions and are not part of CE v0.1.
 
 ### 5.1 `UNKNOWN`
 
@@ -233,7 +190,7 @@ Examples:
 - manifest exists but no heartbeat has been received;
 - status calculation lacks enough information.
 
-### 5.2 `ONLINE`
+### 5.2 `HEALTHY`
 
 The service is currently considered available and healthy.
 
@@ -255,7 +212,7 @@ Agent ONLINE + Health DEGRADED
 
 ### 5.4 `OFFLINE`
 
-The service is reported as unavailable while the Agent is still online, or health is clearly down.
+The service is reported as unavailable, or its health is clearly DOWN, while the Agent is still online.
 
 Typical condition:
 
@@ -265,23 +222,13 @@ Agent ONLINE + Health DOWN
 
 ### 5.5 `STALE`
 
-The last known service status is no longer fresh because the Agent or health report is stale.
+The last known service status is no longer fresh because the Agent is offline or health reports stopped arriving.
 
 Typical condition:
 
 ```text
 Agent OFFLINE + last reported service status exists
 ```
-
-### 5.6 `DISABLED`
-
-The service has been disabled administratively.
-
-### 5.7 `REMOVED`
-
-The service has been removed from governance.
-
-CE v0.1 may not need this status.
 
 ---
 
@@ -326,59 +273,42 @@ HealthStatus is defined in detail in:
 
 CommandStatus describes the lifecycle state of a Command.
 
-Allowed values:
+CE v0.1 required values (must match OpenAPI `CommandStatus`):
 
 ```text
 PENDING
-DISPATCHED
 RUNNING
-SUCCESS
+SUCCEEDED
 FAILED
 EXPIRED
 CANCELLED
 ```
 
-CE v0.1 required values:
-
-```text
-PENDING
-DISPATCHED
-SUCCESS
-FAILED
-EXPIRED
-```
+CE v0.1 may not implement cancellation UI, but the state is reserved.
 
 ### 7.1 `PENDING`
 
-Command has been created and is waiting for Agent delivery.
+Command has been created and is waiting for Agent polling.
 
-### 7.2 `DISPATCHED`
+### 7.2 `RUNNING`
 
-Command has been delivered to Agent.
+Agent has polled the Command and Backend has transitioned the row to RUNNING (with `startedAt` set). The Agent SDK is or is about to be executing the local handler.
 
-### 7.3 `RUNNING`
+### 7.3 `SUCCEEDED`
 
-Agent has started executing the Command.
+Command completed successfully (Agent reported `success = true`).
 
-CE v0.1 may skip this status for short-running action commands.
+### 7.4 `FAILED`
 
-### 7.4 `SUCCESS`
+Command execution failed (Agent reported `success = false`).
 
-Command completed successfully.
+### 7.5 `EXPIRED`
 
-### 7.5 `FAILED`
+Command expired before completion (`now > expiresAt`).
 
-Command failed.
+### 7.6 `CANCELLED`
 
-### 7.6 `EXPIRED`
-
-Command expired before completion.
-
-### 7.7 `CANCELLED`
-
-Command was cancelled.
-
-CE v0.1 does not need cancellation UI.
+Command was cancelled. Reserved for future use; CE v0.1 does not expose cancellation in UI.
 
 ---
 
@@ -419,35 +349,22 @@ Token is past its expiration time.
 
 AuditResult describes the result of an audited operation.
 
-Allowed values:
+CE v0.1 required values (must match OpenAPI `AuditResult`):
 
 ```text
 SUCCESS
-FAILED
-DENIED
-ERROR
-PENDING
+FAILURE
 ```
+
+`DENIED`, `ERROR`, and `PENDING` are reserved for future EE/Cloud editions and are not part of CE v0.1. CE implementations should map authorization rejections and unexpected errors to `FAILURE` with a descriptive `message`.
 
 ### 9.1 `SUCCESS`
 
 Operation completed successfully.
 
-### 9.2 `FAILED`
+### 9.2 `FAILURE`
 
-Operation attempted but failed in normal business or runtime flow.
-
-### 9.3 `DENIED`
-
-Operation was rejected by authorization or policy.
-
-### 9.4 `ERROR`
-
-Unexpected system error occurred.
-
-### 9.5 `PENDING`
-
-Operation was accepted but not completed yet.
+Operation failed for any reason (validation rejection, business error, authorization denial, runtime exception). The `message` field and `metadata.errorCode` carry the specific reason.
 
 ---
 
@@ -507,27 +424,21 @@ Recommended mapping:
 
 | Agent Effective Status | HealthStatus | Service Effective Status |
 |---|---|---|
-| ONLINE | UP | ONLINE |
+| ONLINE | UP | HEALTHY |
 | ONLINE | DEGRADED | UNHEALTHY |
 | ONLINE | DOWN | OFFLINE |
 | ONLINE | UNKNOWN | UNKNOWN |
 | OFFLINE | any | STALE |
-| DISABLED | any | DISABLED |
+| DISABLED | any | STALE |
 | REVOKED | any | STALE |
 
 CE v0.1 required rule:
 
 ```text
-if service is disabled:
-    effectiveStatus = DISABLED
-else if agent effective status == DISABLED:
-    effectiveStatus = DISABLED
-else if agent effective status == REVOKED:
-    effectiveStatus = STALE
-else if agent effective status == OFFLINE:
+if agent effective status in [DISABLED, REVOKED, OFFLINE]:
     effectiveStatus = STALE
 else if health == UP:
-    effectiveStatus = ONLINE
+    effectiveStatus = HEALTHY
 else if health == DEGRADED:
     effectiveStatus = UNHEALTHY
 else if health == DOWN:
@@ -535,6 +446,8 @@ else if health == DOWN:
 else:
     effectiveStatus = UNKNOWN
 ```
+
+Note: CE v0.1 does not implement service-level `DISABLED`. EE/Cloud may add it later.
 
 Calculation timing: Backend MUST recalculate `effectiveStatus` on every heartbeat receipt and on every explicit status change (disable, revoke). The Backend MAY also run a background sweep (recommended interval: every 30 seconds) to transition agents that have missed heartbeats to OFFLINE and mark their services as STALE.
 
@@ -551,34 +464,24 @@ STALE  — last report exceeds healthStaleThresholdSeconds
 
 UI should avoid showing stale data as current truth.
 
-Recommended display model:
-
-```json
-{
-  "reportedStatus": "ONLINE",
-  "effectiveStatus": "STALE",
-  "freshness": "STALE",
-  "lastReportedAt": "2026-04-30T10:21:00Z",
-  "reason": "Agent offline"
-}
-```
+CE v0.1 persists only the **effective** status on `CapsuleService.status`. The "last reported" view is derived from `lastReportedAt` + `lastHealthAt` + the latest `HealthReport` row, not stored in a separate column.
 
 Recommended UI display:
 
 ```text
 Current: Stale
-Last reported: Online
+Health: Up        (from latest HealthReport)
 Last reported at: 2026-04-30 10:21
-Reason: Agent offline
+Reason: Agent offline since 10:22
 ```
 
 Bad UI display:
 
 ```text
-Online
+Healthy
 ```
 
-when the Agent has been offline for hours.
+when the Agent has been offline for hours and `effectiveStatus` is `STALE`.
 
 ---
 
@@ -590,9 +493,9 @@ Recommended mapping:
 
 | Status | Suggested UI Meaning |
 |---|---|
-| ONLINE / UP / SUCCESS / ACTIVE / FRESH | positive |
-| DEGRADED / UNHEALTHY / PENDING / DISPATCHED / RUNNING | warning or in-progress |
-| OFFLINE / DOWN / FAILED / ERROR / EXPIRED / REVOKED | negative |
+| HEALTHY / ONLINE / UP / SUCCEEDED / SUCCESS / ACTIVE / FRESH | positive |
+| DEGRADED / UNHEALTHY / PENDING / RUNNING | warning or in-progress |
+| OFFLINE / DOWN / FAILED / FAILURE / EXPIRED / REVOKED | negative |
 | STALE / UNKNOWN | neutral or warning |
 | DISABLED / CANCELLED / USED | neutral |
 
@@ -629,26 +532,22 @@ A revoked Agent should require token rotation or re-enrollment.
 
 ### 14.2 CommandStatus transitions
 
-Recommended transitions:
+CE v0.1 transitions:
 
 ```text
-PENDING -> DISPATCHED
-PENDING -> EXPIRED
-PENDING -> CANCELLED
-DISPATCHED -> RUNNING
-DISPATCHED -> SUCCESS
-DISPATCHED -> FAILED
-DISPATCHED -> EXPIRED
-RUNNING -> SUCCESS
-RUNNING -> FAILED
-RUNNING -> EXPIRED
-RUNNING -> CANCELLED
+PENDING -> RUNNING       (Agent polled the Command)
+PENDING -> EXPIRED       (timeout reached before delivery)
+PENDING -> CANCELLED     (reserved for future use)
+RUNNING -> SUCCEEDED     (Agent reported success)
+RUNNING -> FAILED        (Agent reported failure)
+RUNNING -> EXPIRED       (timeout reached during execution)
+RUNNING -> CANCELLED     (reserved for future use)
 ```
 
 Terminal states:
 
 ```text
-SUCCESS
+SUCCEEDED
 FAILED
 EXPIRED
 CANCELLED
@@ -688,11 +587,10 @@ REVOKED
 
 ```text
 UNKNOWN
-ONLINE
+HEALTHY
 UNHEALTHY
-OFFLINE
 STALE
-DISABLED
+OFFLINE
 ```
 
 ### 15.3 HealthStatus
@@ -708,10 +606,11 @@ UNKNOWN
 
 ```text
 PENDING
-DISPATCHED
-SUCCESS
+RUNNING
+SUCCEEDED
 FAILED
 EXPIRED
+CANCELLED   (reserved, no UI required)
 ```
 
 ### 15.5 TokenStatus
@@ -747,11 +646,11 @@ UNKNOWN
 
 CE v0.1 Backend should:
 
-1. validate status values;
-2. store reported status and effective status separately for Capsule Services;
-3. calculate Agent offline status from heartbeat timeout;
-4. calculate service stale status from Agent status;
-5. avoid showing stale service reports as online;
+1. validate status values against the enums above;
+2. persist only the **effective** `CapsuleService.status` (the last reported state is reconstructed from `lastReportedAt` + the latest `HealthReport` row, see §12);
+3. calculate Agent offline status from heartbeat timeout (default 90s — see ADR 0001 §Defaults);
+4. calculate service `STALE` status from Agent status;
+5. never expose stale service reports as `HEALTHY`;
 6. expose status values clearly to UI;
 7. keep status values stable and uppercase;
 8. avoid storing UI colors as status.
@@ -774,14 +673,13 @@ CE v0.1 UI should:
 Recommended status fields to display on service detail page:
 
 ```text
-Effective Status
-Reported Status
-Health Status
-Freshness
-Agent Status
+Effective Status (CapsuleService.status)
+Health Status    (latest HealthReport.status)
+Freshness        (derived from lastHealthAt and lastReportedAt)
+Agent Status     (Agent.status, also derived from lastHeartbeatAt)
 Last Heartbeat At
 Last Reported At
-Reason
+Reason           (e.g. "Agent offline since 10:22")
 ```
 
 ---
@@ -814,11 +712,11 @@ Avoid these patterns.
 
 ### 20.1 Mixing health and service status
 
-Do not use `UP` as CapsuleServiceStatus. Use `ONLINE` instead.
+Do not use `UP` (a `HealthStatus` value) as a `CapsuleServiceStatus` value. Use `HEALTHY` instead.
 
-### 20.2 Showing reported status as current status
+### 20.2 Showing last-reported state as current
 
-Do not show `reportedStatus` as current status without freshness calculation.
+Do not display the latest `HealthReport.status` as the service's current status without checking Agent freshness. If the Agent is offline, the service is `STALE`.
 
 ### 20.3 Using colors as status values
 

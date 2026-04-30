@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: architects, backend developers, frontend developers, agent SDK developers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs (especially ADR 0005 — technology stack) or `09-contracts/` disagree, the ADRs and contracts win for CE v0.1.
+
 This document defines the architecture of **Opstage CE v0.1**.
 
 CE architecture should be lightweight, modular, self-hosted, and simple enough for the first open-source implementation, while preserving extension points for EE and Cloud.
@@ -308,111 +310,81 @@ Modules may be physically combined in CE v0.1 if implementation stays simple, bu
 
 ---
 
-## 7. Recommended Monorepo Architecture
+## 7. Monorepo Architecture
 
-Recommended repository structure:
+Repository structure (must match `10-implementation/00-monorepo-structure.md`):
 
 ```text
 xtrape-capsule-opstage/
 ├── apps/
-│   ├── backend/
-│   ├── ui/
+│   ├── opstage-backend/
+│   ├── opstage-ui/
 │   └── demo-capsule-service/
 ├── packages/
-│   ├── agent-sdk-node/
-│   ├── shared-types/
-│   └── capsule-spec/
+│   ├── contracts/
+│   ├── db/
+│   ├── agent-node/
+│   ├── shared/
+│   └── test-utils/
 ├── deploy/
 │   ├── docker/
 │   └── compose/
-├── docs/
 └── README.md
 ```
 
-### 7.1 `apps/backend`
+### 7.1 `apps/opstage-backend`
 
-Backend application.
+Fastify backend application. Contains HTTP server, Admin APIs, Agent APIs, database access, auth, status calculation, command handling, audit writing.
 
-Contains:
+### 7.2 `apps/opstage-ui`
 
-- HTTP server;
-- Admin APIs;
-- Agent APIs;
-- database access;
-- auth;
-- status calculation;
-- command handling;
-- audit writing.
-
-### 7.2 `apps/ui`
-
-Web UI application.
-
-Contains:
-
-- login page;
-- dashboard;
-- Agent pages;
-- Capsule Service pages;
-- Command pages;
-- Audit pages.
+React + Ant Design web UI application. Contains login page, dashboard, Agent pages, Capsule Service pages, Command pages, Audit pages.
 
 ### 7.3 `apps/demo-capsule-service`
 
-Demo Capsule Service used to prove CE integration.
+Demo Capsule Service used to prove CE integration end-to-end.
 
-### 7.4 `packages/agent-sdk-node`
+### 7.4 `packages/agent-node`
 
-Node.js embedded Agent SDK.
+Node.js embedded Agent SDK (formerly proposed as `agent-sdk-node`).
 
-### 7.5 `packages/shared-types`
+### 7.5 `packages/contracts`
 
-Shared TypeScript types for:
+Generated and hand-written TypeScript types derived from `09-contracts/openapi/opstage-ce-v0.1.yaml` (manifest, health, config, action, command, audit, status).
 
-- manifest;
-- health;
-- config;
-- action;
-- command;
-- audit;
-- status.
+### 7.6 `packages/db`
 
-### 7.6 `packages/capsule-spec`
+Prisma schema, generated client, migration runner. Wraps `09-contracts/prisma/schema.prisma`.
 
-Optional package for reusable schema validation and constants.
+### 7.7 `packages/shared`
 
-CE v0.1 may merge `shared-types` and `capsule-spec` if separate packages are too heavy.
+Cross-cutting helpers: `newId(prefix)`, time/clock helpers, redaction utilities, shared error classes.
+
+### 7.8 `packages/test-utils`
+
+Shared test fixtures, factory builders, and HTTP test client used by backend, UI, and Agent SDK test suites.
 
 ---
 
 ## 8. Backend Architecture
 
-### 8.1 Recommended stack
+### 8.1 Backend stack
 
-Current preferred Backend stack:
+CE v0.1 Backend stack (decided by ADR 0005):
 
 ```text
-Node.js + TypeScript + NestJS + Prisma + SQLite
+Node.js + TypeScript + Fastify + Zod + Prisma + SQLite
 ```
 
 Rationale:
 
 - TypeScript matches Agent SDK and UI types;
-- NestJS provides modular structure;
+- Fastify is lightweight, fast, and easy to embed in Docker images;
+- Zod provides shared request/response validation with TypeScript inference;
 - Prisma supports SQLite now and MySQL/PostgreSQL later;
 - SQLite keeps CE deployment lightweight.
 
-A lighter alternative is:
-
-```text
-Fastify + TypeScript + Prisma + SQLite
-```
-
-The final decision should be documented in:
-
-```text
-03-editions/ce/04-ce-technology-stack.md
-```
+NestJS was considered but rejected for CE v0.1 due to its larger runtime footprint and steeper learning curve. See ADR 0005 for the full evaluation.
 
 ### 8.2 API groups
 

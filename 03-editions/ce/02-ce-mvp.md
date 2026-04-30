@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: product designers, architects, backend developers, frontend developers, agent SDK developers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1.
+
 This document defines the **Minimum Viable Product** for **Opstage CE v0.1**.
 
 The MVP must prove the smallest complete governance loop for Capsule Services:

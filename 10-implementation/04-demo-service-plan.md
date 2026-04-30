@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: Capsule Service developers, agent SDK developers, backend developers, frontend developers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/openapi/opstage-ce-v0.1.yaml` disagree, the ADRs and OpenAPI contract win for CE v0.1.
+
 ## 1. Goal
 
 Build a minimal Node.js demo Capsule Service that proves the full CE v0.1 governance loop.

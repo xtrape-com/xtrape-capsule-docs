@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: founders, architects, backend developers, frontend developers, agent SDK developers, test engineers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1.
+
 ## 1. Goal
 
 Define the recommended build order for CE v0.1.

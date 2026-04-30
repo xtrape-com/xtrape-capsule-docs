@@ -303,14 +303,17 @@ Recommended target:
 docker run -p 8080:8080 -v ./data:/app/data xtrape/capsule-opstage-ce
 ```
 
-The internal codebase may still be modular:
+The internal codebase is modular (see `10-implementation/00-monorepo-structure.md`):
 
 ```text
-apps/backend
-apps/ui
+apps/opstage-backend
+apps/opstage-ui
 apps/demo-capsule-service
-packages/agent-sdk-node
-packages/shared-types
+packages/contracts
+packages/db
+packages/agent-node
+packages/shared
+packages/test-utils
 ```
 
 But the first user experience should feel simple.
@@ -334,20 +337,21 @@ Expected qualities:
 - no required external SaaS dependency;
 - safe defaults.
 
-Recommended monorepo structure:
+Recommended monorepo structure (matches `10-implementation/00-monorepo-structure.md`):
 
 ```text
 xtrape-capsule-opstage/
 ├── apps/
-│   ├── backend/
-│   ├── ui/
+│   ├── opstage-backend/
+│   ├── opstage-ui/
 │   └── demo-capsule-service/
 ├── packages/
-│   ├── agent-sdk-node/
-│   ├── shared-types/
-│   └── capsule-spec/
+│   ├── contracts/
+│   ├── db/
+│   ├── agent-node/
+│   ├── shared/
+│   └── test-utils/
 ├── deploy/
-├── docs/
 └── README.md
 ```
 

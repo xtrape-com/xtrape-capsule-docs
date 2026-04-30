@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: architects, backend developers, frontend developers, agent SDK developers, DevOps engineers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/0005-technology-stack-decision.md` (or other ADRs) disagree, the ADRs win for CE v0.1.
+
 This document defines the recommended technology stack for **Opstage CE v0.1**.
 
 The stack should support a lightweight open-source implementation, simple self-hosted deployment, Node.js embedded Agent integration, and future extension toward EE and Cloud.
@@ -344,46 +346,19 @@ The SDK should not provide:
 
 ## 8. Shared Types and Contracts
 
-### 8.1 Recommended package
+### 8.1 `packages/contracts`
 
-Create a shared package:
+`packages/contracts` is the canonical home of:
 
-```text
-packages/shared-types
-```
+- TypeScript types generated or hand-written from `09-contracts/openapi/opstage-ce-v0.1.yaml`;
+- Zod schemas mirroring the OpenAPI request/response models (Capsule Manifest, HealthReport, ConfigItem, ActionDefinition, Command, CommandResult, AuditEvent, status enums, Agent registration payloads);
+- shared status/enum constants.
 
-It should contain TypeScript types for:
+Older drafts referred to this package as `packages/shared-types` and `packages/capsule-spec`; in CE v0.1 they are merged into `packages/contracts`.
 
-- Capsule Manifest;
-- HealthReport;
-- ConfigItem;
-- ActionDefinition;
-- Command;
-- CommandResult;
-- AuditEvent;
-- status values;
-- Agent registration payloads.
+### 8.2 Runtime validation
 
-### 8.2 Optional schema package
-
-Optionally create:
-
-```text
-packages/capsule-spec
-```
-
-for:
-
-- runtime validation schemas;
-- constants;
-- status enums;
-- manifest validation helpers.
-
-CE v0.1 may merge this into `shared-types` if separate packages are too heavy.
-
-### 8.3 Runtime validation
-
-For runtime validation, consider:
+CE v0.1 baseline runtime validator:
 
 ```text
 Zod
@@ -393,10 +368,11 @@ Rationale:
 
 - TypeScript-friendly;
 - good for request validation;
-- can derive types;
-- lightweight enough for CE.
+- can derive types from schemas;
+- lightweight enough for CE;
+- can be shared between Backend, UI, and Agent SDK.
 
-Class-validator or framework-specific validators are possible later, but Zod is the CE v0.1 baseline because it is lightweight and can be shared across packages.
+Class-validator or framework-specific validators are possible later but are not required.
 
 ---
 
@@ -420,20 +396,23 @@ pnpm is recommended because:
 - good dependency isolation;
 - fast install experience.
 
-### 9.3 Recommended workspace structure
+### 9.3 Workspace structure
+
+Must match `10-implementation/00-monorepo-structure.md`:
 
 ```text
 xtrape-capsule-opstage/
 ├── apps/
-│   ├── backend/
-│   ├── ui/
+│   ├── opstage-backend/
+│   ├── opstage-ui/
 │   └── demo-capsule-service/
 ├── packages/
-│   ├── agent-sdk-node/
-│   ├── shared-types/
-│   └── capsule-spec/
+│   ├── contracts/
+│   ├── db/
+│   ├── agent-node/
+│   ├── shared/
+│   └── test-utils/
 ├── deploy/
-├── docs/
 ├── package.json
 ├── pnpm-workspace.yaml
 └── README.md
@@ -660,25 +639,30 @@ SQLite data volume
 
 ## 15. Environment Configuration
 
-Recommended environment variables:
+CE v0.1 environment variables (must match the backend Zod env schema in `apps/opstage-backend`):
 
 ```text
+# ---- required, no defaults ----
+OPSTAGE_ADMIN_USERNAME=<required>
+OPSTAGE_ADMIN_PASSWORD=<required, plain text on first run only — see ADR 0004>
+OPSTAGE_SESSION_SECRET=<required, >=32 random bytes; see ADR 0004>
+
+# ---- optional with defaults ----
 OPSTAGE_PORT=8080
 OPSTAGE_DATABASE_URL=file:./data/opstage.db
-OPSTAGE_ADMIN_USERNAME=admin
-OPSTAGE_ADMIN_PASSWORD=change-me
-OPSTAGE_SESSION_SECRET=change-me
 OPSTAGE_AGENT_HEARTBEAT_INTERVAL_SECONDS=30
 OPSTAGE_AGENT_OFFLINE_THRESHOLD_SECONDS=90
 OPSTAGE_COMMAND_POLL_INTERVAL_SECONDS=5
 OPSTAGE_COMMAND_TTL_SECONDS=300
 ```
 
+Backend bootstrap MUST refuse to start when any required variable is missing or empty (see ADR 0004 §"Bootstrap"). There are no weak defaults like `change-me`.
+
 Agent SDK / demo service variables:
 
 ```text
 OPSTAGE_BACKEND_URL=http://localhost:8080
-OPSTAGE_REGISTRATION_TOKEN=opstage_reg_xxx
+OPSTAGE_REGISTRATION_TOKEN=<opstage_reg_... required for first registration>
 OPSTAGE_AGENT_TOKEN_FILE=./data/agent-token.json
 ```
 

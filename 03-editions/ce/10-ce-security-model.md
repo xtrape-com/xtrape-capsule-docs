@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: architects, backend developers, frontend developers, agent SDK developers, security reviewers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/0004-security-defaults.md` or `09-contracts/openapi/opstage-ce-v0.1.yaml` disagree, the ADRs and OpenAPI contract win for CE v0.1.
+
 This document defines the security model for **Opstage CE v0.1**.
 
 CE security should be practical, lightweight, and safe by default. It should protect the core governance loop without introducing enterprise security complexity that belongs to EE or Cloud.

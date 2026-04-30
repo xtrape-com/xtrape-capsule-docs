@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, architects, security reviewers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1.
+
 This document defines the **Audit Model** for Opstage.
 
 Audit is the traceability mechanism that records important governance operations performed by users, Agents, and the system.
@@ -92,29 +94,23 @@ These may be future EE or Cloud capabilities.
 
 ## 5. AuditEvent
 
-AuditEvent is the durable audit record.
-
-Recommended fields:
+AuditEvent is the durable audit record. CE v0.1 fields match Prisma `AuditEvent` and OpenAPI `AuditEvent`.
 
 ```text
-id
-workspaceId
-actorType
-actorId
-actorDisplay
-action
-resourceType
-resourceId
-resourceDisplay
-result
-description
-requestJson
-resultJson
-metadataJson
-createdAt
+id            aud_xxx
+workspaceId   wks_xxx (default in CE v0.1, not exposed in API)
+actorType     USER | AGENT | SYSTEM
+actorId       string nullable
+action        string
+targetType    string nullable          (formerly `resourceType`)
+targetId      string nullable          (formerly `resourceId`)
+result        SUCCESS | FAILURE
+message       string nullable          (formerly `description`)
+metadataJson  TEXT (JSON serialized) nullable
+createdAt     datetime
 ```
 
-CE may implement a simplified version, but the model should preserve actor, action, resource, result, and timestamp.
+CE v0.1 does NOT persist `actorDisplay`, `resourceDisplay`, `requestJson`, or `resultJson` — sanitized request/result fragments must be folded into `metadata`.
 
 ---
 
@@ -172,12 +168,11 @@ CE v0.1 may use SYSTEM only for command expiration if implemented.
 
 ## 7. Actor Fields
 
-Recommended actor fields:
+CE v0.1 actor fields:
 
 ```text
-actorType
+actorType   (USER | AGENT | SYSTEM)
 actorId
-actorDisplay
 ```
 
 Examples:
@@ -185,100 +180,82 @@ Examples:
 ```json
 {
   "actorType": "USER",
-  "actorId": "usr_admin",
-  "actorDisplay": "admin"
+  "actorId": "usr_admin"
 }
 ```
 
 ```json
 {
   "actorType": "AGENT",
-  "actorId": "agt_001",
-  "actorDisplay": "local-dev-agent"
+  "actorId": "agt_001"
 }
 ```
 
 Rules:
 
-- actorId should be stable;
-- actorDisplay is for readability;
-- actorDisplay should not be the only identifier;
-- deleted users or Agents should not break existing audit records.
+- `actorId` should be stable;
+- if a readable display name is needed, store it in `metadata.actorName`;
+- deleted users or Agents must not break existing audit records;
+- `actorId` MAY be null only for `SYSTEM` events.
 
 ---
 
-## 8. Resource Model
+## 8. Target Model
 
-Resource identifies what was affected.
+Target identifies what was affected. The contract field names are `targetType` and `targetId` (not `resourceType` / `resourceId`).
 
-Recommended resource types:
-
-```text
-WORKSPACE
-USER
-REGISTRATION_TOKEN
-AGENT
-CAPSULE_SERVICE
-ACTION_DEFINITION
-COMMAND
-COMMAND_RESULT
-CONFIG_ITEM
-HEALTH_REPORT
-SYSTEM_SETTING
-```
-
-Future editions may add:
+Recommended `targetType` values (PascalCase string, free-form for forward-compat):
 
 ```text
-ORGANIZATION
-TENANT
-SUBSCRIPTION
-ROLE
-PERMISSION
-ALERT_RULE
-SECRET_PROVIDER
-AUDIT_EXPORT
-SUPPORT_SESSION
+Workspace
+User
+RegistrationToken
+Agent
+AgentToken
+CapsuleService
+ActionDefinition
+Command
+CommandResult
+ConfigItem
+HealthReport
+SystemSetting
 ```
 
-CE should implement only resource types it actually uses.
+CE should implement only target types it actually uses.
 
 ---
 
-## 9. Resource Fields
+## 9. Target Fields
 
-Recommended resource fields:
+CE v0.1 target fields:
 
 ```text
-resourceType
-resourceId
-resourceDisplay
+targetType
+targetId
 ```
 
 Examples:
 
 ```json
 {
-  "resourceType": "CAPSULE_SERVICE",
-  "resourceId": "svc_001",
-  "resourceDisplay": "demo-capsule-service"
+  "targetType": "CapsuleService",
+  "targetId": "svc_001"
 }
 ```
 
 ```json
 {
-  "resourceType": "COMMAND",
-  "resourceId": "cmd_001",
-  "resourceDisplay": "echo"
+  "targetType": "Command",
+  "targetId": "cmd_001"
 }
 ```
 
 Rules:
 
-- resourceId should be stable;
-- resourceDisplay is for readability;
-- resourceDisplay should not contain secrets;
-- deleted resources should not break existing audit records.
+- `targetId` should be stable;
+- if a readable display name is needed, store it in `metadata.targetCode` or `metadata.targetName`;
+- display fields must not contain secrets;
+- deleted targets must not break existing audit records.
 
 ---
 
@@ -324,36 +301,30 @@ Rules:
 
 Audit result identifies operation outcome.
 
-Recommended values:
+CE v0.1 allowed values (must match OpenAPI `AuditResult`):
 
 ```text
 SUCCESS
-FAILED
-DENIED
+FAILURE
 ```
 
-Optional future values:
+Map authorization rejections, validation failures, and unexpected runtime errors to `FAILURE` with `metadata.errorCode` (e.g. `FORBIDDEN`, `VALIDATION_FAILED`, `INTERNAL_ERROR`).
+
+Reserved future values (not in CE v0.1):
 
 ```text
 PARTIAL
 SKIPPED
-EXPIRED
-CANCELLED
-```
-
-CE v0.1 should implement at least:
-
-```text
-SUCCESS
-FAILED
 DENIED
+ERROR
+PENDING
 ```
 
 ---
 
-## 12. Description
+## 12. Message
 
-Description is a human-readable summary.
+`message` is a human-readable summary (formerly called `description`).
 
 Examples:
 
@@ -365,68 +336,47 @@ Registration token was created.
 
 Rules:
 
-- keep description concise;
-- do not put raw secrets in description;
-- do not rely on description for structured filtering;
-- structured fields should carry actor, action, resource, and result.
+- keep `message` concise;
+- do not put raw secrets in `message`;
+- do not rely on `message` for structured filtering;
+- structured fields should carry actor, action, target, and result.
 
 ---
 
-## 13. Request and Result JSON
+## 13. Metadata
 
-AuditEvent may include sanitized request and result details.
+CE v0.1 stores all sanitized request, result, and contextual data inside a single `metadata` object (persisted as `metadataJson` TEXT column).
 
-Recommended fields:
+Recommended sub-keys (free-form, not validated by Backend):
 
 ```text
-requestJson
-resultJson
-metadataJson
+request    sanitized request fragment
+result     sanitized result fragment
+errorCode  short code if result is FAILURE
+ip         client IP if available
+userAgent  HTTP UA if available
+source     "ui" | "admin-api" | "agent-api" | "system"
 ```
 
-### 13.1 requestJson
-
-Sanitized request details.
-
-Examples:
+Example:
 
 ```json
 {
-  "actionName": "echo",
-  "payload": {
-    "message": "hello"
-  }
-}
-```
-
-### 13.2 resultJson
-
-Sanitized result details.
-
-Examples:
-
-```json
-{
-  "commandStatus": "SUCCESS",
-  "resultSummary": "Echo completed."
-}
-```
-
-### 13.3 metadataJson
-
-Additional metadata that does not belong to request or result.
-
-Examples:
-
-```json
-{
+  "request": {
+    "actionName": "echo",
+    "payload": { "message": "hello" }
+  },
+  "result": {
+    "commandId": "cmd_001",
+    "status": "SUCCEEDED"
+  },
   "ip": "127.0.0.1",
   "userAgent": "browser",
-  "source": "admin-api"
+  "source": "ui"
 }
 ```
 
-CE may keep metadata minimal.
+CE may keep metadata minimal. The whole `metadata` blob is sanitized before storage (see §14).
 
 ---
 
@@ -523,17 +473,16 @@ Recommended events:
 ```text
 action.requested
 command.created
-command.dispatched
-command.succeeded
+command.completed     (matches CommandStatus.SUCCEEDED)
 command.failed
 command.expired
 ```
 
 Minimum CE events:
 
-- action.requested;
-- command.succeeded;
-- command.failed.
+- `action.requested`;
+- `command.completed`;
+- `command.failed`.
 
 ### 15.6 System Settings
 
@@ -630,22 +579,20 @@ Recommended endpoint:
 GET /api/admin/audit-events
 ```
 
-Recommended filters:
+CE v0.1 filters (matches OpenAPI):
 
 ```text
-actorType
+actorType    USER | AGENT | SYSTEM
 actorId
 action
-resourceType
-resourceId
-result
-startTime
-endTime
-limit
-offset or cursor
+targetType
+targetId
+result       SUCCESS | FAILURE
+from         ISO-8601
+to           ISO-8601
+page
+pageSize
 ```
-
-CE v0.1 may implement simple pagination and a subset of filters.
 
 ---
 
@@ -660,18 +607,16 @@ Time
 Actor Type
 Actor
 Action
-Resource Type
-Resource
+Target Type
+Target
 Result
-Description
+Message
 ```
 
 Audit detail should show:
 
 ```text
-requestJson
-resultJson
-metadataJson
+metadata (sanitized JSON)
 ```
 
 Sensitive values must remain masked.
@@ -684,10 +629,10 @@ CE should store AuditEvents in SQLite.
 
 Recommended storage rules:
 
-- use structured columns for actor/action/resource/result/time;
-- store requestJson/resultJson/metadataJson as JSON text;
-- index createdAt if practical;
-- index action/result if practical;
+- use structured columns for actor/action/target/result/time;
+- store `metadataJson` as a single JSON text column;
+- index `createdAt` if practical;
+- index `action`/`result` if practical;
 - keep schema portable for future PostgreSQL/MySQL.
 
 CE v0.1 does not need retention policy engine.
@@ -738,15 +683,15 @@ Command operations should be auditable.
 Recommended mapping:
 
 ```text
-User requests action         -> action.requested
-Backend creates Command      -> command.created
-Agent receives Command       -> command.dispatched
-Agent reports SUCCESS        -> command.succeeded
-Agent reports FAILED         -> command.failed
-Backend expires Command      -> command.expired
+User requests action          -> action.requested
+Backend creates Command       -> command.created
+Agent polls Command (RUNNING) -> (no audit by default; high-frequency)
+Agent reports SUCCEEDED       -> command.completed
+Agent reports FAILED          -> command.failed
+Backend expires Command       -> command.expired
 ```
 
-CE may combine command.created with action.requested if necessary, but separate events are clearer.
+CE may combine `command.created` with `action.requested` if necessary, but separate events are clearer.
 
 ---
 
@@ -774,7 +719,7 @@ Audit model supports security but is not a replacement for authorization.
 Rules:
 
 - Backend must enforce authorization before action;
-- denied operations may create `DENIED` AuditEvents;
+- denied operations create `FAILURE` AuditEvents with `metadata.errorCode = "FORBIDDEN"`;
 - audit payloads must be sanitized;
 - audit access should require admin authentication;
 - future EE may restrict audit visibility by role.
@@ -842,7 +787,7 @@ Heartbeat is operational state, not audit history.
 
 AuditEvents must be created by Backend, not trusted from UI.
 
-### 29.5 Missing actor/resource structure
+### 29.5 Missing actor/target structure
 
 Do not store only free-text audit messages.
 
@@ -857,17 +802,18 @@ CE audit is basic traceability, not a full compliance system.
 The CE Audit Model is acceptable when:
 
 - Backend can create AuditEvents;
-- AuditEvent has actor, action, resource, result, and timestamp;
+- AuditEvent has actor, action, target, result, and timestamp;
 - action requests create audit records;
 - command success/failure creates audit records;
 - Agent registration creates audit record;
 - registration token creation/use creates audit record if implemented;
 - AuditEvents are visible in UI;
 - AuditEvents are queryable through Admin API;
-- sensitive values are redacted;
+- sensitive values are redacted from `metadata`;
 - heartbeat does not flood AuditEvents;
 - raw tokens and secrets are not stored in audit;
-- AuditEvent is not used as a general log store.
+- AuditEvent is not used as a general log store;
+- `result` is one of `SUCCESS` or `FAILURE` (no extra values in CE v0.1).
 
 ---
 
@@ -879,4 +825,4 @@ It should be simple enough for CE, but structured enough to support future EE an
 
 The most important Audit rule is:
 
-> Audit should record meaningful governance operations with structured actor, action, resource, result, and sanitized details — not become a noisy log or secret store.
+> Audit should record meaningful governance operations with structured actor, action, target, result, and sanitized metadata — not become a noisy log or secret store.

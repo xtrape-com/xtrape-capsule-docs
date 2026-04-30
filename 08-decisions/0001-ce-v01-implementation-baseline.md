@@ -211,6 +211,31 @@ CE v0.1 must not include:
 - workflow designer;
 - plugin marketplace.
 
-## 10. Implementation Rule
+## 10. Defaults and Thresholds
 
-When documents disagree, CE v0.1 implementation should follow this ADR first, then the CE implementation target documents, then shared specifications.
+CE v0.1 timing defaults are normative. Backend MUST honor these unless explicitly overridden via environment variables. Agent SDK MUST treat the values returned in `RegisterAgentResponse` / `AgentHeartbeatResponse` as the authoritative cadence.
+
+```text
+heartbeatIntervalSeconds         30      OPSTAGE_AGENT_HEARTBEAT_INTERVAL_SECONDS
+agentOfflineThresholdSeconds     90      OPSTAGE_AGENT_OFFLINE_THRESHOLD_SECONDS
+commandPollIntervalSeconds        5      OPSTAGE_COMMAND_POLL_INTERVAL_SECONDS
+commandTtlSeconds               300      OPSTAGE_COMMAND_TTL_SECONDS
+healthStaleThresholdSeconds     120      OPSTAGE_HEALTH_STALE_THRESHOLD_SECONDS  (default: 4 × heartbeatIntervalSeconds)
+backgroundSweepIntervalSeconds   30      OPSTAGE_BACKGROUND_SWEEP_INTERVAL_SECONDS
+backgroundSweepBatchSize        500      OPSTAGE_BACKGROUND_SWEEP_BATCH_SIZE
+sessionTtlSeconds             28800      OPSTAGE_SESSION_TTL_SECONDS              (8 hours)
+csrfTokenBytes                   32      not configurable (CE v0.1)
+```
+
+Constraints:
+
+- `agentOfflineThresholdSeconds` MUST be at least `2 × heartbeatIntervalSeconds`;
+- `commandPollIntervalSeconds` MUST be at least `1` and SHOULD NOT exceed `heartbeatIntervalSeconds`;
+- `commandTtlSeconds` MUST be at least `30`;
+- `backgroundSweepIntervalSeconds` MUST be at most `agentOfflineThresholdSeconds / 2` so freshness updates do not lag a full Agent offline window;
+- `backgroundSweepBatchSize` MUST be a positive integer; SQLite deployments SHOULD keep it at or below 1000;
+- defaults are duplicated in `09-contracts/openapi/opstage-ce-v0.1.yaml` schema descriptions for discoverability, but this ADR is the single source of truth.
+
+## 11. Implementation Rule
+
+When documents disagree, CE v0.1 implementation should follow this ADR first, then the contracts in `09-contracts/`, then the CE implementation target documents, then shared specifications.

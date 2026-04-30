@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: agent SDK developers, Capsule Service developers, backend developers, architects, security reviewers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/openapi/opstage-ce-v0.1.yaml` disagree, the ADRs and OpenAPI contract win for CE v0.1. In particular: CommandResult uses `success / message / data / error` (not `outputText / errorMessage / resultJson`), and `dangerLevel` is `LOW | MEDIUM | HIGH` (no `CRITICAL`).
+
 This document defines the **Embedded Agent** model for the `xtrape-capsule` product family.
 
 An Embedded Agent runs inside the same process as a Capsule Service. It is the first Agent mode implemented by CE.

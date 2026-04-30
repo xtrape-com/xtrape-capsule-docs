@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: backend developers, agent SDK developers, security reviewers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/openapi/opstage-ce-v0.1.yaml` disagree, the ADRs and OpenAPI contract win for CE v0.1. The exact wire format is normative in OpenAPI; this document explains the rationale.
+
 This document defines the **Agent Registration** specification for the `xtrape-capsule` domain.
 
 Agent registration is the entry point for bringing Capsule Services under Opstage governance.
@@ -197,26 +199,24 @@ EXPIRED
 
 An Agent must have a stable identity after registration.
 
-Recommended Agent fields:
+CE v0.1 Agent fields (must match Prisma `Agent` and OpenAPI `Agent`):
 
 ```text
-id
-workspaceId
-code
-name
-mode
-runtime
-version
-status
-hostname
-os
-arch
-lastHeartbeatAt
-registeredAt
-disabledAt
-createdAt
-updatedAt
+id              agt_xxx
+workspaceId     wks_xxx (default Workspace in CE v0.1)
+code            stable kebab-case identifier
+name            human-readable name (nullable)
+mode            embedded | sidecar | external (CE v0.1: embedded only)
+runtime         nodejs | java | python | go | other (CE v0.1: nodejs)
+status          PENDING | ONLINE | OFFLINE | DISABLED | REVOKED
+lastHeartbeatAt datetime nullable
+disabledAt      datetime nullable
+revokedAt       datetime nullable
+createdAt       datetime
+updatedAt       datetime
 ```
+
+EE/Cloud may extend Agent with `version`, `hostname`, `os`, `arch`, `registeredAt`, and `metadataJson` later. CE v0.1 does NOT persist these; if an Agent reports them at registration, Backend may log them but should not require them.
 
 ### 6.1 `code`
 
@@ -292,7 +292,7 @@ POST /api/agents/register
 
 This endpoint is called by the Agent using a Registration Token.
 
-### 7.2 Request
+### 7.2 Request (matches OpenAPI `RegisterAgentRequest`)
 
 ```json
 {
@@ -301,13 +301,13 @@ This endpoint is called by the Agent using a Registration Token.
     "code": "local-dev-agent",
     "name": "Local Development Agent",
     "mode": "embedded",
-    "runtime": "nodejs",
-    "version": "0.1.0",
-    "hostname": "dev-machine",
-    "os": "darwin",
-    "arch": "arm64"
+    "runtime": "nodejs"
   },
   "service": {
+    "code": "demo-capsule-service",
+    "name": "Demo Capsule Service",
+    "version": "0.1.0",
+    "runtime": "nodejs",
     "manifest": {
       "kind": "CapsuleService",
       "code": "demo-capsule-service",
@@ -320,19 +320,22 @@ This endpoint is called by the Agent using a Registration Token.
 }
 ```
 
-`service` is optional at registration time but recommended for CE v0.1 embedded Agent.
+`service` is optional at registration time but recommended for CE v0.1 embedded Agent. When provided, the `service` object must be a valid `ReportedService` (see §10.2).
 
-### 7.3 Response
+The Agent MAY include additional informational fields such as `version`, `hostname`, `os`, `arch` in the request body; Backend ignores unknown fields in CE v0.1 (forward-compat).
+
+### 7.3 Response (envelope omitted; matches OpenAPI `RegisterAgentResponse`)
 
 ```json
 {
-  "agentId": "agt_001",
+  "agentId": "agt_V1StGXR8...",
   "agentToken": "opstage_agent_xxxxxxxxx",
-  "workspaceId": "wks_default",
   "heartbeatIntervalSeconds": 30,
-  "commandPollingIntervalSeconds": 5
+  "commandPollIntervalSeconds": 5
 }
 ```
+
+The raw `agentToken` is shown only once. CE v0.1 does NOT include `workspaceId` in the response (single default Workspace).
 
 ### 7.4 Backend Responsibilities
 
@@ -374,51 +377,44 @@ POST /api/agents/{agentId}/heartbeat
 Authorization: Bearer <agentToken>
 ```
 
-### 9.2 Request
+### 9.2 Request (matches OpenAPI `AgentHeartbeatRequest`)
 
 ```json
 {
-  "timestamp": "2026-04-30T10:21:00Z",
-  "agent": {
-    "version": "0.1.0",
-    "hostname": "dev-machine",
-    "os": "darwin",
-    "arch": "arm64"
-  },
-  "services": [
-    {
-      "code": "demo-capsule-service",
-      "reportedStatus": "ONLINE",
-      "health": {
-        "status": "UP",
-        "details": {}
-      }
-    }
-  ]
+  "serviceId": "svc_001",
+  "health": {
+    "status": "UP",
+    "message": "Demo service is healthy.",
+    "details": {}
+  }
 }
 ```
 
-### 9.3 Response
+Both `serviceId` and `health` are optional. A heartbeat with an empty body `{}` is valid and only updates `Agent.lastHeartbeatAt`.
+
+A heartbeat reports health for at most one service per call. Multi-service Agents should send one heartbeat per service or rely on the dedicated `POST /api/agents/{agentId}/services/report` endpoint.
+
+### 9.3 Response (envelope omitted; matches OpenAPI `AgentHeartbeatResponse`)
 
 ```json
 {
-  "accepted": true,
-  "serverTime": "2026-04-30T10:21:01Z",
-  "nextHeartbeatIntervalSeconds": 30
+  "heartbeatIntervalSeconds": 30,
+  "commandPollIntervalSeconds": 5
 }
 ```
+
+Backend may use this to dynamically adjust the Agent's polling cadence in future versions.
 
 ### 9.4 Backend Responsibilities
 
 Backend must:
 
-1. authenticate Agent Token;
+1. authenticate Agent token;
 2. verify Agent is not revoked or disabled;
-3. update `lastHeartbeatAt`;
-4. update Agent status to `ONLINE`;
-5. update reported service statuses if provided;
-6. store latest health report if provided;
-7. calculate effective service status if needed.
+3. update `Agent.lastHeartbeatAt`;
+4. transition `Agent.status` from `OFFLINE` or `PENDING` to `ONLINE` if needed;
+5. if `health` is provided, create a `HealthReport` row and update `CapsuleService.lastHealthAt` + `healthStatus`;
+6. recalculate `CapsuleService.status` (effective) for the affected service.
 
 ---
 
@@ -433,12 +429,17 @@ POST /api/agents/{agentId}/services/report
 Authorization: Bearer <agentToken>
 ```
 
-### 10.2 Request
+### 10.2 Request (matches OpenAPI `ServiceReportRequest` / `ReportedService`)
 
 ```json
 {
   "services": [
     {
+      "code": "demo-capsule-service",
+      "name": "Demo Capsule Service",
+      "description": "Demo service for Opstage CE v0.1.",
+      "version": "0.1.0",
+      "runtime": "nodejs",
       "manifest": {
         "kind": "CapsuleService",
         "code": "demo-capsule-service",
@@ -446,36 +447,54 @@ Authorization: Bearer <agentToken>
         "version": "0.1.0",
         "runtime": "nodejs",
         "agentMode": "embedded",
-        "capabilities": ["demo.echo"],
-        "actions": [
-          {
-            "name": "runHealthCheck",
-            "label": "Run Health Check",
-            "dangerLevel": "LOW",
-            "enabled": true
-          }
-        ],
-        "configs": []
+        "capabilities": ["demo.echo"]
       },
-      "reportedStatus": "ONLINE"
+      "health": {
+        "status": "UP",
+        "message": "Service is healthy."
+      },
+      "configs": [
+        {
+          "key": "demo.message",
+          "label": "Demo Message",
+          "type": "string",
+          "editable": false,
+          "sensitive": false,
+          "valuePreview": "hello capsule",
+          "source": "env"
+        }
+      ],
+      "actions": [
+        {
+          "name": "runHealthCheck",
+          "label": "Run Health Check",
+          "dangerLevel": "LOW",
+          "requiresConfirmation": false
+        }
+      ]
     }
   ]
 }
 ```
 
+`code` and `name` are sibling fields of `manifest` (not nested inside it). `health`, `configs`, and `actions` are optional but recommended.
+
 ### 10.3 Backend Responsibilities
 
 Backend must:
 
-1. authenticate Agent Token;
-2. validate manifest required fields;
-3. upsert CapsuleService by `workspaceId + code`;
-4. associate CapsuleService with Agent;
-5. store `manifestJson`;
-6. extract display fields;
+1. authenticate Agent token;
+2. validate manifest required fields (`kind`, `code`, `name`, `version`, `runtime`, `agentMode`);
+3. upsert `CapsuleService` by `(workspaceId, code)` (matches Prisma `@@unique([workspaceId, code])`);
+4. associate the service with the calling Agent (set `agentId`);
+5. store the full manifest as `manifestJson`;
+6. extract `description`, `version`, `runtime` for display columns;
 7. update `lastReportedAt`;
-8. update `reportedStatus` and `effectiveStatus`;
-9. write AuditEvent if service is newly registered or materially changed.
+8. if `health` is provided, create a `HealthReport` row and update `lastHealthAt` + `healthStatus`;
+9. upsert `ConfigItem` rows by `(serviceId, configKey)`;
+10. upsert `ActionDefinition` rows by `(serviceId, name)`;
+11. recalculate `CapsuleService.status` (effective);
+12. write an AuditEvent only when the service is newly registered or its manifest version changes (do NOT audit every identical re-report).
 
 ---
 
@@ -490,19 +509,22 @@ GET /api/agents/{agentId}/commands
 Authorization: Bearer <agentToken>
 ```
 
-### 11.2 Response
+### 11.2 Response (matches OpenAPI: `SuccessEnvelope` with `data: Command[]`)
 
 ```json
 {
-  "commands": [
+  "success": true,
+  "data": [
     {
-      "commandId": "cmd_001",
-      "serviceCode": "demo-capsule-service",
+      "id": "cmd_001",
+      "agentId": "agt_001",
       "serviceId": "svc_001",
-      "commandType": "ACTION",
+      "type": "ACTION",
       "actionName": "runHealthCheck",
       "payload": {},
-      "issuedAt": "2026-04-30T10:22:00Z",
+      "status": "RUNNING",
+      "createdAt": "2026-04-30T10:22:00Z",
+      "startedAt": "2026-04-30T10:22:01Z",
       "expiresAt": "2026-04-30T10:27:00Z"
     }
   ]
@@ -513,11 +535,12 @@ Authorization: Bearer <agentToken>
 
 Backend must:
 
-1. authenticate Agent Token;
-2. return pending commands for that Agent;
-3. exclude expired commands;
-4. mark returned commands as `DISPATCHED` if appropriate;
-5. avoid sending commands to revoked or disabled Agents.
+1. authenticate Agent token;
+2. reject if Agent is `DISABLED` or `REVOKED`;
+3. return only `PENDING` Commands assigned to the calling Agent;
+4. exclude commands where `now > expiresAt` (and mark them `EXPIRED` opportunistically);
+5. transition each returned Command from `PENDING` to `RUNNING` and set `startedAt`;
+6. order results by `createdAt ASC`.
 
 ---
 
@@ -530,18 +553,18 @@ POST /api/agents/{agentId}/commands/{commandId}/result
 Authorization: Bearer <agentToken>
 ```
 
-### 12.2 Request
+### 12.2 Request (matches OpenAPI `ReportCommandResultRequest`)
+
+Successful result:
 
 ```json
 {
-  "status": "SUCCESS",
-  "outputText": "Health check completed.",
-  "resultJson": {
+  "success": true,
+  "message": "Health check completed.",
+  "data": {
     "status": "UP",
     "details": {}
-  },
-  "startedAt": "2026-04-30T10:22:01Z",
-  "finishedAt": "2026-04-30T10:22:02Z"
+  }
 }
 ```
 
@@ -549,14 +572,12 @@ Failed result:
 
 ```json
 {
-  "status": "FAILED",
-  "outputText": "Action failed.",
-  "errorMessage": "Action not found: refreshSession",
-  "resultJson": {
-    "errorCode": "ACTION_NOT_FOUND"
-  },
-  "startedAt": "2026-04-30T10:22:01Z",
-  "finishedAt": "2026-04-30T10:22:02Z"
+  "success": false,
+  "message": "Action not found: refreshSession",
+  "error": {
+    "code": "ACTION_NOT_FOUND",
+    "message": "Action not found: refreshSession"
+  }
 }
 ```
 
@@ -564,30 +585,20 @@ Failed result:
 
 Backend must:
 
-1. authenticate Agent Token;
-2. verify the command belongs to the Agent;
-3. update Command status;
-4. create or update CommandResult;
-5. write AuditEvent;
-6. expose the result to UI.
+1. authenticate Agent token;
+2. verify the command belongs to the calling Agent;
+3. reject if the Command is already in a terminal state (`SUCCEEDED` / `FAILED` / `EXPIRED` / `CANCELLED`);
+4. create a `CommandResult` row (1:1 with Command);
+5. transition Command: `RUNNING -> SUCCEEDED` (when `success = true`) or `RUNNING -> FAILED`;
+6. set `Command.completedAt` to server clock;
+7. write AuditEvent (`command.completed` or `command.failed`);
+8. expose the result to UI.
 
 ---
 
 ## 13. Agent Status Model
 
-Recommended Agent statuses:
-
-```text
-PENDING
-REGISTERED
-ONLINE
-OFFLINE
-DISABLED
-REVOKED
-ERROR
-```
-
-CE v0.1 may implement:
+CE v0.1 Agent statuses (must match OpenAPI `AgentStatus`):
 
 ```text
 PENDING
@@ -596,30 +607,28 @@ OFFLINE
 DISABLED
 REVOKED
 ```
+
+`REGISTERED` and `ERROR` are reserved for future EE/Cloud editions.
 
 ### 13.1 `PENDING`
 
-Agent registration token was created, but Agent has not successfully registered.
+Agent record exists but Agent has not yet sent a successful heartbeat.
 
 ### 13.2 `ONLINE`
 
-Agent has sent a valid heartbeat recently.
+Agent has sent a valid heartbeat within the offline threshold.
 
 ### 13.3 `OFFLINE`
 
-Agent has not sent heartbeat within the offline threshold.
+Agent has not sent a heartbeat within the offline threshold (default 90s).
 
 ### 13.4 `DISABLED`
 
-Agent is disabled by an admin.
+Agent is disabled by an admin. May be re-enabled.
 
 ### 13.5 `REVOKED`
 
 Agent token is revoked. Communication must be rejected.
-
-### 13.6 `ERROR`
-
-Agent reported an internal error or Backend detected inconsistent state.
 
 ---
 
@@ -639,15 +648,16 @@ if now - lastHeartbeatAt > offlineThresholdSeconds:
     Agent effective status = OFFLINE
 ```
 
-If an Agent becomes offline, all services managed only by that Agent should become `STALE` or `UNKNOWN`, not confidently `ONLINE`.
+If an Agent becomes offline, all services managed only by that Agent should become `STALE` or `UNKNOWN`, not confidently `HEALTHY`.
 
-Recommended service status behavior:
+Recommended service status behavior (CE v0.1, see `02-specs/09-status-model-spec.md`):
 
 ```text
-Agent ONLINE + service health UP       -> service ONLINE
-Agent ONLINE + service health DOWN     -> service UNHEALTHY or OFFLINE
-Agent OFFLINE + last service ONLINE    -> service STALE
-Agent REVOKED/DISABLED                 -> service STALE or DISABLED depending on policy
+Agent ONLINE  + health UP       -> CapsuleService.status = HEALTHY
+Agent ONLINE  + health DEGRADED -> CapsuleService.status = UNHEALTHY
+Agent ONLINE  + health DOWN     -> CapsuleService.status = OFFLINE
+Agent ONLINE  + health UNKNOWN  -> CapsuleService.status = UNKNOWN
+Agent OFFLINE | DISABLED | REVOKED -> CapsuleService.status = STALE
 ```
 
 ---
@@ -659,7 +669,7 @@ Agent status and Capsule Service status must be separate.
 Examples:
 
 ```text
-Agent ONLINE, Service ONLINE
+Agent ONLINE, Service HEALTHY
 Agent ONLINE, Service UNHEALTHY
 Agent ONLINE, Service OFFLINE
 Agent OFFLINE, Service STALE
@@ -671,15 +681,16 @@ UI should make this distinction visible.
 Bad UI behavior:
 
 ```text
-Service shows green ONLINE even though Agent has been offline for hours.
+Service shows green HEALTHY even though Agent has been offline for hours.
 ```
 
 Correct UI behavior:
 
 ```text
-Last reported: ONLINE
 Current: STALE
-Reason: Agent offline since 10:21
+Last health: UP   (latest HealthReport)
+Last reported at: 2026-04-30 10:21
+Reason: Agent offline since 10:22
 ```
 
 ---

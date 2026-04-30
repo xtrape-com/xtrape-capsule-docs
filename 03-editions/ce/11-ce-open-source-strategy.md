@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: founders, product designers, architects, developers, open-source contributors, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` disagree, the ADRs and contracts win for CE v0.1.
+
 This document defines the open-source strategy for **Opstage CE / Community Edition**.
 
 CE should be a real, useful, self-hosted open-source product. It should establish trust, validate the Capsule Service model, and create an adoption path for future EE and Cloud editions without making CE feel like an intentionally crippled product.
@@ -165,13 +167,15 @@ Recommended monorepo structure:
 ```text
 xtrape-capsule-opstage/
 ├── apps/
-│   ├── backend/
-│   ├── ui/
+│   ├── opstage-backend/
+│   ├── opstage-ui/
 │   └── demo-capsule-service/
 ├── packages/
-│   ├── agent-sdk-node/
-│   ├── shared-types/
-│   └── capsule-spec/
+│   ├── contracts/
+│   ├── db/
+│   ├── agent-node/
+│   ├── shared/
+│   └── test-utils/
 ├── deploy/
 │   ├── docker/
 │   └── compose/
@@ -471,7 +475,7 @@ docs/overview.md
 docs/quick-start.md
 docs/concepts/capsule-service.md
 docs/concepts/agent.md
-docs/agent-sdk-node.md
+docs/agent-node.md
 docs/api.md
 docs/security.md
 docs/deployment.md

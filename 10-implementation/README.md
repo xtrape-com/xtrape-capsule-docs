@@ -24,6 +24,9 @@ Read this directory after:
 10-implementation/03-agent-sdk-scaffold-plan.md
 10-implementation/04-demo-service-plan.md
 10-implementation/05-implementation-sequence.md
+10-implementation/06-ci-cd-pipelines.md
+10-implementation/07-quickstart.md
+10-implementation/08-supply-chain.md
 ```
 
 ## 2. Implementation Rule

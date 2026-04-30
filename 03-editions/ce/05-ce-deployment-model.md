@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: architects, backend developers, frontend developers, DevOps engineers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/0004-security-defaults.md` or `09-contracts/` disagree, the ADRs and contracts win for CE v0.1.
+
 This document defines the deployment model for **Opstage CE v0.1**.
 
 CE deployment should be lightweight, self-hosted, easy to start, and suitable for open-source community users. It should not require Kubernetes, external databases, message queues, or cloud services for the first version.
@@ -165,14 +167,20 @@ It should package:
 Preferred first command:
 
 ```bash
+# Generate strong values first; never use literal placeholders in production.
+ADMIN_PASS="$(openssl rand -base64 24)"
+SESSION_SECRET="$(openssl rand -base64 32)"
+
 docker run \
   -p 8080:8080 \
   -v ./opstage-data:/app/data \
   -e OPSTAGE_ADMIN_USERNAME=admin \
-  -e OPSTAGE_ADMIN_PASSWORD=change-me \
-  -e OPSTAGE_SESSION_SECRET=change-me \
+  -e OPSTAGE_ADMIN_PASSWORD="$ADMIN_PASS" \
+  -e OPSTAGE_SESSION_SECRET="$SESSION_SECRET" \
   xtrape/capsule-opstage-ce:0.1.0
 ```
+
+The Backend refuses to start when `OPSTAGE_ADMIN_PASSWORD` or `OPSTAGE_SESSION_SECRET` is empty (see ADR 0004 §"Bootstrap"). There is no built-in default password.
 
 ### 5.3 Container responsibilities
 
@@ -230,8 +238,9 @@ services:
       OPSTAGE_PORT: "8080"
       OPSTAGE_DATABASE_URL: "file:/app/data/opstage.db"
       OPSTAGE_ADMIN_USERNAME: "admin"
-      OPSTAGE_ADMIN_PASSWORD: "change-me"
-      OPSTAGE_SESSION_SECRET: "change-me"
+      # Required: source these from a .env file or secrets manager. Backend exits if either is empty.
+      OPSTAGE_ADMIN_PASSWORD: "${OPSTAGE_ADMIN_PASSWORD:?required}"
+      OPSTAGE_SESSION_SECRET: "${OPSTAGE_SESSION_SECRET:?required}"
 
   demo-capsule-service:
     image: xtrape/demo-capsule-service:0.1.0
@@ -338,19 +347,21 @@ System settings defaults
 
 ### 9.2 Admin user bootstrap
 
-Recommended environment variables:
+Required environment variables (no defaults):
 
 ```text
-OPSTAGE_ADMIN_USERNAME=admin
-OPSTAGE_ADMIN_PASSWORD=change-me
+OPSTAGE_ADMIN_USERNAME=<required>
+OPSTAGE_ADMIN_PASSWORD=<required, plain text on first run only>
+OPSTAGE_SESSION_SECRET=<required, >=32 random bytes>
 ```
 
-Rules:
+Rules (matches ADR 0004):
 
-- if admin user does not exist, create it;
-- if admin user exists, do not overwrite password automatically unless explicitly configured;
-- password must be hashed;
-- default password should be changed in production.
+- Backend MUST refuse to start when any required variable is missing or empty;
+- if admin user does not exist, create it with hashed password (argon2id or bcrypt);
+- if admin user already exists, never overwrite the password automatically;
+- there is no built-in default password — operators MUST set their own value;
+- after first successful login, operators are encouraged to remove `OPSTAGE_ADMIN_PASSWORD` from the environment (the hash is already persisted in the database).
 
 ### 9.3 Registration token bootstrap
 
@@ -372,14 +383,17 @@ Environment-based bootstrap is acceptable for demos but should be handled carefu
 
 ## 10. Environment Variables
 
-Recommended Opstage CE environment variables:
+Opstage CE environment variables:
 
 ```text
+# ---- required, no defaults (Backend exits if missing) ----
+OPSTAGE_ADMIN_USERNAME=<required>
+OPSTAGE_ADMIN_PASSWORD=<required>
+OPSTAGE_SESSION_SECRET=<required, >=32 random bytes>
+
+# ---- optional with defaults ----
 OPSTAGE_PORT=8080
 OPSTAGE_DATABASE_URL=file:/app/data/opstage.db
-OPSTAGE_ADMIN_USERNAME=admin
-OPSTAGE_ADMIN_PASSWORD=change-me
-OPSTAGE_SESSION_SECRET=change-me
 OPSTAGE_AGENT_HEARTBEAT_INTERVAL_SECONDS=30
 OPSTAGE_AGENT_OFFLINE_THRESHOLD_SECONDS=90
 OPSTAGE_COMMAND_POLL_INTERVAL_SECONDS=5

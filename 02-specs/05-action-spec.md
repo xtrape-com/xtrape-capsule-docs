@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1.
+
 This document defines the shared Action model for the `xtrape-capsule` domain.
 
 An **Action** is a predefined operation exposed by a Capsule Service and executed through an authorized Agent under Opstage governance.
@@ -122,7 +124,7 @@ The ActionDefinition may be reported by:
       "expiresAt": { "type": "string" }
     }
   },
-  "confirmRequired": true,
+  "requiresConfirmation": true,
   "timeoutSeconds": 60,
   "metadata": {
     "category": "session",
@@ -202,13 +204,12 @@ The description should help the operator understand:
 
 The operational risk level of the action.
 
-Allowed values:
+CE v0.1 allowed values (must match OpenAPI `DangerLevel`):
 
 ```text
 LOW
 MEDIUM
 HIGH
-CRITICAL
 ```
 
 Recommended meaning:
@@ -217,10 +218,11 @@ Recommended meaning:
 |---|---|---|
 | LOW | Read-only or low-risk operation | `runHealthCheck` |
 | MEDIUM | Changes local runtime state but is usually safe | `reloadConfig`, `refreshSession` |
-| HIGH | May disrupt service behavior or user resources | `clearExpiredSessions`, `rotateProxy` |
-| CRITICAL | May cause data loss, credential reset, account disablement, or large impact | `disableAccount`, `purgeData` |
+| HIGH | May disrupt service behavior, user resources, or cause data loss / credential reset | `clearExpiredSessions`, `disableAccount`, `purgeData` |
 
-CE v0.1 should display `dangerLevel` in UI and require confirmation for `HIGH` and `CRITICAL` actions.
+`CRITICAL` is reserved for future EE/Cloud editions and is **not** part of CE v0.1.
+
+CE v0.1 should display `dangerLevel` in UI and require confirmation for `HIGH` actions.
 
 ### 4.5 `enabled`
 
@@ -242,7 +244,7 @@ Optional JSON-schema-like definition for structured action result.
 
 CE v0.1 may store result as JSON without strict validation.
 
-### 4.8 `confirmRequired`
+### 4.8 `requiresConfirmation`
 
 Whether UI should ask for confirmation before creating a command.
 
@@ -252,8 +254,9 @@ Recommended default:
 LOW      false
 MEDIUM   false or true depending on action
 HIGH     true
-CRITICAL true
 ```
+
+(Older drafts called this field `confirmRequired`. The CE v0.1 contract name is `requiresConfirmation` — see OpenAPI `ActionDefinition`.)
 
 ### 4.9 `timeoutSeconds`
 
@@ -306,13 +309,11 @@ UI
 
 ## 6. Command Mapping
 
-Every action execution request should create a Command.
-
-Recommended command fields:
+Every action execution request should create a Command. Field names match OpenAPI `Command`.
 
 ```json
 {
-  "commandType": "ACTION",
+  "type": "ACTION",
   "actionName": "runHealthCheck",
   "serviceId": "svc_001",
   "agentId": "agt_001",
@@ -322,7 +323,7 @@ Recommended command fields:
 }
 ```
 
-The Agent should fetch or receive this Command, map `actionName` to a local handler, execute it, and report a CommandResult.
+The Agent polls this Command (transitioning it to `RUNNING`), maps `actionName` to a local handler, executes it, and reports a CommandResult.
 
 ---
 
@@ -444,22 +445,18 @@ The Agent should wrap ActionResult into CommandResult before reporting to Backen
 
 ## 10. CommandResult Mapping
 
-A completed action should produce a CommandResult.
+A completed action produces a CommandResult report (matches OpenAPI `ReportCommandResultRequest`).
 
 Successful example:
 
 ```json
 {
-  "commandId": "cmd_001",
-  "status": "SUCCESS",
-  "outputText": "Session refreshed successfully.",
-  "resultJson": {
-    "success": true,
+  "success": true,
+  "message": "Session refreshed successfully.",
+  "data": {
     "sessionId": "ses_001",
     "expiresAt": "2026-05-01T10:00:00Z"
-  },
-  "startedAt": "2026-04-30T10:01:00Z",
-  "finishedAt": "2026-04-30T10:01:03Z"
+  }
 }
 ```
 
@@ -467,18 +464,16 @@ Failed example:
 
 ```json
 {
-  "commandId": "cmd_001",
-  "status": "FAILED",
-  "outputText": "Session refresh failed.",
-  "errorMessage": "The session is already expired and cannot be refreshed.",
-  "resultJson": {
-    "success": false,
-    "errorCode": "SESSION_EXPIRED"
-  },
-  "startedAt": "2026-04-30T10:01:00Z",
-  "finishedAt": "2026-04-30T10:01:03Z"
+  "success": false,
+  "message": "The session is already expired and cannot be refreshed.",
+  "error": {
+    "code": "SESSION_EXPIRED",
+    "message": "The session is already expired and cannot be refreshed."
+  }
 }
 ```
+
+Backend transitions the Command to `SUCCEEDED` (when `success = true`) or `FAILED` (when `success = false`), records `Command.completedAt`, and writes an AuditEvent.
 
 ---
 
@@ -488,13 +483,12 @@ Actions themselves are definitions. Execution status belongs to Command and Comm
 
 Do not create separate long-running ActionExecution status unless future requirements justify it.
 
-Use Command statuses:
+Use Command statuses (CE v0.1 baseline):
 
 ```text
 PENDING
-DISPATCHED
 RUNNING
-SUCCESS
+SUCCEEDED
 FAILED
 EXPIRED
 CANCELLED
@@ -506,40 +500,40 @@ CANCELLED
 
 Every action request and result should be auditable.
 
-Recommended audit events:
+Recommended audit event names (`AuditEvent.action`):
 
 ```text
 service.action.requested
-service.action.dispatched
 service.action.completed
 service.action.failed
 ```
 
-Minimum CE v0.1 audit fields:
+Minimum CE v0.1 AuditEvent fields (matches OpenAPI `AuditEvent` and Prisma `AuditEvent`):
 
 ```text
-actorType
-actorId
-action
-resourceType
-resourceId
-description
-requestJson
-resultJson
-createdAt
+actorType    USER | AGENT | SYSTEM
+actorId      string nullable
+action       string
+targetType   string nullable
+targetId     string nullable
+result       SUCCESS | FAILURE
+message      string nullable
+metadata     JSON object nullable
+createdAt    datetime
 ```
 
 Example:
 
 ```json
 {
-  "actorType": "user",
+  "actorType": "USER",
   "actorId": "usr_001",
   "action": "service.action.requested",
-  "resourceType": "CapsuleService",
-  "resourceId": "svc_001",
-  "description": "Requested action runHealthCheck on demo-capsule-service.",
-  "requestJson": {
+  "targetType": "CapsuleService",
+  "targetId": "svc_001",
+  "result": "SUCCESS",
+  "message": "Requested action runHealthCheck on demo-capsule-service.",
+  "metadata": {
     "actionName": "runHealthCheck",
     "payload": {}
   }
@@ -597,7 +591,7 @@ Backend must verify that:
 
 ### 14.5 Confirm dangerous actions
 
-UI should require confirmation for `HIGH` and `CRITICAL` actions.
+UI should require confirmation for `HIGH` actions or any action with `requiresConfirmation = true`.
 
 ### 14.6 Audit every action
 

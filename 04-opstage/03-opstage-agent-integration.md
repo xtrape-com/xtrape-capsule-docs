@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: agent SDK developers, backend developers, Capsule Service developers, architects, security reviewers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/openapi/opstage-ce-v0.1.yaml` disagree, the ADRs and OpenAPI contract win for CE v0.1.
+
 This document defines the Agent integration subsystem of **Opstage**.
 
 Agent integration is the bridge between Opstage Backend and Capsule Services. It allows lightweight services to become visible, manageable, and auditable without becoming dependent on Opstage for their core business runtime.

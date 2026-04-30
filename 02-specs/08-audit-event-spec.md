@@ -5,6 +5,8 @@
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, security reviewers, AI coding agents
 
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1.
+
 This document defines the **Audit Event** specification for the `xtrape-capsule` domain.
 
 An Audit Event records an important operation, state change, security-relevant action, or governance activity in Opstage.
@@ -55,52 +57,43 @@ Who did what, to which resource, when, with what result?
 
 ## 3. Audit Event Object
 
-### 3.1 Minimum CE v0.1 AuditEvent
+### 3.1 CE v0.1 AuditEvent (must match OpenAPI `AuditEvent`)
 
 ```json
 {
   "id": "aud_001",
-  "actorType": "user",
+  "actorType": "USER",
   "actorId": "usr_001",
   "action": "command.created",
-  "resourceType": "Command",
-  "resourceId": "cmd_001",
-  "description": "User created command runHealthCheck for demo-capsule-service.",
+  "targetType": "Command",
+  "targetId": "cmd_001",
   "result": "SUCCESS",
+  "message": "User created command runHealthCheck for demo-capsule-service.",
+  "metadata": {
+    "actionName": "runHealthCheck",
+    "payload": {}
+  },
   "createdAt": "2026-04-30T10:22:00Z"
 }
 ```
 
-### 3.2 Recommended AuditEvent
+### 3.2 Persisted columns (matches Prisma `AuditEvent`)
 
-```json
-{
-  "id": "aud_001",
-  "workspaceId": "wks_default",
-  "actorType": "user",
-  "actorId": "usr_001",
-  "actorName": "local-admin",
-  "action": "service.action.requested",
-  "resourceType": "CapsuleService",
-  "resourceId": "svc_001",
-  "resourceCode": "demo-capsule-service",
-  "description": "User requested action runHealthCheck on demo-capsule-service.",
-  "requestJson": {
-    "actionName": "runHealthCheck",
-    "payload": {}
-  },
-  "result": "SUCCESS",
-  "resultJson": {
-    "commandId": "cmd_001"
-  },
-  "ip": "127.0.0.1",
-  "userAgent": "Mozilla/5.0",
-  "createdAt": "2026-04-30T10:22:00Z",
-  "metadata": {
-    "source": "ui"
-  }
-}
+```text
+id              aud_xxx
+workspaceId     wks_xxx (default in CE v0.1, not exposed in API)
+actorType       USER | AGENT | SYSTEM
+actorId         string nullable
+action          string
+targetType      string nullable
+targetId        string nullable
+result          SUCCESS | FAILURE
+message         string nullable
+metadataJson    JSON text nullable    (serialized from `metadata`)
+createdAt       datetime
 ```
+
+CE v0.1 does NOT persist `actorName`, `targetCode`, `ip`, or `userAgent`. Future EE/Cloud editions may add them.
 
 ---
 
@@ -108,210 +101,105 @@ Who did what, to which resource, when, with what result?
 
 ### 4.1 `id`
 
-Unique Audit Event identifier.
+Unique Audit Event identifier. Required. Prefix: `aud_`.
 
-Required.
+### 4.2 `actorType`
 
-Recommended prefix:
+Type of actor that caused the event. Required.
 
-```text
-aud_
-```
-
-### 4.2 `workspaceId`
-
-Logical workspace boundary.
-
-Recommended even in CE v0.1, where a default Workspace may be used.
-
-### 4.3 `actorType`
-
-Type of actor that caused the event.
-
-Required.
-
-Allowed values:
+CE v0.1 allowed values (uppercase, must match OpenAPI `AuditActorType`):
 
 ```text
-user
-agent
-system
+USER
+AGENT
+SYSTEM
 ```
 
-Future values may include:
+### 4.3 `actorId`
 
-```text
-apiClient
-scheduler
-cloudSystem
-```
+Identifier of the actor. Required when available; null for purely system-generated events.
 
-### 4.4 `actorId`
+Examples: `usr_001`, `agt_001`. Null for events emitted by background sweeps.
 
-Identifier of the actor.
+### 4.4 `action`
 
-Required when available.
-
-Examples:
-
-```text
-usr_001
-agt_001
-system
-```
-
-### 4.5 `actorName`
-
-Optional display name of the actor at the time of event creation.
-
-This helps preserve readable audit history even if the user or Agent name changes later.
-
-### 4.6 `action`
-
-Stable audit action name.
-
-Required.
-
-Use dot-separated lower-case naming.
+Stable audit action name. Required. Use dot-separated lower-case naming.
 
 Examples:
 
 ```text
 user.login
 agent.registered
-agent.heartbeat.received
 agent.service.reported
 service.action.requested
-service.action.completed
 command.created
 command.completed
 command.failed
 ```
 
-### 4.7 `resourceType`
+### 4.5 `targetType`
 
-Type of resource affected by the event.
+Type of resource affected by the event. String, nullable.
 
 Recommended values:
 
 ```text
 User
 Agent
+RegistrationToken
 AgentToken
 CapsuleService
 Command
-CommandResult
 ConfigItem
+ActionDefinition
 AuditEvent
 System
 ```
 
-Future values may include:
+### 4.6 `targetId`
+
+Identifier of the affected resource. Optional. For system-wide events, may be null.
+
+### 4.7 `result`
+
+Operation result summary. Required.
+
+CE v0.1 allowed values (must match OpenAPI `AuditResult`):
 
 ```text
-Workspace
-Tenant
-Organization
-SecretRef
-Capability
-ResourceDefinition
-AlertRule
+SUCCESS
+FAILURE
 ```
 
-### 4.8 `resourceId`
+Map authorization rejections, validation failures, and unexpected errors to `FAILURE` with descriptive `message` and `metadata.errorCode`.
 
-Identifier of the affected resource.
+### 4.8 `message`
 
-Optional for system-wide events.
+Human-readable summary. Recommended for UI display. Nullable.
 
-### 4.9 `resourceCode`
+### 4.9 `metadata`
 
-Optional stable code of the resource.
-
-Useful for Capsule Services and Agents.
-
-Examples:
-
-```text
-demo-capsule-service
-local-dev-agent
-```
-
-### 4.10 `description`
-
-Human-readable description of the event.
-
-Recommended for UI display.
-
-### 4.11 `requestJson`
-
-Optional structured request data.
-
-Should be sanitized before storage.
+Optional free-form structured payload. Sanitized before storage.
 
 Examples:
 
 ```json
 {
   "actionName": "runHealthCheck",
-  "payload": {}
+  "payload": {},
+  "errorCode": "ACTION_NOT_FOUND"
 }
 ```
 
-### 4.12 `result`
+### 4.10 `createdAt`
 
-Operation result summary.
-
-Allowed values:
-
-```text
-SUCCESS
-FAILED
-DENIED
-ERROR
-PENDING
-```
-
-### 4.13 `resultJson`
-
-Optional structured result data.
-
-Should be sanitized before storage.
-
-### 4.14 `ip`
-
-Optional IP address of the user or client.
-
-CE v0.1 may store it when available.
-
-### 4.15 `userAgent`
-
-Optional HTTP user-agent string for user-initiated operations.
-
-### 4.16 `createdAt`
-
-Timestamp when the event was created.
-
-Required.
-
-### 4.17 `metadata`
-
-Optional free-form metadata.
-
-Examples:
-
-```json
-{
-  "source": "ui",
-  "dangerLevel": "LOW"
-}
-```
+Timestamp when the event was created. Required.
 
 ---
 
 ## 5. Actor Types
 
-### 5.1 `user`
+### 5.1 `USER`
 
 A human operator using Opstage UI or Admin API.
 
@@ -323,7 +211,7 @@ Examples:
 - disable Agent;
 - revoke token.
 
-### 5.2 `agent`
+### 5.2 `AGENT`
 
 A registered Opstage Agent.
 
@@ -334,9 +222,9 @@ Examples:
 - report Capsule Service manifest;
 - report CommandResult.
 
-### 5.3 `system`
+### 5.3 `SYSTEM`
 
-The Opstage Backend or system scheduler.
+The Opstage Backend or its background scheduler.
 
 Examples:
 
@@ -648,38 +536,32 @@ CE v0.1 should at least avoid intentionally writing raw tokens, passwords, cooki
 
 ## 10. Backend Storage
 
-Recommended audit table fields:
+CE v0.1 audit table columns (matches Prisma `AuditEvent`):
 
 ```text
-id
-workspaceId
-actorType
-actorId
-actorName
-action
-resourceType
-resourceId
-resourceCode
-description
-requestJson
-result
-resultJson
-ip
-userAgent
-metadataJson
-createdAt
+id            aud_xxx
+workspaceId   wks_xxx
+actorType     USER | AGENT | SYSTEM
+actorId       string nullable
+action        string
+targetType    string nullable
+targetId      string nullable
+result        SUCCESS | FAILURE
+message       string nullable
+metadataJson  TEXT (JSON serialized) nullable
+createdAt     datetime
 ```
 
-CE v0.1 may use SQLite JSON/text fields for request and result data.
+CE v0.1 uses SQLite JSON/TEXT for `metadataJson`.
 
 Recommended indexes:
 
 ```text
-createdAt
-action
-actorType + actorId
-resourceType + resourceId
-workspaceId + createdAt
+(createdAt)
+(action)
+(workspaceId, createdAt)
+(actorType, actorId)
+(targetType, targetId)
 ```
 
 CE v0.1 may implement only basic indexes.
@@ -706,7 +588,7 @@ Optional filters:
 ```text
 Action
 Actor
-Resource Type
+Target Type
 Result
 Time Range
 ```
@@ -725,9 +607,9 @@ CE v0.1 Backend should:
 
 1. provide an AuditEvent storage model;
 2. write audit events for required triggers;
-3. sanitize request and result JSON;
+3. sanitize the `metadata` payload before storage;
 4. expose audit list API for UI;
-5. expose resource-specific audit query if practical;
+5. expose target-specific audit query if practical;
 6. avoid storing raw secrets;
 7. keep audit writes non-blocking where possible, but do not silently ignore critical audit failures without logging.
 
@@ -767,31 +649,20 @@ CE v0.1 does not need advanced retention management.
 
 ## 15. Audit Result Values
 
-Allowed result values:
+CE v0.1 allowed values (must match OpenAPI `AuditResult`):
 
 ```text
 SUCCESS
-FAILED
-DENIED
-ERROR
-PENDING
+FAILURE
 ```
 
-Recommended meaning:
-
-| Result | Meaning |
-|---|---|
-| SUCCESS | Operation completed successfully |
-| FAILED | Operation attempted but failed in normal business or runtime flow |
-| DENIED | Operation was rejected by authorization or policy |
-| ERROR | Unexpected system error occurred |
-| PENDING | Operation was accepted but not completed yet |
+`DENIED`, `ERROR`, and `PENDING` are reserved for future EE/Cloud editions and are not part of CE v0.1. Map authorization rejections, validation failures, and unexpected runtime errors to `FAILURE` with `metadata.errorCode`.
 
 Examples:
 
-- action request creates `PENDING` or `SUCCESS` depending on whether the event is for request acceptance;
-- final command result creates `SUCCESS` or `FAILED`;
-- permission failure creates `DENIED`.
+- final command success → `SUCCESS`;
+- command failure or expired command → `FAILURE`;
+- permission denial → `FAILURE` with `metadata.errorCode = "FORBIDDEN"`.
 
 ---
 
@@ -886,7 +757,7 @@ Good audit event:
 ```json
 {
   "action": "service.action.requested",
-  "requestJson": {
+  "metadata": {
     "actionName": "refreshSession",
     "sessionId": "ses_001"
   }
@@ -898,7 +769,7 @@ Bad audit event:
 ```json
 {
   "action": "service.action.requested",
-  "requestJson": {}
+  "metadata": {}
 }
 ```
 
@@ -928,8 +799,8 @@ Stable fields:
 actorType
 actorId
 action
-resourceType
-resourceId
+targetType
+targetId
 result
 createdAt
 ```

@@ -5,6 +5,8 @@
 - Priority: Current
 - Audience: architects, backend developers, frontend developers, agent SDK developers, AI coding agents
 
+> **Precedence rule**: When this document and `09-contracts/openapi/opstage-ce-v0.1.yaml` disagree, the OpenAPI contract wins for CE v0.1. Examples below are illustrative; the OpenAPI document is the normative wire format.
+
 This document defines the API design for **Opstage CE v0.1**.
 
 CE APIs are divided into two surfaces:
@@ -193,23 +195,25 @@ CE v0.1 may use a simple response shape.
 
 ### 5.3 List response
 
+CE v0.1 list endpoints return the array directly under `data`, with a sibling `pagination` object (matches OpenAPI):
+
 ```json
 {
   "success": true,
-  "data": {
-    "items": [],
+  "data": [
+    { "id": "agt_001", "code": "local-dev-agent" }
+  ],
+  "pagination": {
     "page": 1,
     "pageSize": 20,
-    "total": 0
+    "total": 1
   }
 }
 ```
 
 ### 5.4 Notes
 
-The exact envelope may be adjusted during implementation, but APIs should remain consistent.
-
-Do not mix raw arrays and enveloped responses randomly.
+This shape is fixed by `09-contracts/openapi/opstage-ce-v0.1.yaml`. Do not nest list items as `data.items`; that pattern is no longer valid in CE v0.1.
 
 ---
 
@@ -234,34 +238,71 @@ CE may keep status usage simple, but it should not return `200` for clear authen
 
 ---
 
-## 7. Pagination and Filtering
+## 7. Pagination, Sorting, and Filtering
 
-List APIs should support simple pagination.
+All list endpoints share a single convention. Backend MUST validate every query param with the Zod schema in `packages/contracts/list-query.ts` before reaching the data layer; unknown params return `422 VALIDATION_FAILED`.
 
-Recommended query parameters:
-
-```text
-page=1
-pageSize=20
-```
-
-Optional filtering:
+### 7.1 Pagination
 
 ```text
-status=ONLINE
-q=demo
-from=2026-04-30T00:00:00Z
-to=2026-04-30T23:59:59Z
+page=1            # >= 1, default 1
+pageSize=20       # 1..100, default 20
 ```
 
-CE v0.1 may implement minimal filters.
+Response body (always wrapped in `SuccessEnvelope`):
 
-Page size rules:
+```json
+{
+  "data": [ /* items of type T */ ],
+  "pagination": { "page": 1, "pageSize": 20, "total": 137 }
+}
+```
+
+`total` is the total count after filtering (NOT after pagination).
+
+### 7.2 Sorting
+
+```text
+sort=-createdAt           # single field, descending
+sort=name,-updatedAt      # multi-field, applied left-to-right
+```
+
+Allowed sort fields per endpoint (CE v0.1):
+
+| Endpoint                                | Allowed `sort` fields                                            |
+|----------------------------------------|------------------------------------------------------------------|
+| `GET /api/admin/agents`                | `createdAt`, `lastSeenAt`, `name`                                |
+| `GET /api/admin/capsule-services`      | `createdAt`, `lastReportedAt`, `code`, `name`                    |
+| `GET /api/admin/commands`              | `createdAt`, `finishedAt`                                        |
+| `GET /api/admin/audit-events`          | `createdAt`                                                      |
+| `GET /api/admin/registration-tokens`   | `createdAt`, `expiresAt`                                         |
+
+Default sort if none supplied: `-createdAt` (newest first) for every list endpoint above.
+
+### 7.3 Filtering
+
+Filters are individual query params named after the field they filter:
+
+| Endpoint                                | Supported filters                                                |
+|----------------------------------------|------------------------------------------------------------------|
+| `GET /api/admin/agents`                | `status` (`AgentStatus`)                                         |
+| `GET /api/admin/capsule-services`      | `status` (`CapsuleServiceStatus`), `agentId`                     |
+| `GET /api/admin/commands`              | `status` (`CommandStatus`), `serviceId`, `agentId`               |
+| `GET /api/admin/audit-events`          | `actorType`, `targetType`, `targetId`, `result`, `from`, `to` (`from`/`to` apply to `createdAt`) |
+| `GET /api/admin/registration-tokens`   | `status` (`TokenStatus`)                                         |
+
+Multiple values for the same key (e.g. `status=PENDING&status=RUNNING`) are OR'ed; multiple keys are AND'ed. `from`/`to` are ISO-8601 timestamps and apply to the endpoint's natural time field (`occurredAt` for audit, `createdAt` otherwise).
+
+CE v0.1 does NOT implement free-text search (`q=`); that is reserved for EE.
+
+### 7.4 Page size limits
 
 ```text
 default pageSize = 20
-max pageSize = 100
+max pageSize     = 100
 ```
+
+Backend MUST clamp out-of-range values to `422 VALIDATION_FAILED` instead of silently coercing.
 
 ---
 
@@ -292,7 +333,7 @@ Request:
 ```json
 {
   "username": "admin",
-  "password": "change-me"
+  "password": "<example-only>"
 }
 ```
 
@@ -421,20 +462,20 @@ Response:
 ```json
 {
   "success": true,
-  "data": {
-    "items": [
-      {
-        "id": "agt_001",
-        "code": "local-dev-agent",
-        "name": "Local Development Agent",
-        "mode": "embedded",
-        "runtime": "nodejs",
-        "version": "0.1.0",
-        "status": "ONLINE",
-        "lastHeartbeatAt": "2026-04-30T10:21:00Z",
-        "registeredAt": "2026-04-30T10:00:00Z"
-      }
-    ],
+  "data": [
+    {
+      "id": "agt_001",
+      "code": "local-dev-agent",
+      "name": "Local Development Agent",
+      "mode": "embedded",
+      "runtime": "nodejs",
+      "status": "ONLINE",
+      "lastHeartbeatAt": "2026-04-30T10:21:00Z",
+      "createdAt": "2026-04-30T10:00:00Z",
+      "updatedAt": "2026-04-30T10:21:00Z"
+    }
+  ],
+  "pagination": {
     "page": 1,
     "pageSize": 20,
     "total": 1
@@ -448,7 +489,7 @@ Response:
 GET /api/admin/agents/{agentId}
 ```
 
-Response:
+Response (matches OpenAPI `AgentDetail`):
 
 ```json
 {
@@ -459,18 +500,18 @@ Response:
     "name": "Local Development Agent",
     "mode": "embedded",
     "runtime": "nodejs",
-    "version": "0.1.0",
     "status": "ONLINE",
-    "hostname": "dev-machine",
-    "os": "darwin",
-    "arch": "arm64",
     "lastHeartbeatAt": "2026-04-30T10:21:00Z",
+    "createdAt": "2026-04-30T10:00:00Z",
+    "updatedAt": "2026-04-30T10:21:00Z",
     "services": [
       {
         "id": "svc_001",
+        "agentId": "agt_001",
         "code": "demo-capsule-service",
         "name": "Demo Capsule Service",
-        "effectiveStatus": "ONLINE"
+        "status": "HEALTHY",
+        "healthStatus": "UP"
       }
     ]
   }
@@ -581,26 +622,23 @@ Response:
 ```json
 {
   "success": true,
-  "data": {
-    "items": [
-      {
-        "id": "svc_001",
-        "code": "demo-capsule-service",
-        "name": "Demo Capsule Service",
-        "version": "0.1.0",
-        "runtime": "nodejs",
-        "agentMode": "embedded",
-        "effectiveStatus": "ONLINE",
-        "reportedStatus": "ONLINE",
-        "healthStatus": "UP",
-        "lastReportedAt": "2026-04-30T10:21:00Z",
-        "agent": {
-          "id": "agt_001",
-          "code": "local-dev-agent",
-          "status": "ONLINE"
-        }
-      }
-    ],
+  "data": [
+    {
+      "id": "svc_001",
+      "agentId": "agt_001",
+      "code": "demo-capsule-service",
+      "name": "Demo Capsule Service",
+      "version": "0.1.0",
+      "runtime": "nodejs",
+      "status": "HEALTHY",
+      "healthStatus": "UP",
+      "lastReportedAt": "2026-04-30T10:21:00Z",
+      "lastHealthAt": "2026-04-30T10:21:00Z",
+      "createdAt": "2026-04-30T10:00:00Z",
+      "updatedAt": "2026-04-30T10:21:00Z"
+    }
+  ],
+  "pagination": {
     "page": 1,
     "pageSize": 20,
     "total": 1
@@ -614,30 +652,25 @@ Response:
 GET /api/admin/capsule-services/{serviceId}
 ```
 
-Response:
+Response (matches OpenAPI `CapsuleServiceDetail`):
 
 ```json
 {
   "success": true,
   "data": {
     "id": "svc_001",
+    "agentId": "agt_001",
     "code": "demo-capsule-service",
     "name": "Demo Capsule Service",
     "description": "A demo Capsule Service.",
     "version": "0.1.0",
     "runtime": "nodejs",
-    "agentMode": "embedded",
-    "reportedStatus": "ONLINE",
-    "effectiveStatus": "ONLINE",
+    "status": "HEALTHY",
     "healthStatus": "UP",
-    "freshness": "FRESH",
     "lastReportedAt": "2026-04-30T10:21:00Z",
-    "agent": {
-      "id": "agt_001",
-      "code": "local-dev-agent",
-      "status": "ONLINE",
-      "lastHeartbeatAt": "2026-04-30T10:21:00Z"
-    },
+    "lastHealthAt": "2026-04-30T10:21:00Z",
+    "createdAt": "2026-04-30T10:00:00Z",
+    "updatedAt": "2026-04-30T10:21:00Z",
     "manifest": {},
     "health": {},
     "configs": [],
@@ -682,25 +715,32 @@ These detail endpoints may be implemented separately or included in the main det
 POST /api/admin/capsule-services/{serviceId}/actions/{actionName}
 ```
 
-Request:
+Request (matches OpenAPI `CreateActionCommandRequest`):
 
 ```json
 {
   "payload": {
     "message": "hello"
-  },
-  "confirmed": true
+  }
 }
 ```
 
-Response:
+Response (matches OpenAPI `Command`):
 
 ```json
 {
   "success": true,
   "data": {
-    "commandId": "cmd_001",
-    "status": "PENDING"
+    "id": "cmd_001",
+    "agentId": "agt_001",
+    "serviceId": "svc_001",
+    "type": "ACTION",
+    "actionName": "echo",
+    "payload": { "message": "hello" },
+    "status": "PENDING",
+    "createdByUserId": "usr_001",
+    "createdAt": "2026-04-30T10:22:00Z",
+    "expiresAt": "2026-04-30T10:27:00Z"
   }
 }
 ```
@@ -742,25 +782,25 @@ from
 to
 ```
 
-Response:
+Response (matches OpenAPI `Command[]` + `Pagination`):
 
 ```json
 {
   "success": true,
-  "data": {
-    "items": [
-      {
-        "id": "cmd_001",
-        "serviceId": "svc_001",
-        "serviceCode": "demo-capsule-service",
-        "agentId": "agt_001",
-        "commandType": "ACTION",
-        "actionName": "echo",
-        "status": "SUCCESS",
-        "createdAt": "2026-04-30T10:22:00Z",
-        "finishedAt": "2026-04-30T10:22:02Z"
-      }
-    ],
+  "data": [
+    {
+      "id": "cmd_001",
+      "agentId": "agt_001",
+      "serviceId": "svc_001",
+      "type": "ACTION",
+      "actionName": "echo",
+      "status": "SUCCEEDED",
+      "createdAt": "2026-04-30T10:22:00Z",
+      "startedAt": "2026-04-30T10:22:01Z",
+      "completedAt": "2026-04-30T10:22:02Z"
+    }
+  ],
+  "pagination": {
     "page": 1,
     "pageSize": 20,
     "total": 1
@@ -774,40 +814,32 @@ Response:
 GET /api/admin/commands/{commandId}
 ```
 
-Response:
+Response (matches OpenAPI `CommandDetail`):
 
 ```json
 {
   "success": true,
   "data": {
     "id": "cmd_001",
-    "commandType": "ACTION",
+    "agentId": "agt_001",
+    "serviceId": "svc_001",
+    "type": "ACTION",
     "actionName": "echo",
-    "payload": {
-      "message": "hello"
-    },
-    "status": "SUCCESS",
-    "service": {
-      "id": "svc_001",
-      "code": "demo-capsule-service"
-    },
-    "agent": {
-      "id": "agt_001",
-      "code": "local-dev-agent"
-    },
-    "result": {
-      "status": "SUCCESS",
-      "outputText": "Action completed.",
-      "resultJson": {
-        "success": true,
-        "data": {
-          "message": "hello"
-        }
-      }
-    },
+    "payload": { "message": "hello" },
+    "status": "SUCCEEDED",
+    "createdByUserId": "usr_001",
     "createdAt": "2026-04-30T10:22:00Z",
-    "dispatchedAt": "2026-04-30T10:22:01Z",
-    "finishedAt": "2026-04-30T10:22:02Z"
+    "startedAt": "2026-04-30T10:22:01Z",
+    "completedAt": "2026-04-30T10:22:02Z",
+    "expiresAt": "2026-04-30T10:27:00Z",
+    "result": {
+      "id": "crs_001",
+      "commandId": "cmd_001",
+      "success": true,
+      "message": "Action completed.",
+      "data": { "message": "hello" },
+      "reportedAt": "2026-04-30T10:22:02Z"
+    }
   }
 }
 ```
@@ -828,34 +860,37 @@ Query parameters:
 page
 pageSize
 action
-actorType
+actorType       USER | AGENT | SYSTEM
 actorId
-resourceType
-resourceId
-result
+targetType
+targetId
+result          SUCCESS | FAILURE
 from
 to
 ```
 
-Response:
+Response (matches OpenAPI `AuditEvent[]` + `Pagination`):
 
 ```json
 {
   "success": true,
-  "data": {
-    "items": [
-      {
-        "id": "aud_001",
-        "actorType": "user",
-        "actorName": "admin",
-        "action": "command.created",
-        "resourceType": "Command",
-        "resourceId": "cmd_001",
-        "description": "User created command echo for demo-capsule-service.",
-        "result": "SUCCESS",
-        "createdAt": "2026-04-30T10:22:00Z"
-      }
-    ],
+  "data": [
+    {
+      "id": "aud_001",
+      "actorType": "USER",
+      "actorId": "usr_001",
+      "action": "command.created",
+      "targetType": "Command",
+      "targetId": "cmd_001",
+      "result": "SUCCESS",
+      "message": "User created command echo for demo-capsule-service.",
+      "metadata": {
+        "actionName": "echo"
+      },
+      "createdAt": "2026-04-30T10:22:00Z"
+    }
+  ],
+  "pagination": {
     "page": 1,
     "pageSize": 20,
     "total": 1
@@ -869,7 +904,7 @@ Response:
 GET /api/admin/audit-events/{auditEventId}
 ```
 
-Response includes sanitized `requestJson` and `resultJson`.
+Response includes sanitized `metadata`. Sensitive fields must be redacted before storage.
 
 ---
 
@@ -978,41 +1013,27 @@ POST /api/agents/{agentId}/heartbeat
 Authorization: Bearer <agentToken>
 ```
 
-Request:
+Request (matches OpenAPI `AgentHeartbeatRequest`):
 
 ```json
 {
-  "timestamp": "2026-04-30T10:21:00Z",
-  "agent": {
-    "version": "0.1.0",
-    "hostname": "dev-machine",
-    "os": "darwin",
-    "arch": "arm64"
-  },
-  "services": [
-    {
-      "code": "demo-capsule-service",
-      "reportedStatus": "ONLINE",
-      "health": {
-        "status": "UP",
-        "checkedAt": "2026-04-30T10:21:00Z",
-        "message": "Service is healthy.",
-        "details": {}
-      }
-    }
-  ]
+  "serviceId": "svc_001",
+  "health": {
+    "status": "UP",
+    "message": "Service is healthy.",
+    "details": {}
+  }
 }
 ```
 
-Response:
+Response (matches OpenAPI `AgentHeartbeatResponse`):
 
 ```json
 {
   "success": true,
   "data": {
-    "accepted": true,
-    "serverTime": "2026-04-30T10:21:01Z",
-    "nextHeartbeatIntervalSeconds": 30
+    "heartbeatIntervalSeconds": 30,
+    "commandPollIntervalSeconds": 5
   }
 }
 ```
@@ -1024,12 +1045,16 @@ POST /api/agents/{agentId}/services/report
 Authorization: Bearer <agentToken>
 ```
 
-Request:
+Request (matches OpenAPI `ServiceReportRequest`):
 
 ```json
 {
   "services": [
     {
+      "code": "demo-capsule-service",
+      "name": "Demo Capsule Service",
+      "version": "0.1.0",
+      "runtime": "nodejs",
       "manifest": {
         "kind": "CapsuleService",
         "schemaVersion": "1.0",
@@ -1038,44 +1063,47 @@ Request:
         "version": "0.1.0",
         "runtime": "nodejs",
         "agentMode": "embedded",
-        "capabilities": ["demo.echo"],
-        "actions": [
-          {
-            "name": "echo",
-            "label": "Echo",
-            "dangerLevel": "LOW",
-            "enabled": true
-          }
-        ],
-        "configs": [
-          {
-            "key": "demo.message",
-            "label": "Demo Message",
-            "type": "string",
-            "defaultValue": "hello capsule",
-            "editable": true,
-            "sensitive": false
-          }
-        ]
+        "capabilities": ["demo.echo"]
       },
-      "reportedStatus": "ONLINE"
+      "health": {
+        "status": "UP",
+        "message": "Service is healthy."
+      },
+      "configs": [
+        {
+          "key": "demo.message",
+          "label": "Demo Message",
+          "type": "string",
+          "editable": false,
+          "sensitive": false,
+          "valuePreview": "hello capsule",
+          "source": "env"
+        }
+      ],
+      "actions": [
+        {
+          "name": "echo",
+          "label": "Echo",
+          "dangerLevel": "LOW",
+          "requiresConfirmation": false
+        }
+      ]
     }
   ]
 }
 ```
 
-Response:
+Response (matches OpenAPI `ServiceReportResponse`):
 
 ```json
 {
   "success": true,
   "data": {
-    "accepted": true,
     "services": [
       {
         "code": "demo-capsule-service",
         "serviceId": "svc_001",
-        "status": "ACCEPTED"
+        "accepted": true
       }
     ]
   }
@@ -1094,22 +1122,20 @@ Response:
 ```json
 {
   "success": true,
-  "data": {
-    "commands": [
-      {
-        "commandId": "cmd_001",
-        "serviceId": "svc_001",
-        "serviceCode": "demo-capsule-service",
-        "commandType": "ACTION",
-        "actionName": "echo",
-        "payload": {
-          "message": "hello"
-        },
-        "issuedAt": "2026-04-30T10:22:00Z",
-        "expiresAt": "2026-04-30T10:27:00Z"
-      }
-    ]
-  }
+  "data": [
+    {
+      "id": "cmd_001",
+      "agentId": "agt_001",
+      "serviceId": "svc_001",
+      "type": "ACTION",
+      "actionName": "echo",
+      "payload": { "message": "hello" },
+      "status": "RUNNING",
+      "createdAt": "2026-04-30T10:22:00Z",
+      "startedAt": "2026-04-30T10:22:01Z",
+      "expiresAt": "2026-04-30T10:27:00Z"
+    }
+  ]
 }
 ```
 
@@ -1120,20 +1146,15 @@ POST /api/agents/{agentId}/commands/{commandId}/result
 Authorization: Bearer <agentToken>
 ```
 
-Request:
+Request (matches OpenAPI `ReportCommandResultRequest`):
 
 ```json
 {
-  "status": "SUCCESS",
-  "outputText": "Action completed.",
-  "resultJson": {
-    "success": true,
-    "data": {
-      "message": "hello"
-    }
-  },
-  "startedAt": "2026-04-30T10:22:01Z",
-  "finishedAt": "2026-04-30T10:22:02Z"
+  "success": true,
+  "message": "Action completed.",
+  "data": {
+    "message": "hello"
+  }
 }
 ```
 
@@ -1141,30 +1162,24 @@ Failed result:
 
 ```json
 {
-  "status": "FAILED",
-  "outputText": "Action failed.",
-  "errorMessage": "Action not found: refreshSession",
-  "resultJson": {
-    "success": false,
-    "error": {
-      "code": "ACTION_NOT_FOUND",
-      "message": "Action not found: refreshSession"
-    }
-  },
-  "startedAt": "2026-04-30T10:22:01Z",
-  "finishedAt": "2026-04-30T10:22:02Z"
+  "success": false,
+  "message": "Action not found: refreshSession",
+  "error": {
+    "code": "ACTION_NOT_FOUND",
+    "message": "Action not found: refreshSession"
+  }
 }
 ```
 
-Response:
+Response (matches OpenAPI `Command` after transition):
 
 ```json
 {
   "success": true,
   "data": {
-    "accepted": true,
-    "commandId": "cmd_001",
-    "status": "SUCCESS"
+    "id": "cmd_001",
+    "status": "SUCCEEDED",
+    "completedAt": "2026-04-30T10:22:02Z"
   }
 }
 ```
@@ -1172,6 +1187,8 @@ Response:
 ---
 
 ## 19. Error Codes
+
+The canonical, exhaustive CE v0.1 error code list lives in `09-contracts/errors.md`. The codes below are illustrative.
 
 Recommended common error codes:
 
