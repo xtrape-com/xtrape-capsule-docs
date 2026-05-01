@@ -1,0 +1,910 @@
+<!-- 
+================================================================================
+中文翻译版本 / Chinese Translation Version
+================================================================================
+原始文件 / Original File: 10-ce-security-model.md
+翻译状态 / Translation Status: 已翻译 / Translated
+生成时间 / Generated: 2026-05-01 09:28:53
+================================================================================
+注意 / Notes:
+- 技术术语如 Capsule Service、Agent、Opstage 等保留英文或采用中英对照
+- 代码块中的内容不翻译
+- 文件路径和 URL 不翻译
+- 保持原有的 Markdown 格式结构
+================================================================================
+-->
+
+# CE（社区版） 安全 Model
+
+- Status: 实现 Target
+- Edition: CE（社区版）
+- Priority: Current
+- Audience: architects, backend developers, frontend developers, agent SDK developers, security reviewers, AI coding agents
+
+> **Precedence rule**: When this document and `08-decisions/0004-security-defaults.md` or `09-contracts/openapi/opstage-ce-v0.1.yaml` disagree, the ADRs and OpenAPI contract win for CE（社区版） v0.1.
+
+This document 定义 the security model for **Opstage（运维舞台） CE（社区版） v0.1**.
+
+CE（社区版） security should be practical, lightweight, and safe by default. It should protect the core governance loop without introducing enterprise security complexity that belongs to EE（企业版） or Cloud（云版）.
+
+---
+
+## 1. 安全 Goal
+
+The goal of CE（社区版） v0.1 security is to protect the minimum Capsule governance loop:
+
+```text
+Admin user
+    ↓ authenticated Admin API
+Opstage Backend
+    ↑ authenticated Agent API
+Registered Agent
+    ↔ Capsule Service providers and handlers
+Capsule Service
+```
+
+CE（社区版） v0.1 must ensure that:
+
+- Admin UI is not publicly usable without authentication;
+- Agent（代理） APIs require valid Agent（代理） tokens after registration;
+- registration is controlled by registration tokens;
+- raw tokens are not stored;
+- sensitive values are not casually exposed;
+- only predefined actions can be executed;
+- important operations are audited;
+- stale or offline states are not misrepresented as healthy.
+
+---
+
+## 2. 安全 Principles
+
+CE（社区版） v0.1 should follow these principles:
+
+1. Secure the core loop first.
+2. Keep security understandable for self-hosted users.
+3. Store hashes, not raw tokens.
+4. Avoid raw secrets in shared payloads.
+5. Use explicit Agent（代理） registration.
+6. Trust only registered and authorized Agents.
+7. Allow only predefined actions.
+8. Do not provide arbitrary shell execution.
+9. Audit important operations.
+10. Prefer safe defaults over hidden convenience.
+11. Do not implement heavy EE（企业版）/Cloud（云版） security features in CE（社区版） v0.1.
+
+---
+
+## 3. Trust Boundaries
+
+CE（社区版） v0.1 has four primary trust zones:
+
+```text
+Browser UI
+    ↓
+Opstage Backend
+    ↓
+SQLite Database
+
+Registered Agent
+    ↓
+Capsule Service process
+```
+
+### 3.1 Browser UI
+
+The Browser UI is not trusted by itself.
+
+All important actions must be validated by Backend.
+
+UI must not:
+
+- bypass Backend validation;
+- call Agents directly;
+- expose raw secrets;
+- execute arbitrary commands.
+
+### 3.2 Opstage（运维舞台） Backend
+
+Backend is the primary trust anchor in CE（社区版）.
+
+Backend is responsible for:
+
+- authenticating users;
+- authenticating Agents;
+- validating registration tokens;
+- issuing Agent（代理） tokens;
+- validating action requests;
+- creating Commands;
+- storing audit events;
+- masking sensitive values;
+- rejecting disabled or revoked Agents.
+
+### 3.3 SQLite Database
+
+SQLite stores CE（社区版） state.
+
+It must not store:
+
+- raw user passwords;
+- raw registration tokens;
+- raw Agent（代理） tokens;
+- raw secrets when avoidable.
+
+### 3.4 Registered Agent（代理）
+
+A registered Agent（代理） is trusted only within its granted scope.
+
+CE（社区版） v0.1 may keep Agent（代理） permissions simple, but the Backend must still validate:
+
+- Agent（代理） token;
+- Agent（代理） status;
+- Agent（代理） ownership of Commands;
+- service association.
+
+### 3.5 Capsule Service（胶囊服务）
+
+Capsule Service（胶囊服务） owns business logic and local secrets.
+
+Opstage（运维舞台） should govern it through the Agent（代理）, not take over its internal runtime.
+
+---
+
+## 4. 认证 Model
+
+CE（社区版） v0.1 has two authentication models:
+
+```text
+Admin user authentication
+Agent authentication
+```
+
+### 4.1 Admin user authentication
+
+Admin users access Opstage（运维舞台） UI and Admin APIs.
+
+Recommended CE（社区版） v0.1 approach:
+
+```text
+username + password
+HTTP-only session cookie
+```
+
+JWT bearer token is acceptable if implementation is simpler, but browser storage must be handled carefully.
+
+### 4.2 Password storage
+
+Passwords must be stored as hashes.
+
+Recommended hashing:
+
+```text
+argon2
+```
+
+Fallback if packaging is difficult:
+
+```text
+bcrypt
+```
+
+Never store raw passwords.
+
+### 4.3 Failed login behavior
+
+Failed login should:
+
+- return a generic error;
+- not reveal whether username or password was wrong;
+- create an audit event;
+- avoid logging raw password.
+
+### 4.4 Session security
+
+If session cookies are used:
+
+- use HTTP-only cookies;
+- use secure cookies when HTTPS is enabled;
+- use SameSite protection;
+- use a strong session secret;
+- document `OPSTAGE_SESSION_SECRET`.
+
+---
+
+## 5. Agent（代理） Registration 安全
+
+Agent（代理） registration is the trust entry point for Agents.
+
+### 5.1 Registration token
+
+A registration token is used for first enrollment.
+
+Rules:
+
+- must be generated by Backend or setup flow;
+- should be one-time use or short-lived;
+- must be stored as hash;
+- should be shown only once;
+- should be revocable;
+- must not be logged.
+
+Recommended token prefix:
+
+```text
+opstage_reg_
+```
+
+### 5.2 Agent（代理） token
+
+An Agent（代理） token is used after registration.
+
+Rules:
+
+- issued only after valid registration;
+- must be stored as hash in Backend;
+- should be stored locally by Agent（代理） SDK using a token store;
+- must not be logged;
+- must be revocable;
+- must be sent using 授权 header.
+
+Recommended token prefix:
+
+```text
+opstage_agent_
+```
+
+### 5.3 Registration flow
+
+```text
+Admin creates registration token
+    ↓
+Agent starts with registration token
+    ↓
+Agent calls registration API
+    ↓
+Backend validates token hash and status
+    ↓
+Backend creates or updates Agent
+    ↓
+Backend issues Agent token
+    ↓
+Agent stores Agent token locally
+```
+
+### 5.4 Registration token reuse
+
+One-time registration tokens should become `USED` after successful registration.
+
+If a used token is submitted again, Backend should reject it.
+
+---
+
+## 6. Agent（代理） API 授权
+
+After registration, all Agent（代理） APIs require:
+
+```http
+Authorization: Bearer <agentToken>
+```
+
+Backend must validate:
+
+- token exists by hash;
+- token status is active;
+- token is not expired;
+- token is associated with the Agent（代理）;
+- Agent（代理） is not disabled;
+- Agent（代理） is not revoked.
+
+### 6.1 Agent（代理） endpoint ownership
+
+An Agent（代理） must only access its own Agent（代理） endpoints.
+
+Example:
+
+```http
+GET /api/agents/{agentId}/commands
+```
+
+The `{agentId}` in path must match the Agent（代理） authenticated by token.
+
+### 6.2 Command ownership
+
+An Agent（代理） may only poll and report results for Commands assigned to itself.
+
+Backend must reject result reports where:
+
+```text
+command.agentId != authenticatedAgent.id
+```
+
+### 6.3 Service association
+
+For CE（社区版） v0.1, an Agent（代理） may report services associated with itself.
+
+Future EE（企业版）/Cloud（云版） may add explicit permission policies.
+
+---
+
+## 7. Token Storage Rules
+
+### 7.1 Backend token storage
+
+Backend must store only token hashes.
+
+Store:
+
+```text
+tokenHash
+```
+
+Do not store:
+
+```text
+registrationToken
+agentToken
+```
+
+### 7.2 Agent（代理） token local storage
+
+Agent（代理） SDK may store the Agent（代理） token in a local file controlled by the Capsule Service（胶囊服务） owner.
+
+Recommended behavior:
+
+- configurable token file path;
+- restrictive file permissions where possible;
+- no token printed in logs;
+- clear token when Backend reports invalid or revoked token.
+
+### 7.3 Token display
+
+Registration tokens and Agent（代理） tokens should be shown only once when generated or issued.
+
+Admin UI should not display raw token after creation.
+
+---
+
+## 8. 授权 Model
+
+CE（社区版） v0.1 authorization is intentionally simple.
+
+### 8.1 Admin authorization
+
+CE（社区版） v0.1 may support only one effective admin role:
+
+```text
+owner
+```
+
+Reserved roles:
+
+```text
+admin
+viewer
+```
+
+Full RBAC is out of scope.
+
+### 8.2 Agent（代理） authorization
+
+Agent（代理） authorization is token-based.
+
+Agent（代理） may:
+
+- heartbeat for itself;
+- report its services;
+- poll its Commands;
+- report results for its Commands.
+
+Agent（代理） may not:
+
+- access other Agents' Commands;
+- call Admin APIs;
+- create Commands directly;
+- modify user accounts;
+- bypass Backend validation.
+
+### 8.3 Future authorization
+
+Future EE（企业版）/Cloud（云版） may add:
+
+- RBAC;
+- service-level permissions;
+- action-level permissions;
+- approval workflows;
+- tenant policies;
+- Agent（代理） permission scopes.
+
+CE（社区版） v0.1 should not implement a full policy engine.
+
+---
+
+## 9. Sensitive Data Model
+
+Sensitive data 包括:
+
+```text
+password
+token
+accessToken
+refreshToken
+cookie
+apiKey
+privateKey
+credential
+secret
+sessionSecret
+oauthCode
+```
+
+### 9.1 General rule
+
+Sensitive data should not be stored or displayed unless strictly necessary.
+
+When a sensitive value must be referenced, use:
+
+```text
+secretRef
+```
+
+Example:
+
+```text
+agent-local://agent-001/secrets/chatgpt/account-001
+```
+
+### 9.2 Manifest
+
+Manifest must not include raw secrets.
+
+### 9.3 Config
+
+Config values marked as sensitive must be masked or represented as `secretRef`.
+
+### 9.4 Health
+
+Health details must not include raw secrets or private session data.
+
+### 9.5 Command payload and result
+
+Command payloads and results should not include raw secrets.
+
+If a command needs a secret, pass a `secretRef`.
+
+### 9.6 Audit events
+
+Audit events must sanitize request and result JSON.
+
+---
+
+## 10. SecretRef Model
+
+CE（社区版） v0.1 does not need a full secret store, but it should recognize `secretRef`.
+
+Recommended secretRef examples:
+
+```text
+agent-local://agent-001/secrets/chatgpt/account-001
+opstage-secret://workspace/key
+vault://secret/path
+```
+
+CE（社区版） v0.1 behavior:
+
+- display secretRef safely;
+- do not resolve secretRef;
+- do not fetch raw secret;
+- preserve secretRef in metadata;
+- use secretRef as future extension point.
+
+---
+
+## 11. Action 安全
+
+Actions are the main operational interface.
+
+### 11.1 Only predefined actions
+
+CE（社区版） v0.1 must only allow actions declared by the Capsule Service（胶囊服务） and reported through Agent（代理）.
+
+### 11.2 No arbitrary shell execution
+
+CE（社区版） v0.1 must not provide:
+
+```text
+shell terminal
+runShell action
+exec endpoint
+custom script execution UI
+```
+
+Bad action names:
+
+```text
+runShell
+exec
+bash
+customCommand
+```
+
+### 11.3 Action validation
+
+Before creating a Command, Backend must validate:
+
+- user is authenticated;
+- service exists;
+- service is manageable;
+- Agent（代理） is not disabled or revoked;
+- action exists;
+- action is enabled;
+- payload is acceptable if schema exists;
+- dangerous action confirmation is present if required.
+
+### 11.4 Dangerous actions
+
+Danger levels:
+
+```text
+LOW
+MEDIUM
+HIGH
+CRITICAL
+```
+
+UI should require confirmation for:
+
+```text
+HIGH
+CRITICAL
+```
+
+CE（社区版） v0.1 demo actions should be `LOW` risk.
+
+---
+
+## 12. Command 安全
+
+Commands must be controlled and auditable.
+
+Rules:
+
+- Commands are created by Backend, not UI directly to Agent（代理）;
+- Agent（代理） polls only assigned Commands;
+- Agent（代理） reports only assigned CommandResults;
+- expired Commands should not be dispatched;
+- Command payloads should avoid raw secrets;
+- final results should be sanitized;
+- important Command state changes should be audited.
+
+CE（社区版） v0.1 should support only:
+
+```text
+ACTION
+```
+
+as Command type.
+
+---
+
+## 13. Audit 安全
+
+AuditEvents provide traceability.
+
+CE（社区版） v0.1 must audit:
+
+- successful login;
+- failed login;
+- Agent（代理） registration;
+- first service report or material service report;
+- action request;
+- Command creation;
+- Command success;
+- Command failure.
+
+### 13.1 Audit sanitization
+
+Audit request/result JSON must not contain raw secrets.
+
+Recommended mask:
+
+```text
+***REDACTED***
+```
+
+### 13.2 Avoid noisy audit
+
+Do not audit every heartbeat.
+
+Do not use AuditEvent as general log storage.
+
+---
+
+## 14. UI 安全
+
+CE（社区版） UI must:
+
+- require login;
+- not store raw passwords;
+- not display raw tokens after creation;
+- mask sensitive config values;
+- show secretRef instead of raw secret;
+- not expose shell terminal;
+- confirm dangerous actions;
+- show stale state clearly;
+- avoid exposing raw stack traces.
+
+### 14.1 Registration token UI
+
+When creating a registration token, UI should:
+
+- display token once;
+- provide copy button;
+- warn that it cannot be viewed again;
+- never show token in list after creation.
+
+---
+
+## 15. Backend 安全
+
+Backend must:
+
+- validate all Admin API requests;
+- validate all Agent（代理） API requests;
+- hash passwords;
+- hash tokens;
+- sanitize audit payloads;
+- reject revoked tokens;
+- reject disabled Agents;
+- enforce command ownership;
+- avoid logging secrets;
+- return structured errors without leaking internals;
+- keep security-sensitive defaults documented.
+
+---
+
+## 16. Agent（代理） SDK 安全
+
+Agent（代理） SDK must:
+
+- not log tokens;
+- not log raw secrets;
+- store Agent（代理） token only through configured token store;
+- use Agent（代理） token in 授权 header;
+- clear token when invalid or revoked;
+- not include shell execution action;
+- execute only registered action handlers;
+- sanitize error details where practical;
+- continue service runtime when Backend is unavailable.
+
+---
+
+## 17. 部署 安全
+
+CE（社区版） deployment should follow these rules:
+
+- do not ship with fixed default admin password;
+- require admin password setup or environment variable;
+- require strong session secret or generate one locally;
+- mount SQLite data directory securely;
+- do not expose SQLite file through web server;
+- recommend HTTPS behind reverse proxy for production-like use;
+- avoid exposing unnecessary ports;
+- log to stdout/stderr without secrets.
+
+### 17.1 HTTPS
+
+Local development may use HTTP.
+
+生产-like self-hosted deployments should use HTTPS through a reverse proxy.
+
+CE（社区版） v0.1 does not need built-in TLS certificate management.
+
+---
+
+## 18. Error Handling 安全
+
+API errors should be structured but not overly revealing.
+
+Good error:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "AGENT_TOKEN_INVALID",
+    "message": "Agent token is invalid."
+  }
+}
+```
+
+Bad error:
+
+```json
+{
+  "stack": "...",
+  "sql": "select ...",
+  "tokenHash": "..."
+}
+```
+
+UI should show friendly error messages and avoid raw stack traces.
+
+---
+
+## 19. 日志 安全
+
+Logs must not include:
+
+- raw passwords;
+- registration tokens;
+- Agent（代理） tokens;
+- cookies;
+- API keys;
+- private keys;
+- OAuth codes;
+- raw credentials.
+
+Logs may include:
+
+- Agent（代理） ID;
+- service code;
+- command ID;
+- audit event ID;
+- status values;
+- sanitized error codes.
+
+---
+
+## 20. CE（社区版） v0.1 Required 安全 Features
+
+CE（社区版） v0.1 must implement:
+
+- local admin login;
+- password hash storage;
+- session or JWT authentication;
+- registration token model;
+- Agent（代理） token model;
+- token hash storage;
+- Agent（代理） API bearer authentication;
+- Agent（代理） ownership validation;
+- Agent（代理） disabled/revoked checks;
+- action validation;
+- no arbitrary shell execution;
+- sensitive value masking;
+- basic audit events;
+- audit payload sanitization;
+- structured errors.
+
+---
+
+## 21. Explicitly Out of Scope for CE（社区版） v0.1
+
+CE（社区版） v0.1 does not need:
+
+- SSO;
+- OIDC;
+- LDAP;
+- SAML;
+- enterprise RBAC;
+- policy engine;
+- multi-factor authentication;
+- mTLS;
+- device attestation;
+- full secret vault;
+- managed key rotation;
+- audit immutability;
+- SIEM integration;
+- compliance reports;
+- tenant isolation;
+- Cloud（云版） security gateway.
+
+These may be future EE（企业版） or Cloud（云版） features.
+
+---
+
+## 22. Threats and Mitigations
+
+### 22.1 Unauthorized UI access
+
+Threat:
+
+- attacker accesses UI without login.
+
+Mitigation:
+
+- require admin authentication for Admin APIs and UI.
+
+### 22.2 Registration token leakage
+
+Threat:
+
+- leaked registration token allows unwanted Agent（代理） enrollment.
+
+Mitigation:
+
+- show token once;
+- make token short-lived or one-time;
+- allow revocation;
+- audit Agent（代理） registration.
+
+### 22.3 Agent（代理） token leakage
+
+Threat:
+
+- leaked Agent（代理） token allows fake Agent（代理） communication.
+
+Mitigation:
+
+- store token hash in Backend;
+- avoid logging token;
+- allow token revocation;
+- validate Agent（代理） ownership.
+
+### 22.4 Arbitrary command execution
+
+Threat:
+
+- UI or API becomes remote shell.
+
+Mitigation:
+
+- no shell API;
+- only predefined actions;
+- action registry in Agent（代理） SDK;
+- Backend validates actions.
+
+### 22.5 Secret leakage in audit or logs
+
+Threat:
+
+- passwords, cookies, or tokens appear in audit/logs.
+
+Mitigation:
+
+- sanitize payloads;
+- mask sensitive fields;
+- use secretRef;
+- logging rules.
+
+### 22.6 Stale service shown as online
+
+Threat:
+
+- operator trusts stale status and makes wrong decision.
+
+Mitigation:
+
+- calculate effective status;
+- show stale state clearly;
+- combine Agent（代理） heartbeat and health freshness.
+
+---
+
+## 23. 安全 Acceptance Criteria
+
+CE（社区版） v0.1 security is acceptable when:
+
+- UI requires login;
+- password is stored as hash;
+- failed login is audited;
+- registration token is stored as hash;
+- registration token is shown only once;
+- Agent（代理） token is stored as hash;
+- Agent（代理） APIs reject invalid token;
+- Agent（代理） APIs reject revoked or disabled Agent（代理）;
+- Agent（代理） cannot access another Agent（代理）'s Commands;
+- action execution requires predefined action;
+- no shell execution endpoint exists;
+- sensitive config values are masked;
+- audit events do not contain raw secrets;
+- logs do not contain raw tokens;
+- stale service status is visible.
+
+---
+
+## 24. Summary
+
+CE（社区版） security should protect the essential governance model without turning CE（社区版） into an enterprise security suite.
+
+The most important security rule is:
+
+> Only authenticated users and registered Agents can participate, and all operations must remain predefined, auditable, and secret-safe.
