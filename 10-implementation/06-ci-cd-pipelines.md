@@ -5,39 +5,89 @@
 - Priority: Current
 - Audience: DevOps engineers, backend developers, frontend developers, agent SDK developers, AI coding agents
 
-> **Precedence rule**: When this document and `08-decisions/` ADRs disagree, the ADRs win for CE v0.1.
+> **Precedence rule**: When this document and `08-decisions/` ADRs disagree, the ADRs win for CE v0.1. Repository naming and the four-repo split are pinned by [ADR 0008](../08-decisions/0008-naming-and-repositories.md); the contracts sync workflow is pinned by [ADR 0009](../08-decisions/0009-contracts-spec-and-bindings.md).
 
 ## 1. Goal
 
-Define the CI/CD pipeline for Opstage CE v0.1 on GitHub Actions. Pipelines should:
+Define the GitHub Actions CI/CD layout for the **four CE v0.1 repositories**:
+
+```text
+xtrape-capsule-docs
+xtrape-capsule-contracts-node
+xtrape-capsule-agent-node
+xtrape-capsule-ce
+```
+
+Each repo has its own `.github/workflows/` directory. Pipelines must:
 
 - run on every PR;
 - block merge on test/lint/typecheck/contract failures;
-- publish Docker images on tag pushes;
-- never publish a release with failing checks.
+- publish artifacts (npm packages or Docker images) on tag pushes;
+- never publish a release with failing checks;
+- enforce reverse-dependency prohibition (ADR 0008).
 
 CE v0.1 targets GitHub Actions specifically because it is the de-facto standard for open-source repos. Mirroring to GitLab CI / CircleCI is out of scope.
 
-## 2. Pipeline Stages
+## 2. Per-Repository Pipeline Summary
 
-```text
-1. install                pnpm install --frozen-lockfile
-2. lint                   pnpm -r lint
-3. typecheck              pnpm -r typecheck
-4. contracts              validate OpenAPI + Prisma + ID/token unit tests
-5. unit                   pnpm -r test --reporter=junit
-6. integration            backend + agent contract tests against temp SQLite
-7. build                  pnpm -r build
-8. docker (optional)      build + push opstage image (only on tag push)
+| Repo | What it builds | Where it publishes | Triggers |
+|---|---|---|---|
+| `xtrape-capsule-docs` | Markdown lint, JSON SSOT validity, render-parity check, OpenAPI lint | n/a (docs only) | PR + push to `main` |
+| `xtrape-capsule-contracts-node` | TypeScript bindings (npm) | `@xtrape/capsule-contracts-node` on npm with provenance | PR + tag `vX.Y.Z` (changesets) |
+| `xtrape-capsule-agent-node` | Node Agent SDK (npm) | `@xtrape/capsule-agent-node` on npm with provenance | PR + tag `vX.Y.Z` (changesets) |
+| `xtrape-capsule-ce` | Backend, UI, demo, Docker images | `ghcr.io/xtrape/opstage-ce:vX.Y.Z` and `ghcr.io/xtrape/demo-capsule-service:vX.Y.Z` | PR + tag `vX.Y.Z` |
+
+## 3. Required Workflows per Repository
+
+Pseudo-content is provided; teams may iterate but the surface MUST stay equivalent.
+
+### 3.1 `xtrape-capsule-docs/.github/workflows/`
+
+#### `ci.yml`
+
+```yaml
+name: ci
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  validate-spec:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: OpenAPI YAML validity
+        run: ruby -e "require 'yaml'; YAML.load_file('09-contracts/openapi/opstage-ce-v0.1.yaml')"
+      - name: OpenAPI lint (Redocly, zero warnings)
+        run: pnpm --package=@redocly/cli dlx redocly lint 09-contracts/openapi/opstage-ce-v0.1.yaml --config 09-contracts/openapi/redocly.yaml
+      - name: Prisma schema validity
+        run: pnpm dlx prisma@latest validate --schema 09-contracts/prisma/schema.prisma
+      - name: JSON SSOT validity
+        run: |
+          for f in 09-contracts/errors.json 09-contracts/enums/*.json 09-contracts/examples/*.json; do
+            node -e "JSON.parse(require('fs').readFileSync('$f','utf8'))"
+          done
+      - name: errors.md render parity
+        run: pnpm tsx 09-contracts/tools/render-errors.ts --check
+      - name: Markdown lint
+        run: pnpm dlx markdownlint-cli2 "**/*.md" "#node_modules"
 ```
 
-Stages 1-7 run on every PR; stage 8 only runs on tags matching `v*.*.*`.
+This is the upstream CI. When this passes on `main`, every binding repo's `upstream-bump.yml` (below) becomes free to consume the new commit SHA.
 
-## 3. Required GitHub Actions Workflows
+### 3.2 `xtrape-capsule-contracts-node/.github/workflows/`
 
-The implementation MUST add at least the following workflow files. Pseudo-content is provided; teams may iterate but the surface MUST stay equivalent.
-
-### 3.1 `.github/workflows/ci.yml`
+#### `ci.yml`
 
 ```yaml
 name: ci
@@ -54,12 +104,169 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
         with:
-          version: 9
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - name: Sync-spec drift check
+        run: pnpm tsx tools/sync-spec.ts --check
+      - name: Codegen drift check
+        run: pnpm tsx tools/codegen.ts --check
+      - run: pnpm test                                  # includes conformance.spec.ts against spec/examples
+      - run: pnpm build
+      - name: Reverse-dep check
+        run: pnpm tsx tools/check-no-reverse-deps.ts    # forbids @xtrape/opstage-* and @xtrape/capsule-agent-*
+```
+
+#### `upstream-bump.yml`
+
+```yaml
+name: upstream-bump
+on:
+  schedule:
+    - cron: '0 6 * * *'           # daily 06:00 UTC
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone xtrape-capsule-docs
+        run: git clone --depth=1 https://github.com/xtrape/xtrape-capsule-docs.git ../docs
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Sync spec from docs HEAD
+        run: pnpm tsx tools/sync-spec.ts --from ../docs/09-contracts
+      - name: Regenerate bindings
+        run: pnpm tsx tools/codegen.ts
+      - name: Run conformance
+        run: pnpm test
+      - name: Open PR if changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/spec-bump
+          title: "chore(spec): bump to xtrape-capsule-docs@${{ github.sha }}"
+          body: "Automated nightly sync from xtrape-capsule-docs."
+          labels: spec-bump,automated
+```
+
+If conformance fails, this job exits non-zero **without** opening a PR; instead a separate workflow opens an **issue** with the failure log so a human can decide whether the spec or the binding needs to change.
+
+#### `release.yml`
+
+```yaml
+name: release
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+  id-token: write             # for npm provenance
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Create release PR or publish via Changesets
+        uses: changesets/action@v1
+        with:
+          publish: pnpm changeset publish --provenance
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+`changesets` drives semver bumps; `--provenance` attaches npm provenance per [SLSA](https://slsa.dev/) v1.
+
+### 3.3 `xtrape-capsule-agent-node/.github/workflows/`
+
+Same shape as `xtrape-capsule-contracts-node` minus the `upstream-bump.yml`. Instead of mirroring `09-contracts/`, it relies on Renovate to bump `@xtrape/capsule-contracts-node` automatically.
+
+#### `ci.yml`
+
+```yaml
+name: ci
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test                                  # unit + conformance against installed @xtrape/capsule-contracts-node
+      - run: pnpm build
+      - name: Reverse-dep check
+        run: pnpm tsx tools/check-no-reverse-deps.ts    # forbids @xtrape/opstage-*
+      - name: Lockfile link-check
+        run: pnpm tsx tools/check-no-link-in-lockfile.ts
+```
+
+#### `release.yml`
+
+Same as `xtrape-capsule-contracts-node/release.yml`, publishing `@xtrape/capsule-agent-node`.
+
+### 3.4 `xtrape-capsule-ce/.github/workflows/`
+
+#### `ci.yml`
+
+```yaml
+name: ci
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -67,10 +274,14 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm -r lint
       - run: pnpm -r typecheck
-      - run: pnpm --filter @xtrape/capsule-contracts run check
-      - run: pnpm --filter @xtrape/capsule-db run validate
-      - run: pnpm -r test -- --run --reporter=verbose
+      - name: DB schema parity (must match xtrape-capsule-docs/09-contracts/prisma/schema.prisma)
+        run: pnpm --filter @xtrape/capsule-db run check-schema-parity
+      - run: pnpm -r test --reporter=verbose
       - run: pnpm -r build
+      - name: Reverse-dep check
+        run: pnpm tsx scripts/check-no-reverse-deps.ts
+      - name: Lockfile link-check
+        run: pnpm tsx scripts/check-no-link-in-lockfile.ts
       - name: Upload coverage
         if: always()
         uses: actions/upload-artifact@v4
@@ -80,42 +291,7 @@ jobs:
           if-no-files-found: ignore
 ```
 
-### 3.2 `.github/workflows/contracts.yml`
-
-```yaml
-name: contracts
-on:
-  pull_request:
-    paths:
-      - 'xtrape-capsule-docs/09-contracts/**'
-      - 'packages/contracts/**'
-      - 'packages/db/**'
-permissions:
-  contents: read
-jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Validate OpenAPI
-        run: pnpm --package=@redocly/cli dlx redocly lint xtrape-capsule-docs/09-contracts/openapi/opstage-ce-v0.1.yaml
-      - name: Validate Prisma schema
-        run: pnpm dlx prisma@latest validate --schema xtrape-capsule-docs/09-contracts/prisma/schema.prisma
-      - name: Contract drift check
-        run: pnpm --filter @xtrape/capsule-contracts run drift-check
-```
-
-`drift-check` is a script in `packages/contracts` that compares generated TypeScript types against the OpenAPI YAML and exits non-zero on diff (recommended via `openapi-typescript` + `git diff --exit-code`).
-
-### 3.3 `.github/workflows/release.yml`
+#### `release.yml`
 
 ```yaml
 name: release
@@ -125,6 +301,7 @@ on:
 permissions:
   contents: write
   packages: write
+  id-token: write
 jobs:
   docker:
     runs-on: ubuntu-latest
@@ -137,18 +314,30 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push opstage image
+      - name: Build and push opstage-ce image
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: deploy/docker/opstage.Dockerfile
+          file: deploy/docker/opstage-ce.Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           provenance: true
           sbom: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/opstage:${{ github.ref_name }}
-            ghcr.io/${{ github.repository_owner }}/opstage:latest
+            ghcr.io/${{ github.repository_owner }}/opstage-ce:${{ github.ref_name }}
+            ghcr.io/${{ github.repository_owner }}/opstage-ce:latest
+      - name: Build and push demo-capsule-service image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/docker/demo-capsule-service.Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          provenance: true
+          sbom: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/demo-capsule-service:${{ github.ref_name }}
+            ghcr.io/${{ github.repository_owner }}/demo-capsule-service:latest
       - name: Generate SBOM (CycloneDX)
         run: pnpm dlx @cyclonedx/cdxgen@^11 -t pnpm -o sbom.json
       - name: Attach SBOM and changelog to GitHub Release
@@ -163,7 +352,7 @@ Tag rules:
 - Pre-release tags (`vX.Y.Z-rc.N`) push to `:rc-X.Y.Z-rc.N` only.
 - Branch pushes to `main` MUST NOT publish images.
 
-### 3.4 `.github/workflows/security.yml`
+#### `security.yml`
 
 ```yaml
 name: security
@@ -181,8 +370,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        with: { version: 9 }
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -198,54 +386,106 @@ jobs:
       languages: javascript-typescript
 ```
 
-## 4. Required Status Checks
+The same `security.yml` is used in `xtrape-capsule-contracts-node` and `xtrape-capsule-agent-node`.
 
-Branch protection on `main` MUST require:
+## 4. Cross-Repo Coordination via Renovate
 
-```text
-ci / build
-contracts / validate     (when matching paths change)
-security / audit
-security / codeql
+Each consumer repo (`xtrape-capsule-agent-node` and `xtrape-capsule-ce`) MUST run Renovate (or Dependabot) configured to:
+
+```jsonc
+// renovate.json (sketch)
+{
+  "extends": ["config:recommended"],
+  "packageRules": [
+    {
+      "matchPackageNames": ["@xtrape/capsule-contracts-node", "@xtrape/capsule-agent-node"],
+      "automerge": true,
+      "automergeType": "pr",
+      "matchUpdateTypes": ["patch"],
+      "labels": ["dep:contracts"]
+    },
+    {
+      "matchPackageNames": ["@xtrape/capsule-contracts-node", "@xtrape/capsule-agent-node"],
+      "matchUpdateTypes": ["minor", "major"],
+      "automerge": false,
+      "labels": ["dep:contracts","needs-review"]
+    }
+  ],
+  "schedule": ["after 1am every weekday"]
+}
 ```
+
+This realizes the sync flow described in [ADR 0009](../08-decisions/0009-contracts-spec-and-bindings.md) §"Sync Workflow".
+
+## 5. Required Status Checks
+
+Branch protection on `main` in each repo MUST require:
+
+| Repo | Required checks |
+|---|---|
+| `xtrape-capsule-docs` | `ci / validate-spec` |
+| `xtrape-capsule-contracts-node` | `ci / build` |
+| `xtrape-capsule-agent-node` | `ci / build` |
+| `xtrape-capsule-ce` | `ci / build`, `security / audit`, `security / codeql` |
 
 PRs that fail any of these MUST NOT be merged. Force-merge by maintainers is allowed only when the failure is an infra outage (documented in PR comments).
 
-## 5. Caching
+## 6. Caching
 
 - pnpm cache via `cache: pnpm` on `actions/setup-node` (built-in).
 - Vitest result cache: `.vitest-cache/` is part of the pnpm cache key automatically.
 - Prisma engines: prefer pinning Prisma version so that `~/.cache/prisma` reuses across runs.
 - Docker buildx layer cache: enabled by `docker/build-push-action@v6` automatically when the runner caches `/tmp/.buildx-cache`.
 
-## 6. Secrets
+## 7. Secrets
 
-Only the following GitHub repository secrets are needed for CE v0.1:
+Per-repository secret needs (CE v0.1):
 
-```text
-NPM_TOKEN              (only if publishing @xtrape/capsule-agent-node to npm)
-```
+| Repo | Secrets |
+|---|---|
+| `xtrape-capsule-docs` | none beyond `GITHUB_TOKEN` |
+| `xtrape-capsule-contracts-node` | `NPM_TOKEN` (publishing); npm provenance uses GitHub OIDC `id-token` |
+| `xtrape-capsule-agent-node` | `NPM_TOKEN` |
+| `xtrape-capsule-ce` | `GITHUB_TOKEN` is sufficient for `ghcr.io` push |
 
-`GITHUB_TOKEN` is sufficient for pushing to `ghcr.io`. Do NOT add personal access tokens for normal CI flows.
+Do NOT add personal access tokens for normal CI flows.
 
-## 7. Local Equivalents
+## 8. Local Equivalents
 
-To make CI failures reproducible locally, the repo MUST expose:
+To make CI failures reproducible locally, each repo MUST expose:
 
 ```bash
+# common to all repos
 pnpm install --frozen-lockfile
-pnpm -r lint
-pnpm -r typecheck
-pnpm -r test
-pnpm --filter @xtrape/capsule-contracts run check
-pnpm --filter @xtrape/capsule-db run validate
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+
+# xtrape-capsule-docs additions
+ruby -e "require 'yaml'; YAML.load_file('09-contracts/openapi/opstage-ce-v0.1.yaml')"
+pnpm --package=@redocly/cli dlx redocly lint 09-contracts/openapi/opstage-ce-v0.1.yaml --config 09-contracts/openapi/redocly.yaml
+pnpm tsx 09-contracts/tools/render-errors.ts --check
+
+# xtrape-capsule-contracts-node additions
+pnpm tsx tools/sync-spec.ts --check
+pnpm tsx tools/codegen.ts --check
+
+# xtrape-capsule-ce additions
+pnpm --filter @xtrape/capsule-db run check-schema-parity
+pnpm tsx scripts/check-no-reverse-deps.ts
+pnpm tsx scripts/check-no-link-in-lockfile.ts
 ```
 
-A single `pnpm verify` script SHOULD bundle all of the above so contributors can run "is this PR-ready?" in one command.
+Each repo SHOULD bundle the relevant subset into a `pnpm verify` root script.
 
-## 8. Acceptance Criteria
+## 9. Acceptance Criteria
 
-- Every PR that lands in `main` has all required status checks green.
-- A `vX.Y.Z` tag produces an image at `ghcr.io/<org>/opstage:vX.Y.Z` with multi-arch (amd64, arm64) and an SBOM artifact attached to the GitHub Release.
+- All four repositories have `.github/workflows/` directories with `ci.yml` (and `release.yml` where applicable).
+- Every PR that lands in any `main` branch has all required status checks green.
+- A `vX.Y.Z` tag in `xtrape-capsule-ce` produces multi-arch images at `ghcr.io/xtrape/opstage-ce:vX.Y.Z` and `ghcr.io/xtrape/demo-capsule-service:vX.Y.Z` with SBOM + provenance attached to the GitHub Release.
+- A successful merge to `main` in `xtrape-capsule-contracts-node` (with a changeset) publishes `@xtrape/capsule-contracts-node@X.Y.Z` to npm with provenance.
+- Renovate opens a PR in `xtrape-capsule-agent-node` and `xtrape-capsule-ce` within 24h of any contracts publish.
 - License scan blocks the PR when a transitive dependency lands a non-allowed license.
 - Weekly security workflow runs even when there are no commits.
+- Reverse-dep check fails the PR if any forbidden dependency is added (ADR 0008).

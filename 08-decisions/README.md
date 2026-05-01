@@ -17,6 +17,8 @@ For CE v0.1, read in this order:
 08-decisions/0005-technology-stack-decision.md
 08-decisions/0006-logging-and-observability.md
 08-decisions/0007-ui-state-and-data-fetching.md
+08-decisions/0008-naming-and-repositories.md
+08-decisions/0009-contracts-spec-and-bindings.md
 ```
 
 When implementation documents disagree, accepted ADRs should be treated as the higher-priority current decision until the conflicting documents are updated.

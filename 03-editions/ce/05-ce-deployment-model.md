@@ -177,7 +177,7 @@ docker run \
   -e OPSTAGE_ADMIN_USERNAME=admin \
   -e OPSTAGE_ADMIN_PASSWORD="$ADMIN_PASS" \
   -e OPSTAGE_SESSION_SECRET="$SESSION_SECRET" \
-  xtrape/capsule-opstage-ce:0.1.0
+  ghcr.io/xtrape/opstage-ce:v0.1.0
 ```
 
 The Backend refuses to start when `OPSTAGE_ADMIN_PASSWORD` or `OPSTAGE_SESSION_SECRET` is empty (see ADR 0004 §"Bootstrap"). There is no built-in default password.
@@ -229,7 +229,7 @@ Docker Compose mode is useful for:
 ```yaml
 services:
   opstage:
-    image: xtrape/capsule-opstage-ce:0.1.0
+    image: ghcr.io/xtrape/opstage-ce:v0.1.0
     ports:
       - "8080:8080"
     volumes:

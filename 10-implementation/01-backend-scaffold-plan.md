@@ -116,10 +116,10 @@ Backend stores only `hash` in the database; `raw` is returned to the caller exac
 
 ## 4.3 List Query Helper
 
-Pagination/sort/filter parsing is shared via `packages/contracts`:
+Pagination/sort/filter parsing is shared via `@xtrape/capsule-contracts-node` (the published npm package; see [ADR 0008](../08-decisions/0008-naming-and-repositories.md)):
 
 ```ts
-// packages/contracts/src/list-query.ts
+// @xtrape/capsule-contracts-node/src/list-query.ts
 import { z } from "zod";
 
 export const ListQueryBase = z.object({

@@ -64,19 +64,17 @@ CE v0.1 UI should follow these principles:
 
 ## 3. Recommended UI Stack
 
-Recommended stack:
+CE v0.1 UI stack (decided by [ADR 0007](../../08-decisions/0007-ui-state-and-data-fetching.md)):
 
 ```text
-React + TypeScript + Ant Design + Vite
+Vue 3 + TypeScript + Ant Design Vue + Vite
++ TanStack Vue Query  (server state)
++ Pinia               (client UI state)
++ Vue Router          (URL state)
++ Vee-Validate + Zod  (forms)
 ```
 
-Alternative:
-
-```text
-Vue 3 + TypeScript + Naive UI / Element Plus + Vite
-```
-
-Current CE recommendation is React + Ant Design because it provides mature admin-console components.
+Ant Design Vue provides the same mature admin-console components as the React Ant Design ecosystem.
 
 The UI must remain a Web console. A native mobile app is not required for CE v0.1.
 

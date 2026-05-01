@@ -374,7 +374,7 @@ README.md
 09-contracts/prisma/schema.prisma
 09-contracts/prisma/prisma.config.ts
 10-implementation/README.md
-10-implementation/00-monorepo-structure.md
+10-implementation/00-repository-structure.md
 10-implementation/05-implementation-sequence.md
 02-specs/README.md
 02-specs/03-agent-registration-spec.md

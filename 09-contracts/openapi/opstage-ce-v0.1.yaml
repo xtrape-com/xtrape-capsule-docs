@@ -8,7 +8,7 @@ info:
     identifier: Apache-2.0
   contact:
     name: Opstage CE maintainers
-    url: https://github.com/xtrape/opstage-capsule
+    url: https://github.com/xtrape/xtrape-capsule-ce
   description: |
     This contract defines the CE v0.1 Admin API, Agent API, and System API.
     Admin API uses /api/admin/*, Agent API uses /api/agents/*, and System API uses /api/system/*.

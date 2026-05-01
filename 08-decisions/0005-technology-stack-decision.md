@@ -15,19 +15,24 @@ Backend:         Fastify + TypeScript
 Validation:      Zod
 ORM:             Prisma
 Database:        SQLite
-UI:              React + TypeScript + Ant Design
-Agent SDK:       Node.js + TypeScript
+UI:              Vue 3 + TypeScript + Ant Design Vue       (frontend stack pinned by ADR 0007)
+Agent SDK:       Node.js + TypeScript                      (separate repo: xtrape-capsule-agent-node)
+Contracts:       @xtrape/capsule-contracts-node from npm   (separate repo: xtrape-capsule-contracts-node)
 Package Manager: pnpm
-Monorepo:        pnpm workspace
+Monorepo:        pnpm workspace inside xtrape-capsule-ce only (4-repo polyrepo per ADR 0008)
 UI Build:        Vite
 Package Build:   tsup or tsdown
-Container:       Docker
+Container:       Docker (ghcr.io/xtrape/opstage-ce)
 Deployment:      single Opstage container first, Docker Compose optional
 ```
 
 ## Rationale
 
 Fastify is selected for CE v0.1 because it is lightweight, fast to implement, easy to package, and sufficient for the first API surface.
+
+Vue 3 + Ant Design Vue is selected for the UI; see [ADR 0007](./0007-ui-state-and-data-fetching.md) for the full stack and rationale.
+
+The four-repository structure (CE app + Agent SDK + Contracts + Docs) is pinned by [ADR 0008](./0008-naming-and-repositories.md), with contracts spec/bindings governance defined by [ADR 0009](./0009-contracts-spec-and-bindings.md).
 
 NestJS remains acceptable for future productization if the project needs heavier module structure, dependency injection patterns, or enterprise-scale backend organization.
 

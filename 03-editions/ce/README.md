@@ -235,21 +235,16 @@ Rules:
 
 ### 7.3 UI
 
-UI should be a Web console.
-
-Recommended options:
+UI is a Web console. CE v0.1 stack (decided by [ADR 0007](../../08-decisions/0007-ui-state-and-data-fetching.md)):
 
 ```text
-React + TypeScript + Ant Design
+Vue 3 + TypeScript + Ant Design Vue
++ TanStack Vue Query (server state)
++ Pinia (client UI state)
++ Vue Router (URL state)
++ Vee-Validate + Zod (forms)
++ Vite (build)
 ```
-
-or:
-
-```text
-Vue 3 + TypeScript + Naive UI / Element Plus
-```
-
-Current decision may be finalized in `04-ce-technology-stack.md`.
 
 CE UI should support responsive viewing for mobile, but it does not need to be a full mobile app.
 
@@ -300,36 +295,43 @@ SQLite data volume
 Recommended target:
 
 ```bash
-docker run -p 8080:8080 -v ./data:/app/data xtrape/capsule-opstage-ce
+docker run -p 8080:8080 -v ./data:/app/data ghcr.io/xtrape/opstage-ce:v0.1.0
 ```
 
-The internal codebase is modular (see `10-implementation/00-monorepo-structure.md`):
+The CE monorepo `xtrape-capsule-ce` (see [`10-implementation/00-repository-structure.md`](../../10-implementation/00-repository-structure.md)) contains:
 
 ```text
 apps/opstage-backend
-apps/opstage-ui
+apps/opstage-ui                   (Vue 3 + Ant Design Vue)
 apps/demo-capsule-service
-packages/contracts
 packages/db
-packages/agent-node
 packages/shared
 packages/test-utils
 ```
 
-But the first user experience should feel simple.
+`@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` come from npm (separate repos: `xtrape-capsule-contracts-node` and `xtrape-capsule-agent-node` — see [ADR 0008](../../08-decisions/0008-naming-and-repositories.md)).
+
+The first user experience should feel simple.
 
 ---
 
 ## 9. Repository Expectations
 
-The CE implementation should be suitable for an open-source repository.
+CE v0.1 ships across **four repositories** (see [ADR 0008 — Naming and Repositories](../../08-decisions/0008-naming-and-repositories.md) for the authoritative decision):
 
-Expected qualities:
+| Repo | Edition | Purpose |
+|---|---|---|
+| `xtrape-capsule-docs` | shared | Design docs, ADRs, Layer 1 contract SSOT |
+| `xtrape-capsule-contracts-node` | shared | Node bindings of the contracts (Layer 2). Published as `@xtrape/capsule-contracts-node` (npm). |
+| `xtrape-capsule-agent-node` | shared | Node Agent SDK. Published as `@xtrape/capsule-agent-node` (npm). |
+| `xtrape-capsule-ce` | **CE** | Backend + UI + demo + deploy (only edition-bound code repo). |
+
+Each repository should exhibit:
 
 - clear README;
 - simple setup;
-- demo service included;
-- Docker-based quick start;
+- demo service included (in `xtrape-capsule-ce/apps/demo-capsule-service`);
+- Docker-based quick start (`xtrape-capsule-ce/deploy/compose/`);
 - documented APIs;
 - documented Agent SDK usage;
 - clean project structure;
@@ -337,23 +339,23 @@ Expected qualities:
 - no required external SaaS dependency;
 - safe defaults.
 
-Recommended monorepo structure (matches `10-implementation/00-monorepo-structure.md`):
+`xtrape-capsule-ce` monorepo internal layout (matches [`10-implementation/00-repository-structure.md`](../../10-implementation/00-repository-structure.md)):
 
 ```text
-xtrape-capsule-opstage/
+xtrape-capsule-ce/
 ├── apps/
 │   ├── opstage-backend/
-│   ├── opstage-ui/
+│   ├── opstage-ui/                   (Vue 3 + Ant Design Vue)
 │   └── demo-capsule-service/
 ├── packages/
-│   ├── contracts/
 │   ├── db/
-│   ├── agent-node/
 │   ├── shared/
 │   └── test-utils/
 ├── deploy/
 └── README.md
 ```
+
+There is **no** `packages/contracts/` and **no** `packages/agent-node/` here — both come from npm.
 
 ---
 
@@ -559,17 +561,29 @@ README.md
 08-decisions/0003-command-action-lifecycle.md
 08-decisions/0004-security-defaults.md
 08-decisions/0005-technology-stack-decision.md
+08-decisions/0006-logging-and-observability.md
+08-decisions/0007-ui-state-and-data-fetching.md
+08-decisions/0008-naming-and-repositories.md
+08-decisions/0009-contracts-spec-and-bindings.md
 09-contracts/README.md
+09-contracts/errors.json
+09-contracts/errors.md
+09-contracts/enums/status-enums.json
+09-contracts/enums/audit-actions.json
+09-contracts/enums/id-prefixes.json
 09-contracts/openapi/opstage-ce-v0.1.yaml
 09-contracts/prisma/schema.prisma
 09-contracts/prisma/prisma.config.ts
 10-implementation/README.md
-10-implementation/00-monorepo-structure.md
+10-implementation/00-repository-structure.md
 10-implementation/01-backend-scaffold-plan.md
 10-implementation/02-ui-scaffold-plan.md
 10-implementation/03-agent-sdk-scaffold-plan.md
 10-implementation/04-demo-service-plan.md
 10-implementation/05-implementation-sequence.md
+10-implementation/06-ci-cd-pipelines.md
+10-implementation/07-quickstart.md
+10-implementation/08-supply-chain.md
 01-capsule/00-overview.md
 01-capsule/01-capsule-service-concept.md
 01-capsule/03-domain-model.md

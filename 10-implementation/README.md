@@ -18,7 +18,7 @@ Read this directory after:
 ## 1. Documents
 
 ```text
-10-implementation/00-monorepo-structure.md
+10-implementation/00-repository-structure.md
 10-implementation/01-backend-scaffold-plan.md
 10-implementation/02-ui-scaffold-plan.md
 10-implementation/03-agent-sdk-scaffold-plan.md

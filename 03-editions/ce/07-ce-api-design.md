@@ -240,7 +240,7 @@ CE may keep status usage simple, but it should not return `200` for clear authen
 
 ## 7. Pagination, Sorting, and Filtering
 
-All list endpoints share a single convention. Backend MUST validate every query param with the Zod schema in `packages/contracts/list-query.ts` before reaching the data layer; unknown params return `422 VALIDATION_FAILED`.
+All list endpoints share a single convention. Backend MUST validate every query param with the Zod schema exported from `@xtrape/capsule-contracts-node` (the published npm package; see [ADR 0008](../../08-decisions/0008-naming-and-repositories.md)) before reaching the data layer; unknown params return `422 VALIDATION_FAILED`.
 
 ### 7.1 Pagination
 

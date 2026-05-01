@@ -13,19 +13,17 @@ Build the Node Embedded Agent SDK for CE v0.1.
 
 The SDK should make it easy for a Node.js Capsule Service to register with Opstage, report metadata, poll Commands, execute predefined actions, and report results safely.
 
-## 2. Package
+## 2. Repository
 
-Recommended package:
+The Node Agent SDK lives in a **dedicated edition-agnostic repository**: `xtrape-capsule-agent-node` (see [ADR 0008 — Naming and Repositories](../08-decisions/0008-naming-and-repositories.md)). It is NOT a workspace package inside the CE monorepo.
 
-```text
-packages/agent-node
-```
-
-Published name:
+Published npm package:
 
 ```text
 @xtrape/capsule-agent-node
 ```
+
+Repository skeleton (see [`00-repository-structure.md`](./00-repository-structure.md) §5 for the full layout).
 
 ## 3. Runtime
 
@@ -38,7 +36,7 @@ ESM-first if repository standard allows it
 ## 4. Source Layout
 
 ```text
-packages/agent-node/src/
+xtrape-capsule-agent-node/src/
 ├── index.ts
 ├── capsule-agent.ts
 ├── types.ts
@@ -59,6 +57,8 @@ packages/agent-node/src/
 │   └── redaction.ts
 └── tests/
 ```
+
+Types and Zod schemas come from `@xtrape/capsule-contracts-node` (a runtime dependency, NOT from a workspace clone).
 
 ## 5. Public API
 

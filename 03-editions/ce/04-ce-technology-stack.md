@@ -23,10 +23,13 @@ Backend:         Fastify + TypeScript
 Validation:      Zod
 Database ORM:    Prisma
 Database:        SQLite by default
-UI:              React + TypeScript + Ant Design
-Agent SDK:       Node.js + TypeScript
+UI:              Vue 3 + TypeScript + Ant Design Vue
+                 (+ TanStack Vue Query + Pinia + Vue Router + Vee-Validate)
+Agent SDK:       Node.js + TypeScript (separate repo: xtrape-capsule-agent-node)
+Contracts:       @xtrape/capsule-contracts-node from npm
+                 (separate repo: xtrape-capsule-contracts-node; spec lives in xtrape-capsule-docs/09-contracts/)
 Package Manager: pnpm
-Monorepo:        pnpm workspace
+Monorepo:        pnpm workspace inside xtrape-capsule-ce only
 Build Tooling:   Vite for UI, tsup or tsdown for packages
 Container:       Docker
 Deployment:      single container first, Docker Compose optional
@@ -34,13 +37,15 @@ Deployment:      single container first, Docker Compose optional
 
 This stack prioritizes:
 
-- TypeScript sharing across UI, Backend, and Agent SDK;
+- TypeScript sharing across UI, Backend, and Agent SDK via the published `@xtrape/capsule-contracts-node` npm package;
 - lightweight Backend structure;
 - lightweight SQLite deployment;
 - future MySQL/PostgreSQL compatibility;
 - fast UI development;
 - open-source friendliness;
 - simple local development.
+
+See [ADR 0008](../../08-decisions/0008-naming-and-repositories.md) for the four-repository decision and [ADR 0009](../../08-decisions/0009-contracts-spec-and-bindings.md) for the contracts spec/bindings model.
 
 ---
 
@@ -226,50 +231,43 @@ CE v0.1 database design should:
 
 ## 6. UI Stack
 
-### 6.1 Recommended UI stack
+### 6.1 CE v0.1 UI stack (decided)
 
 Use:
 
 ```text
-React + TypeScript + Ant Design
+Vue 3.5+ + TypeScript + Ant Design Vue 4
++ TanStack Vue Query (server state)
++ Pinia (client UI state)
++ Vue Router 4 (URL state)
++ Vee-Validate 4 + @vee-validate/zod (forms)
++ Vite 5 (build)
++ Vitest + @vue/test-utils (tests)
 ```
+
+This is normative for CE v0.1 — see [ADR 0007 — UI State and Data Fetching](../../08-decisions/0007-ui-state-and-data-fetching.md) for the full rationale, store shape, API client rules, query conventions, and folder layout.
 
 ### 6.2 Rationale
 
-React + Ant Design is recommended because:
+Vue 3 + Ant Design Vue is selected because:
 
-- it is strong for admin-console style products;
-- Ant Design provides mature tables, forms, tabs, layouts, modals, tags, and status indicators;
-- many developers and AI coding tools are familiar with React;
-- it is suitable for fast MVP delivery;
-- it can support responsive layouts for mobile viewing.
+- Ant Design Vue provides the same mature tables, forms, tabs, layouts, modals, tags, and status indicators as the React Ant Design ecosystem, with feature parity for admin-console workloads;
+- `<script setup>` Composition API + Pinia keeps state management explicit and tree-shakeable;
+- TanStack Query has a first-class Vue adapter (`@tanstack/vue-query`), giving the same server-state model;
+- Vue's smaller core and reactivity primitives suit a small admin SPA;
+- Zod + Vee-Validate share the schema source (`@xtrape/capsule-contracts-node`) with the backend and Agent SDK.
 
-### 6.3 Alternative UI stack
+### 6.3 Rejected alternatives
 
-Possible alternative:
+- **React 18**: viable but provides no advantage here; Vue is selected for CE v0.1.
+- **Naive UI / Element Plus / PrimeVue**: not selected because Ant Design Vue's component density best matches existing CE UI specs.
 
-```text
-Vue 3 + TypeScript + Naive UI / Element Plus
-```
-
-Vue is also suitable, especially for teams that prefer Vue.
-
-### 6.4 Decision
-
-For CE v0.1, choose:
-
-```text
-React + TypeScript + Ant Design
-```
-
-unless the implementation team strongly prefers Vue.
-
-### 6.5 UI build tool
+### 6.4 UI build tool
 
 Use:
 
 ```text
-Vite
+Vite 5
 ```
 
 Rationale:
@@ -277,7 +275,8 @@ Rationale:
 - fast dev server;
 - simple build process;
 - good TypeScript support;
-- common for modern React/Vue apps.
+- first-class Vue 3 support via `@vitejs/plugin-vue`;
+- supports `unplugin-vue-components` for Ant Design Vue auto-import.
 
 ---
 
@@ -346,22 +345,31 @@ The SDK should not provide:
 
 ## 8. Shared Types and Contracts
 
-### 8.1 `packages/contracts`
+### 8.1 `@xtrape/capsule-contracts-node` (separate repo)
 
-`packages/contracts` is the canonical home of:
+The canonical TypeScript binding of the wire contracts is **NOT** a workspace package inside `xtrape-capsule-ce`. It lives in the dedicated repository `xtrape-capsule-contracts-node` and is published to npm as `@xtrape/capsule-contracts-node`.
 
-- TypeScript types generated or hand-written from `09-contracts/openapi/opstage-ce-v0.1.yaml`;
-- Zod schemas mirroring the OpenAPI request/response models (Capsule Manifest, HealthReport, ConfigItem, ActionDefinition, Command, CommandResult, AuditEvent, status enums, Agent registration payloads);
-- shared status/enum constants.
+Backend, UI, and demo Capsule Service all install it from npm:
 
-Older drafts referred to this package as `packages/shared-types` and `packages/capsule-spec`; in CE v0.1 they are merged into `packages/contracts`.
+```jsonc
+{ "dependencies": { "@xtrape/capsule-contracts-node": "^0.1.0" } }
+```
+
+The package contains:
+
+- TypeScript types generated from `xtrape-capsule-docs/09-contracts/openapi/opstage-ce-v0.1.yaml`;
+- Zod schemas mirroring the OpenAPI request/response models (Capsule Manifest, HealthReport, ConfigItem, ActionDefinition, Command, CommandResult, AuditEvent, Agent registration payloads);
+- generated enum constants from `09-contracts/enums/status-enums.json`, `audit-actions.json`, and `id-prefixes.json`;
+- generated error code constants from `09-contracts/errors.json`.
+
+See [ADR 0009 — Contracts Spec and Bindings](../../08-decisions/0009-contracts-spec-and-bindings.md) for the two-layer model and codegen rules.
 
 ### 8.2 Runtime validation
 
 CE v0.1 baseline runtime validator:
 
 ```text
-Zod
+Zod 3.x (delivered via @xtrape/capsule-contracts-node)
 ```
 
 Rationale:
@@ -370,7 +378,7 @@ Rationale:
 - good for request validation;
 - can derive types from schemas;
 - lightweight enough for CE;
-- can be shared between Backend, UI, and Agent SDK.
+- shared between Backend, UI, and Agent SDK by exporting from one npm package.
 
 Class-validator or framework-specific validators are possible later but are not required.
 
@@ -396,27 +404,31 @@ pnpm is recommended because:
 - good dependency isolation;
 - fast install experience.
 
-### 9.3 Workspace structure
+### 9.3 Workspace structure (CE monorepo only)
 
-Must match `10-implementation/00-monorepo-structure.md`:
+CE v0.1 uses pnpm workspace **only inside the `xtrape-capsule-ce` repository**. The other three repositories (`xtrape-capsule-docs`, `xtrape-capsule-contracts-node`, `xtrape-capsule-agent-node`) are independent npm projects.
+
+CE monorepo layout (must match [`10-implementation/00-repository-structure.md`](../../10-implementation/00-repository-structure.md)):
 
 ```text
-xtrape-capsule-opstage/
+xtrape-capsule-ce/
 ├── apps/
 │   ├── opstage-backend/
 │   ├── opstage-ui/
 │   └── demo-capsule-service/
 ├── packages/
-│   ├── contracts/
 │   ├── db/
-│   ├── agent-node/
 │   ├── shared/
 │   └── test-utils/
 ├── deploy/
+│   ├── docker/
+│   └── compose/
 ├── package.json
 ├── pnpm-workspace.yaml
 └── README.md
 ```
+
+There is **no** `packages/contracts/` and **no** `packages/agent-node/` in this monorepo — both come from npm (`@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` respectively). See [ADR 0008](../../08-decisions/0008-naming-and-repositories.md) for why.
 
 ---
 
@@ -749,7 +761,7 @@ future extensibility
 Recommended stack:
 
 ```text
-TypeScript + Fastify + Zod + Prisma + SQLite + React + Ant Design + pnpm + Docker
+TypeScript + Fastify + Zod + Prisma + SQLite + Vue 3 + Ant Design Vue + pnpm + Docker
 ```
 
 The most important technology rule is:

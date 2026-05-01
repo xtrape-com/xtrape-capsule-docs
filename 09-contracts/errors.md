@@ -5,7 +5,11 @@
 - Priority: Current
 - Audience: backend developers, frontend developers, agent SDK developers, AI coding agents
 
-This document is the **single source of truth** for CE v0.1 error codes. Backend, UI, and Agent SDK must use only the codes listed here. New codes require a contract update.
+> **This file is rendered from `09-contracts/errors.json` by `09-contracts/tools/render-errors.ts`.**
+> Edit `errors.json` (the SSOT). CI verifies this file is byte-for-byte equal to the rendered output.
+> See ADR 0009 — Contracts Spec and Bindings.
+
+This document enumerates the CE v0.1 error codes. Backend, UI, and Agent SDK MUST use only the codes listed here. New codes require a contract update (edit `errors.json`, regenerate this file).
 
 ---
 
@@ -50,12 +54,12 @@ Rules:
 
 ## 3. Authentication Codes
 
-| Code                       | HTTP | Meaning                                                       |
-|----------------------------|------|---------------------------------------------------------------|
-| `LOGIN_FAILED`             | 401  | Username or password invalid (do not reveal which).           |
-| `SESSION_EXPIRED`          | 401  | Session cookie present but expired.                           |
-| `SESSION_INVALID`          | 401  | Session cookie tampered with or session not found.            |
-| `CSRF_TOKEN_MISMATCH`      | 403  | `X-CSRF-Token` header missing or does not match cookie.       |
+| Code                       | HTTP | Meaning                                                            |
+|----------------------------|------|--------------------------------------------------------------------|
+| `LOGIN_FAILED`             | 401  | Username or password invalid (do not reveal which).                |
+| `SESSION_EXPIRED`          | 401  | Session cookie present but expired.                                |
+| `SESSION_INVALID`          | 401  | Session cookie tampered with or session not found.                 |
+| `CSRF_TOKEN_MISMATCH`      | 403  | `X-CSRF-Token` header missing or does not match server-side session token. |
 
 ---
 

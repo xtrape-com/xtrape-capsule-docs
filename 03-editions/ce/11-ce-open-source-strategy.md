@@ -122,64 +122,50 @@ CE should follow these product principles:
 
 ## 6. Repository Strategy
 
-### 6.1 Recommended repository name
+CE v0.1 ships across **four repositories** under the `xtrape` GitHub organization. The decision and full rationale live in [ADR 0008 — Naming and Repositories](../../08-decisions/0008-naming-and-repositories.md). This section is a public-facing summary.
 
-Recommended repository name:
+### 6.1 The four repositories
 
-```text
-xtrape-capsule-opstage
-```
+| Repo | Edition | What it contains |
+|---|---|---|
+| `xtrape-capsule-docs` | shared | Design docs, ADRs, and the language-agnostic Layer 1 contract SSOT (OpenAPI YAML, JSON enums, error codes). |
+| `xtrape-capsule-contracts-node` | shared | Node bindings of the contracts (TypeScript types, Zod schemas, enum constants). Published as `@xtrape/capsule-contracts-node` on npm. |
+| `xtrape-capsule-agent-node` | shared | Node Agent SDK. Published as `@xtrape/capsule-agent-node` on npm. |
+| **`xtrape-capsule-ce`** | **CE** | The CE control plane: Opstage backend (Fastify), Opstage UI (Vue 3 + Ant Design Vue), demo Capsule Service, and Docker deploy. The only edition-bound code repo. |
 
-Alternative names:
+### 6.2 Why this split
 
-```text
-xtrape-opstage
-xtrape-capsule
-capsule-opstage
-```
+Two principles drove the four-repo decision:
 
-Current recommendation:
+1. **Edition-agnostic vs edition-bound separation.** The wire contracts and the Agent SDK MUST work against future EE and Cloud backends without recompilation, so they live outside any edition's release cycle.
+2. **One language per binding repo.** Future Java / Python / Go agents will get their own `xtrape-capsule-contracts-{lang}` and `xtrape-capsule-agent-{lang}` repos, each with its own native toolchain. Path C in [ADR 0009](../../08-decisions/0009-contracts-spec-and-bindings.md).
 
-```text
-xtrape-capsule-opstage
-```
+### 6.3 Repository descriptions (used in GitHub "About" field)
 
-because it clearly connects Opstage to the Capsule domain.
+| Repo | Description |
+|---|---|
+| `xtrape-capsule-docs` | Design documents, ADRs, and wire-contract SSOT for the Opstage / Capsule Service product family. |
+| `xtrape-capsule-contracts-node` | TypeScript bindings (types, Zod schemas, enums, error codes) for the Opstage wire contracts. |
+| `xtrape-capsule-agent-node` | Node.js Agent SDK for embedding Capsule Services into the Opstage governance loop. |
+| `xtrape-capsule-ce` | Opstage CE — a lightweight, self-hosted, open-source control plane for Capsule Services. |
 
-### 6.2 Repository description
+### 6.4 `xtrape-capsule-ce` internal layout
 
-Recommended short description:
-
-```text
-A lightweight, self-hosted, open-source control plane for Capsule Services.
-```
-
-Recommended long description:
+Inside `xtrape-capsule-ce` (the CE monorepo), pnpm workspace packages are arranged as follows:
 
 ```text
-Opstage CE helps developers and small teams register, observe, configure, operate, and audit lightweight Capsule Services through an Agent-based governance model.
-```
-
-### 6.3 Repository structure
-
-Recommended monorepo structure:
-
-```text
-xtrape-capsule-opstage/
+xtrape-capsule-ce/
 ├── apps/
-│   ├── opstage-backend/
-│   ├── opstage-ui/
-│   └── demo-capsule-service/
+│   ├── opstage-backend/                @xtrape/opstage-backend         (private)
+│   ├── opstage-ui/                     @xtrape/opstage-ui              (private; Vue 3 + AntDV)
+│   └── demo-capsule-service/           @xtrape/demo-capsule-service    (private)
 ├── packages/
-│   ├── contracts/
-│   ├── db/
-│   ├── agent-node/
-│   ├── shared/
-│   └── test-utils/
+│   ├── db/                             @xtrape/capsule-db              (private)
+│   ├── shared/                         @xtrape/capsule-shared          (private)
+│   └── test-utils/                     @xtrape/capsule-test-utils      (private)
 ├── deploy/
 │   ├── docker/
 │   └── compose/
-├── docs/
 ├── README.md
 ├── LICENSE
 ├── CONTRIBUTING.md
@@ -187,20 +173,18 @@ xtrape-capsule-opstage/
 └── ROADMAP.md
 ```
 
-### 6.4 Public documentation
+`@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` come from npm; they are NOT workspace packages here. See [`10-implementation/00-repository-structure.md`](../../10-implementation/00-repository-structure.md) for the full details.
 
-The repository should include clear public documentation:
+### 6.5 Public documentation
 
-- project overview;
-- quick start;
-- demo guide;
-- Agent SDK guide;
-- API overview;
-- architecture overview;
-- security model;
-- CE/EE/Cloud edition explanation;
-- roadmap;
-- contribution guide.
+Each of the four repositories should include clear public documentation:
+
+- `xtrape-capsule-docs`: full design docs (this directory).
+- `xtrape-capsule-contracts-node` README: project overview, npm install snippet, compatibility table (binding version ↔ spec version), pointer to docs repo.
+- `xtrape-capsule-agent-node` README: SDK overview, install snippet, minimal example, pointer to docs repo.
+- `xtrape-capsule-ce` README: project overview, quick start (`docker compose up`), demo guide, Agent SDK guide, API overview, architecture overview, security model, CE/EE/Cloud edition explanation, roadmap, contribution guide.
+
+Per ADR 0008, repository names, npm scope (`@xtrape`), GHCR namespace (`ghcr.io/xtrape`), and image names (`opstage-ce`, `demo-capsule-service`) are normative — implementation MUST follow them.
 
 ---
 

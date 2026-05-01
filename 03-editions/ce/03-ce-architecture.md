@@ -127,7 +127,7 @@ Docker Host
 The first public deployment should be possible with:
 
 ```bash
-docker run -p 8080:8080 -v ./data:/app/data xtrape/capsule-opstage-ce
+docker run -p 8080:8080 -v ./data:/app/data ghcr.io/xtrape/opstage-ce:v0.1.0
 ```
 
 A Docker Compose example may include both Opstage CE and demo service.
@@ -310,59 +310,63 @@ Modules may be physically combined in CE v0.1 if implementation stays simple, bu
 
 ---
 
-## 7. Monorepo Architecture
+## 7. Repository Architecture
 
-Repository structure (must match `10-implementation/00-monorepo-structure.md`):
+CE v0.1 ships across **four repositories** (see [ADR 0008](../../08-decisions/0008-naming-and-repositories.md) and [`10-implementation/00-repository-structure.md`](../../10-implementation/00-repository-structure.md) for the authoritative details):
 
 ```text
-xtrape-capsule-opstage/
+xtrape-capsule-docs              ← design docs + Layer 1 contract SSOT
+xtrape-capsule-contracts-node    ← @xtrape/capsule-contracts-node (npm)
+xtrape-capsule-agent-node        ← @xtrape/capsule-agent-node (npm)
+xtrape-capsule-ce                ← CE backend, UI, demo, deploy (this is the only edition-bound code repo)
+```
+
+The `xtrape-capsule-ce` monorepo is the only one that uses pnpm workspace. Internal layout:
+
+```text
+xtrape-capsule-ce/
 ├── apps/
-│   ├── opstage-backend/
-│   ├── opstage-ui/
-│   └── demo-capsule-service/
+│   ├── opstage-backend/                    @xtrape/opstage-backend       (private)
+│   ├── opstage-ui/                         @xtrape/opstage-ui            (private; Vue 3 + Ant Design Vue)
+│   └── demo-capsule-service/               @xtrape/demo-capsule-service  (private)
 ├── packages/
-│   ├── contracts/
-│   ├── db/
-│   ├── agent-node/
-│   ├── shared/
-│   └── test-utils/
+│   ├── db/                                 @xtrape/capsule-db            (private)
+│   ├── shared/                             @xtrape/capsule-shared        (private)
+│   └── test-utils/                         @xtrape/capsule-test-utils    (private)
 ├── deploy/
 │   ├── docker/
 │   └── compose/
 └── README.md
 ```
 
+There is **no** `packages/contracts/` and **no** `packages/agent-node/` inside `xtrape-capsule-ce`. Both come from npm:
+
+- `@xtrape/capsule-contracts-node` — consumed by `apps/opstage-backend`, `apps/opstage-ui`, and `apps/demo-capsule-service`;
+- `@xtrape/capsule-agent-node` — consumed by `apps/demo-capsule-service` only (it is the SDK external developers also install).
+
 ### 7.1 `apps/opstage-backend`
 
-Fastify backend application. Contains HTTP server, Admin APIs, Agent APIs, database access, auth, status calculation, command handling, audit writing.
+Fastify backend application. Contains HTTP server, Admin APIs, Agent APIs, database access via `@xtrape/capsule-db`, auth, status calculation, command handling, audit writing. Imports types and Zod schemas from `@xtrape/capsule-contracts-node`.
 
 ### 7.2 `apps/opstage-ui`
 
-React + Ant Design web UI application. Contains login page, dashboard, Agent pages, Capsule Service pages, Command pages, Audit pages.
+Vue 3 + Ant Design Vue web UI application. Contains login page, dashboard, Agent pages, Capsule Service pages, Command pages, Audit pages. See [ADR 0007](../../08-decisions/0007-ui-state-and-data-fetching.md) for the full state-and-data-fetching stack.
 
 ### 7.3 `apps/demo-capsule-service`
 
-Demo Capsule Service used to prove CE integration end-to-end.
+Demo Capsule Service used to prove CE integration end-to-end. Imports `@xtrape/capsule-agent-node` from npm exactly as external users would.
 
-### 7.4 `packages/agent-node`
+### 7.4 `packages/db`
 
-Node.js embedded Agent SDK (formerly proposed as `agent-sdk-node`).
+Prisma schema, generated client, migration runner. The schema is the **authoritative** copy of `09-contracts/prisma/schema.prisma`; CI verifies they remain identical.
 
-### 7.5 `packages/contracts`
+### 7.5 `packages/shared`
 
-Generated and hand-written TypeScript types derived from `09-contracts/openapi/opstage-ce-v0.1.yaml` (manifest, health, config, action, command, audit, status).
+CE-internal cross-cutting helpers: `newId(prefix)` (uses `enums/id-prefixes.json` from contracts), time/clock helpers, redaction utilities, shared error classes.
 
-### 7.6 `packages/db`
+### 7.6 `packages/test-utils`
 
-Prisma schema, generated client, migration runner. Wraps `09-contracts/prisma/schema.prisma`.
-
-### 7.7 `packages/shared`
-
-Cross-cutting helpers: `newId(prefix)`, time/clock helpers, redaction utilities, shared error classes.
-
-### 7.8 `packages/test-utils`
-
-Shared test fixtures, factory builders, and HTTP test client used by backend, UI, and Agent SDK test suites.
+Shared test fixtures, factory builders, fake clock, and HTTP test clients used by backend and demo-capsule-service test suites. NOT published.
 
 ---
 
@@ -439,21 +443,20 @@ Agent APIs must require Agent token after registration.
 
 ### 9.1 Recommended UI shape
 
-UI should be a single-page Web console.
+UI is a single-page Web console.
 
-It may use:
-
-```text
-React + TypeScript + Ant Design
-```
-
-or:
+CE v0.1 stack (decided by [ADR 0007](../../08-decisions/0007-ui-state-and-data-fetching.md)):
 
 ```text
-Vue 3 + TypeScript + Naive UI / Element Plus
+Vue 3 + TypeScript + Ant Design Vue
++ TanStack Vue Query (server state)
++ Pinia (client UI state)
++ Vue Router (URL state)
++ Vee-Validate + Zod (forms)
++ Vite (build)
 ```
 
-The final decision should be documented in `04-ce-technology-stack.md`.
+This decision is normative; React is no longer a candidate for CE v0.1.
 
 ### 9.2 UI pages
 

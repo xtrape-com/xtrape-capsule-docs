@@ -124,11 +124,7 @@ Alternative package names (not used in CE v0.1):
 @xtrape/opstage-agent-node
 ```
 
-CE v0.1 package location (matches `10-implementation/00-monorepo-structure.md`):
-
-```text
-packages/agent-node
-```
+CE v0.1 location: the Node Agent SDK lives in its **own dedicated repository**, `xtrape-capsule-agent-node` (see [ADR 0008 — Naming and Repositories](../../08-decisions/0008-naming-and-repositories.md)). It is published to npm as `@xtrape/capsule-agent-node` and consumed by `xtrape-capsule-ce/apps/demo-capsule-service` (and external Capsule Service authors) via standard `pnpm add @xtrape/capsule-agent-node`. It is NOT a workspace package inside the CE monorepo.
 
 Recommended output:
 

@@ -385,7 +385,7 @@ CE v0.1 must support a simple Docker-based local deployment.
 Preferred target:
 
 ```bash
-docker run -p 8080:8080 -v ./data:/app/data xtrape/capsule-opstage-ce
+docker run -p 8080:8080 -v ./data:/app/data ghcr.io/xtrape/opstage-ce:v0.1.0
 ```
 
 A Docker Compose example is also acceptable.

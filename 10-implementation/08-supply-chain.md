@@ -61,7 +61,7 @@ Artifacts: sbom.json           (attached to the GitHub Release)
            sbom.json           (also baked into the image at /app/sbom.json)
 ```
 
-Generation command (also wired into `release.yml`, see `06-ci-cd-pipelines.md` §3.3):
+Generation command (also wired into `xtrape-capsule-ce/.github/workflows/release.yml`, see `06-ci-cd-pipelines.md` §3.4):
 
 ```bash
 pnpm dlx @cyclonedx/cdxgen@^11 -t pnpm -o sbom.json
@@ -89,15 +89,15 @@ Recommended Trivy invocation:
 
 ```bash
 trivy image --severity HIGH,CRITICAL --exit-code 1 \
-  ghcr.io/<org>/opstage:${TAG}
+  ghcr.io/xtrape/opstage-ce:${TAG}
 ```
 
-The `release.yml` workflow described in `06-ci-cd-pipelines.md` §3.3 SHOULD be extended with a Trivy step before pushing the `:latest` tag.
+The `xtrape-capsule-ce/.github/workflows/release.yml` workflow described in `06-ci-cd-pipelines.md` §3.4 SHOULD be extended with a Trivy step before pushing the `:latest` tag.
 
 ## 4. Dependency Pinning
 
 - All `package.json` entries MUST use exact-or-caret versions in lockfile (`pnpm-lock.yaml` is the source of truth).
-- `pnpm install --frozen-lockfile` is enforced in CI (`06-ci-cd-pipelines.md` §3.1).
+- `pnpm install --frozen-lockfile` is enforced in CI (`06-ci-cd-pipelines.md` §3.x — the `ci.yml` of every repo).
 - Renovate (or Dependabot) MUST be configured to open weekly grouped PRs for non-breaking updates and immediate PRs for security advisories.
 
 Recommended `renovate.json`:
@@ -127,7 +127,7 @@ provenance: true
 sbom:       true
 ```
 
-This ensures GitHub Container Registry stores SLSA build provenance and an in-registry SBOM for `ghcr.io/<org>/opstage:<tag>`.
+This ensures GitHub Container Registry stores SLSA build provenance and an in-registry SBOM for `ghcr.io/xtrape/opstage-ce:<tag>` and `ghcr.io/xtrape/demo-capsule-service:<tag>` per [ADR 0008](../08-decisions/0008-naming-and-repositories.md).
 
 ## 6. Acceptance Criteria
 

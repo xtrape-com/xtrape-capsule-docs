@@ -93,15 +93,17 @@ Backend:         Fastify + TypeScript
 Validation:      Zod
 ORM:             Prisma
 Database:        SQLite
-UI:              React + TypeScript + Ant Design
-Agent SDK:       Node.js + TypeScript
+UI:              Vue 3 + TypeScript + Ant Design Vue
+                 (+ TanStack Vue Query + Pinia + Vue Router + Vee-Validate; see ADR 0007)
+Agent SDK:       Node.js + TypeScript (separate repo: xtrape-capsule-agent-node)
+Contracts:       @xtrape/capsule-contracts-node from npm (separate repo)
 Package Manager: pnpm
-Monorepo:        pnpm workspace
+Monorepo:        pnpm workspace inside xtrape-capsule-ce only (4-repo polyrepo overall; see ADR 0008)
 Build:           Vite for UI, tsup or tsdown for packages
-Deployment:      single container first, Docker Compose optional
+Deployment:      single container first (ghcr.io/xtrape/opstage-ce), Docker Compose optional
 ```
 
-NestJS remains a future or alternative option, but it is not the CE v0.1 baseline.
+NestJS remains a future or alternative option, but it is not the CE v0.1 baseline. The UI stack and the multi-repo split are pinned by [ADR 0007](./0007-ui-state-and-data-fetching.md) and [ADR 0008](./0008-naming-and-repositories.md) respectively, which supersede earlier drafts of this baseline.
 
 ## 6. Command and Action Baseline
 
