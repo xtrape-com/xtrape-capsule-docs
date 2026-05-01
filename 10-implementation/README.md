@@ -27,6 +27,10 @@ Read this directory after:
 10-implementation/06-ci-cd-pipelines.md
 10-implementation/07-quickstart.md
 10-implementation/08-supply-chain.md
+10-implementation/09-database-implementation.md
+10-implementation/10-user-and-ops-manual.md
+10-implementation/11-api-and-security-implementation.md
+10-implementation/12-development-and-release-implementation.md
 ```
 
 ## 2. Implementation Rule

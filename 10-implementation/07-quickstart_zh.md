@@ -51,7 +51,7 @@ cd deploy/compose
 docker compose up -d
 ```
 
-The `compose.yaml` MUST refuse to start without the three required env vars (per ADR 0004). After the container is ready, `docker compose ps` shows the `opstage` service as healthy when `GET /api/system/health` returns `200`.
+Compose 部署必须在缺少三个必需环境变量时拒绝启动（per ADR 0004）。容器 ready 后，`docker compose ps` 会显示 `opstage` service healthy，此时 `GET /api/system/health` 返回 `200`。
 
 ## 3. First Login
 
@@ -75,17 +75,18 @@ The demo container (defined in `deploy/compose/compose.yaml` under the `demo` pr
 
 Within ~30 seconds (one heartbeat cycle), the demo service appears in the UI under Capsule Services with status `HEALTHY`.
 
-## 5. Run an Action
+## 5. 执行 Action
 
-In the UI:
+在 UI 中：
 
-1. Open Capsule Services → `demo-billing` → Actions.
-2. Click the `restart` action.
-3. The dialog shows `dangerLevel: MEDIUM` and `requiresConfirmation: true`. Tick the confirmation checkbox.
-4. Submit. UI navigates to the new Command's detail page.
-5. The Command moves `PENDING → RUNNING → SUCCEEDED` within the heartbeat window.
+1. 打开 Capsule Services → `demo-capsule-service` → Actions。
+2. 点击 `echo` action。
+3. 输入 JSON payload，例如 `{ "message": "hello" }`。
+4. 提交后，UI 会跳转或展示新的 Command 详情。
+5. Agent poll Command 后，状态会从 `PENDING → RUNNING → SUCCEEDED`。
+6. 执行 `runHealthCheck`，验证 action 可以调用已注册的 health provider。
 
-The Audit Events tab now 包含 a `service.action.requested` and `command.completed` row.
+Audit Events 页面会出现该 action/command 生命周期相关审计记录。
 
 ## 6. Tear Down
 

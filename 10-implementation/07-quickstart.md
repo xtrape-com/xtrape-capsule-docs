@@ -35,7 +35,7 @@ cd deploy/compose
 docker compose up -d
 ```
 
-The `compose.yaml` MUST refuse to start without the three required env vars (per ADR 0004). After the container is ready, `docker compose ps` shows the `opstage` service as healthy when `GET /api/system/health` returns `200`.
+The Compose deployment MUST refuse to start without the three required env vars (per ADR 0004). After the container is ready, `docker compose ps` shows the `opstage` service as healthy when `GET /api/system/health` returns `200`.
 
 ## 3. First Login
 
@@ -63,13 +63,14 @@ Within ~30 seconds (one heartbeat cycle), the demo service appears in the UI und
 
 In the UI:
 
-1. Open Capsule Services → `demo-billing` → Actions.
-2. Click the `restart` action.
-3. The dialog shows `dangerLevel: MEDIUM` and `requiresConfirmation: true`. Tick the confirmation checkbox.
-4. Submit. UI navigates to the new Command's detail page.
-5. The Command moves `PENDING → RUNNING → SUCCEEDED` within the heartbeat window.
+1. Open Capsule Services → `demo-capsule-service` → Actions.
+2. Click the `echo` action.
+3. Enter a JSON payload, for example `{ "message": "hello" }`.
+4. Submit. UI navigates to or shows the new Command detail.
+5. The Agent polls the Command and it moves `PENDING → RUNNING → SUCCEEDED`.
+6. Run `runHealthCheck` to verify an action can call the registered health provider.
 
-The Audit Events tab now contains a `service.action.requested` and `command.completed` row.
+The Audit Events tab now contains action/command lifecycle rows for the request and completion.
 
 ## 6. Tear Down
 
@@ -110,5 +111,5 @@ CE v0.1 is intended for self-host evaluation, internal tools, and small ops team
 ## 10. Next Steps
 
 - Read `04-opstage/04-command-and-action-model.md` to learn the command/action lifecycle.
-- Read `05-agents/04-node-agent-sdk.md` to embed the Node Agent SDK in your own service.
+- Read `05-agents/04-node-agent-sdk.md` and `10-implementation/10-user-and-ops-manual.md` to embed and operate the Node Agent SDK.
 - Review `08-decisions/0004-security-defaults.md` before exposing Opstage to the public internet.
