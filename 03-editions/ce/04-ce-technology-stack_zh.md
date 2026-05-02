@@ -39,8 +39,8 @@ Backend:         Fastify + TypeScript
 Validation:      Zod
 Database ORM:    Prisma
 Database:        SQLite by default
-UI:              Vue 3 + TypeScript + Ant Design Vue
-                 (+ TanStack Vue Query + Pinia + Vue Router + Vee-Validate)
+UI:              React 18 + TypeScript + Ant Design (antd 5.x)
+                 (+ TanStack React Query + React Router 7.x)
 Agent SDK:       Node.js + TypeScript (separate repo: xtrape-capsule-agent-node)
 Contracts:       @xtrape/capsule-contracts-node from npm
                  (separate repo: xtrape-capsule-contracts-node; spec lives in xtrape-capsule-docs/09-contracts/)
@@ -252,31 +252,29 @@ CE（社区版） v0.1 database design should:
 Use:
 
 ```text
-Vue 3.5+ + TypeScript + Ant Design Vue 4
-+ TanStack Vue Query (server state)
-+ Pinia (client UI state)
-+ Vue Router 4 (URL state)
-+ Vee-Validate 4 + @vee-validate/zod (forms)
+React 18 + TypeScript + Ant Design (antd 5.x)
++ TanStack React Query (server state)
++ React Router 7.x (URL state)
++ Zod (form validation via antd Form)
 + Vite 5 (build)
-+ Vitest + @vue/test-utils (tests)
++ Vitest (tests)
 ```
 
-This is normative for CE（社区版） v0.1 — see [ADR 0007 — UI State and Data Fetching](../../08-decisions/0007-ui-state-and-data-fetching.md) for the full rationale, store shape, API client rules, query conventions, and folder layout.
+This is normative for CE（社区版） v0.1 — see [ADR 0007 — UI State and Data Fetching](../../08-decisions/0007-ui-state-and-data-fetching.md) for the full rationale, API client rules, query conventions, and folder layout.
 
 ### 6.2 Rationale
 
-Vue 3 + Ant 设计 Vue is selected because:
+React 18 + Ant Design (antd) is selected because:
 
-- Ant 设计 Vue 提供 the same mature tables, forms, tabs, layouts, modals, tags, and status indicators as the React Ant 设计 ecosystem, with feature parity for admin-console workloads;
-- `<script setup>` Composition API + Pinia keeps state management explicit and tree-shakeable;
-- TanStack Query has a first-class Vue adapter (`@tanstack/vue-query`), giving the same server-state model;
-- Vue's smaller core and reactivity primitives suit a small admin SPA;
-- Zod + Vee-Validate share the schema source (`@xtrape/capsule-contracts-node`) with the backend and Agent（代理） SDK.
+- Ant Design React (antd) 提供 mature tables, forms, tabs, layouts, modals, tags, and status indicators ideal for admin-console workloads;
+- TanStack Query has a first-class React adapter (`@tanstack/react-query`) with the same server-state model;
+- React's JSX and hooks model suits a small admin SPA;
+- Zod shares the schema source (`@xtrape/capsule-contracts-node`) with the backend and Agent（代理） SDK.
 
 ### 6.3 Rejected alternatives
 
-- **React 18**: viable but 提供 no advantage here; Vue is selected for CE（社区版） v0.1.
-- **Naive UI / Element Plus / PrimeVue**: not selected because Ant 设计 Vue's component density best matches existing CE（社区版） UI specs.
+- **Vue 3**: viable but React is the implemented choice for CE（社区版） v0.1.
+- **Naive UI / Element Plus / PrimeVue**: not selected because antd's component density best matches existing CE（社区版） UI specs.
 
 ### 6.4 UI build tool
 
@@ -291,8 +289,7 @@ Rationale:
 - fast dev server;
 - simple build process;
 - good TypeScript support;
-- first-class Vue 3 support via `@vitejs/plugin-vue`;
-- 支持 `unplugin-vue-components` for Ant 设计 Vue auto-import.
+- first-class React support via `@vitejs/plugin-react`.
 
 ---
 
@@ -777,7 +774,7 @@ future extensibility
 Recommended stack:
 
 ```text
-TypeScript + Fastify + Zod + Prisma + SQLite + Vue 3 + Ant Design Vue + pnpm + Docker
+TypeScript + Fastify + Zod + Prisma + SQLite + React 18 + Ant Design (antd) + pnpm + Docker
 ```
 
 The most important technology rule is:

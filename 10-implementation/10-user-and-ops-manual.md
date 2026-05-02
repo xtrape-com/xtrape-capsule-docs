@@ -41,7 +41,7 @@ On first boot, the backend creates the default workspace and the initial admin u
 Session TTL is controlled by:
 
 ```text
-OPSTAGE_SESSION_TTL_SECONDS=86400
+OPSTAGE_SESSION_TTL_SECONDS=28800
 ```
 
 Rotating `OPSTAGE_SESSION_SECRET` invalidates all active sessions.
@@ -70,7 +70,7 @@ Recommended operations model:
 ```text
 OPSTAGE_BACKEND_URL=http://localhost:8080
 OPSTAGE_REGISTRATION_TOKEN=opstage_reg_...
-CAPSULE_AGENT_TOKEN_FILE=./data/agent-token.json
+OPSTAGE_AGENT_TOKEN_FILE=./data/agent-token.json
 ```
 
 The Agent registers once, stores its Agent token file, and then uses that file on later restarts. If the token file is deleted, the Agent needs a new registration token unless another valid Agent token is provided.
@@ -101,7 +101,7 @@ Common status interpretation:
 Stale detection uses:
 
 ```text
-OPSTAGE_AGENT_STALE_SECONDS=120
+OPSTAGE_AGENT_OFFLINE_THRESHOLD_SECONDS=90
 OPSTAGE_MAINTENANCE_INTERVAL_SECONDS=60
 ```
 
@@ -165,7 +165,7 @@ Do not expose diagnostics publicly without authentication and TLS.
 | --- | --- | --- |
 | Login fails after restart | Session secret rotated | Login again; if password unknown, restore DB or create migration/admin recovery flow. |
 | Registration token not accepted | Token already used/revoked/expired | Create a new registration token. |
-| Agent appears offline | Heartbeat stopped or stale threshold too low | Check Agent logs, network, and `OPSTAGE_AGENT_STALE_SECONDS`. |
+| Agent appears offline | Heartbeat stopped or stale threshold too low | Check Agent logs, network, and `OPSTAGE_AGENT_OFFLINE_THRESHOLD_SECONDS`. |
 | Action remains pending | Agent is not polling or token revoked | Check Agent status and token file. |
 | `CSRF_INVALID` on POST | Missing `X-CSRF-Token` or cookie issue | Ensure proxy preserves cookies and request headers. |
 | Backup endpoint forbidden | User is not owner | Login with owner role. |

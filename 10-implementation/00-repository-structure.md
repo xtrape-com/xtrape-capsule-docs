@@ -52,7 +52,7 @@ This is the only repository where pnpm workspace is meaningful. It contains the 
 xtrape-capsule-ce/
 ├── apps/
 │   ├── opstage-backend/                @xtrape/opstage-backend         (private)
-│   ├── opstage-ui/                     @xtrape/opstage-ui              (private; Vue 3)
+│   ├── opstage-ui/                     @xtrape/opstage-ui              (private; React 18)
 │   └── demo-capsule-service/           @xtrape/demo-capsule-service    (private)
 ├── packages/
 │   ├── db/                             @xtrape/capsule-db              (private)
@@ -120,7 +120,7 @@ Fastify API server implementing:
 
 #### `apps/opstage-ui`
 
-Vue 3 + Ant Design Vue UI per [ADR 0007](../08-decisions/0007-ui-state-and-data-fetching.md). See [`02-ui-scaffold-plan.md`](./02-ui-scaffold-plan.md) for full details.
+React 18 + Ant Design (antd 5.x) UI per [ADR 0007](../08-decisions/0007-ui-state-and-data-fetching.md). See [`02-ui-scaffold-plan.md`](./02-ui-scaffold-plan.md) for full details.
 
 #### `apps/demo-capsule-service`
 

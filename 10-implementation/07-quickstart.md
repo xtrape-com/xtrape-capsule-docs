@@ -45,19 +45,22 @@ After login, the dashboard shows zero Agents and zero Capsule Services.
 
 ## 4. Connecting the Demo Capsule Service
 
-```bash
-# Still in deploy/compose
-# 1. In the UI, go to Settings → Registration Tokens → Create.
-#    Copy the rawToken value (shown ONCE).
-export OPSTAGE_REGISTRATION_TOKEN="opstage_reg_..."
+Create a registration token in the UI, then run the demo service locally or through a future Compose demo profile. The current CE repository ships the demo service as a Node workspace app.
 
-# 2. Start the demo service container
-docker compose --profile demo up -d
+```bash
+# 1. In the UI, go to Settings → Registration Tokens → Create.
+#    Copy the raw token value (shown ONCE).
+
+# 2. Start the demo service from the CE repository root.
+OPSTAGE_BACKEND_URL=http://localhost:8080 \
+OPSTAGE_REGISTRATION_TOKEN=opstage_reg_... \
+OPSTAGE_AGENT_TOKEN_FILE=./data/demo-agent-token.json \
+pnpm --filter @xtrape/demo-capsule-service start
 ```
 
-The demo container (defined in `deploy/compose/compose.yaml` under the `demo` profile) reads `OPSTAGE_REGISTRATION_TOKEN` from `.env` and registers itself on first start. The Agent token is then persisted in the `demo-data` volume so subsequent restarts skip registration.
+The demo service registers itself on first start. The Agent token is persisted in `OPSTAGE_AGENT_TOKEN_FILE`, so subsequent restarts skip registration while that file remains valid.
 
-Within ~30 seconds (one heartbeat cycle), the demo service appears in the UI under Capsule Services with status `HEALTHY`.
+Within one heartbeat cycle, the demo service appears in the UI under Capsule Services with status `HEALTHY`.
 
 ## 5. Run an Action
 

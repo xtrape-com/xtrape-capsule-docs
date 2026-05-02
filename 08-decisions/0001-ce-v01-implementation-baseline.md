@@ -93,8 +93,8 @@ Backend:         Fastify + TypeScript
 Validation:      Zod
 ORM:             Prisma
 Database:        SQLite
-UI:              Vue 3 + TypeScript + Ant Design Vue
-                 (+ TanStack Vue Query + Pinia + Vue Router + Vee-Validate; see ADR 0007)
+UI:              React 18 + TypeScript + Ant Design (antd 5.x)
+                 (+ TanStack React Query + React Router 7.x; see ADR 0007)
 Agent SDK:       Node.js + TypeScript (separate repo: xtrape-capsule-agent-node)
 Contracts:       @xtrape/capsule-contracts-node from npm (separate repo)
 Package Manager: pnpm

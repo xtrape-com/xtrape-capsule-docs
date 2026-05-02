@@ -327,7 +327,7 @@ The `xtrape-capsule-ce` monorepo is the only one that uses pnpm workspace. Inter
 xtrape-capsule-ce/
 ├── apps/
 │   ├── opstage-backend/                    @xtrape/opstage-backend       (private)
-│   ├── opstage-ui/                         @xtrape/opstage-ui            (private; Vue 3 + Ant Design Vue)
+│   ├── opstage-ui/                         @xtrape/opstage-ui            (private; React 18 + Ant Design)
 │   └── demo-capsule-service/               @xtrape/demo-capsule-service  (private)
 ├── packages/
 │   ├── db/                                 @xtrape/capsule-db            (private)
@@ -350,7 +350,7 @@ Fastify backend application. Contains HTTP server, Admin APIs, Agent APIs, datab
 
 ### 7.2 `apps/opstage-ui`
 
-Vue 3 + Ant Design Vue web UI application. Contains login page, dashboard, Agent pages, Capsule Service pages, Command pages, Audit pages. See [ADR 0007](../../08-decisions/0007-ui-state-and-data-fetching.md) for the full state-and-data-fetching stack.
+React 18 + Ant Design (antd) web UI application. Contains login page, dashboard, Agent pages, Capsule Service pages, Command pages, Audit pages. See [ADR 0007](../../08-decisions/0007-ui-state-and-data-fetching.md) for the full state-and-data-fetching stack.
 
 ### 7.3 `apps/demo-capsule-service`
 
@@ -448,15 +448,12 @@ UI is a single-page Web console.
 CE v0.1 stack (decided by [ADR 0007](../../08-decisions/0007-ui-state-and-data-fetching.md)):
 
 ```text
-Vue 3 + TypeScript + Ant Design Vue
-+ TanStack Vue Query (server state)
-+ Pinia (client UI state)
-+ Vue Router (URL state)
-+ Vee-Validate + Zod (forms)
+React 18 + TypeScript + Ant Design (antd 5.x)
++ TanStack React Query (server state)
++ React Router 7.x (URL state)
++ Zod (form validation)
 + Vite (build)
 ```
-
-This decision is normative; React is no longer a candidate for CE v0.1.
 
 ### 9.2 UI pages
 

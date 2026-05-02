@@ -16,111 +16,81 @@
 
 # ADR 0007: CE（社区版） v0.1 UI State and Data Fetching
 
-- Status: Accepted
+- Status: Accepted (supersedes the Vue 3 draft; React 18 is the implemented stack)
 - Edition: CE（社区版）
 - Priority: Current
 - Audience: frontend developers, product designers, backend developers, AI coding agents
 
 ## Decision
 
-Opstage（运维舞台） CE（社区版） UI is a **Vue 3** SPA built with **Ant 设计 Vue** for components, **TanStack Vue Query** for server state, and **Pinia** for the small slice of client state that does not belong on the server. There is no Vuex, no hand-rolled global event bus, no Composition API helpers reinventing what Vue Router or Pinia already 提供.
+Opstage（运维舞台） CE（社区版） UI is a **React 18** SPA built with **Ant Design (antd 5.x)** for components, **TanStack React Query** for server state, and **React component state plus module-scoped in-memory CSRF state** for the small slice of client state that does not belong on the server.
 
-This ADR replaces the React/Zustand stack proposed in earlier drafts. Frontend lives in `xtrape-capsule-ce/apps/opstage-ui` (CE（社区版） monorepo).
+Frontend lives in `xtrape-capsule-ce/apps/opstage-ui` (CE（社区版） monorepo).
 
 ## Stack
 
 ```text
-Vue                     3.5.x   (Composition API + <script setup> only)
+React                   18.x
 TypeScript              5.x     (strict)
 Vite                    5.x
-Ant Design Vue          4.x
-@tanstack/vue-query     5.x     (server state)
-Pinia                   2.x     (small client state slice)
-Vue Router              4.x
-Vee-Validate            4.x     (form validation; resolves Zod schemas via @vee-validate/zod)
+antd                    5.x     (Ant Design React)
+@tanstack/react-query   5.x     (server state)
+react-router-dom        7.x     (URL state + routing)
 Zod                     3.x     (shared with Backend via @xtrape/capsule-contracts-node)
-@vueuse/core            11.x    (a few primitive composables: useElementVisibility, etc.)
 Vitest                  2.x
 Playwright                       optional, for happy-path E2E
 ```
 
-The Vue version, Vue Router, and Pinia choices are normative for CE（社区版） v0.1. Replacing any of them requires a new ADR.
-
 ## State Boundaries
 
 ```text
-Server state    → TanStack Vue Query                  # everything fetched from /api/*
-Form state      → Vee-Validate (driven by Zod)        # transient input
-Client UI state → Pinia                               # the small global pieces below
-URL state       → Vue Router (query string + params)  # filters, pagination, sort
-Component state → ref / reactive                      # everything else
+Server state    → TanStack React Query           # everything fetched from /api/*
+Form state      → antd Form (built-in) + Zod     # transient input
+Client UI state → React component state + module memory  # session, csrfToken
+URL state       → React Router (search params)    # filters, pagination, sort
+Component state → useState / useReducer           # everything else
 ```
 
-The `csrfToken` is stored in a Pinia store and re-hydrated from `GET /api/admin/auth/me` on bootstrap (see ADR 0004). It MUST NOT be persisted to `localStorage` or `sessionStorage`.
+The `csrfToken` is stored only in module-scoped memory and re-hydrated from `POST /api/admin/auth/login`, `GET /api/admin/auth/me`, or `GET /api/admin/auth/csrf` (see ADR 0004). It MUST NOT be persisted to `localStorage` or `sessionStorage`.
 
-## Pinia App Store (CE（社区版） v0.1)
+## Session and CSRF State (CE v0.1)
 
 ```ts
-// apps/opstage-ui/src/stores/app-store.ts
-import { defineStore } from "pinia";
-import { ref } from "vue";
+// apps/opstage-ui/src/api.ts (sketch)
+let csrfToken = "";
 
-export type AdminUser = {
-  id: string;
-  username: string;
-  displayName: string | null;
-  role: "owner";
-  status: "ACTIVE" | "DISABLED";
-};
+export function setCsrfToken(token: string) {
+  csrfToken = token;
+}
 
-export const useAppStore = defineStore("app", () => {
-  const bootstrapped = ref(false);
-  const user = ref<AdminUser | null>(null);
-  const csrfToken = ref<string | null>(null);
-  const sessionExpiresAt = ref<string | null>(null);
-  const theme = ref<"light" | "dark">("light");
+export function clearCsrfToken() {
+  csrfToken = "";
+}
 
-  function setSession(s: { user: AdminUser; csrfToken: string; expiresAt: string }) {
-    user.value = s.user;
-    csrfToken.value = s.csrfToken;
-    sessionExpiresAt.value = s.expiresAt;
-    bootstrapped.value = true;
-  }
-
-  function clearSession() {
-    user.value = null;
-    csrfToken.value = null;
-    sessionExpiresAt.value = null;
-  }
-
-  function setCsrfToken(t: string) { csrfToken.value = t; }
-  function setTheme(t: "light" | "dark") { theme.value = t; }
-
-  return {
-    bootstrapped, user, csrfToken, sessionExpiresAt, theme,
-    setSession, clearSession, setCsrfToken, setTheme,
-  };
-});
+export async function refreshCsrfToken() {
+  const res = await fetch("/api/admin/auth/csrf", { credentials: "include" });
+  const env = await res.json();
+  setCsrfToken(env.data.csrfToken);
+}
 ```
 
-The store MUST be persisted to neither `localStorage` nor `sessionStorage` (no `pinia-plugin-persistedstate`). The session and CSRF token come from the server on every page load via `GET /api/admin/auth/me`.
+The session and CSRF token MUST NOT be persisted to `localStorage` or `sessionStorage`. They come from the server on every page load via `GET /api/admin/auth/me`, and CSRF can be refreshed via `GET /api/admin/auth/csrf`.
 
 ## API Client
 
-A single thin fetch wrapper lives in `apps/opstage-ui/src/lib/api-client.ts`. Rules:
+A single thin fetch wrapper lives in `apps/opstage-ui/src/api.ts`. Rules:
 
 - always sends `credentials: "include"` so the session cookie is attached;
-- adds `X-CSRF-Token` from the Pinia store on every non-GET request;
-- on `401`: clears the Pinia session and pushes the `login` route via `useRouter()`;
-- on `403` with `error.code === "CSRF_TOKEN_MISMATCH"`: calls `GET /api/admin/auth/csrf`, updates Pinia, retries the request once;
+- adds `X-CSRF-Token` from module-scoped memory on every non-GET request;
+- on `401`: clears session context and navigates to `/login`;
+- on `403` with `error.code === "CSRF_INVALID"`: calls `GET /api/admin/auth/csrf`, updates the in-memory token, retries the request once;
 - on `4xx` errors: throws an `ApiError` with `httpStatus`, `code`, `message`, `details` (parsed from `ErrorEnvelope`);
 - on network error: throws an `ApiError` with `code: "NETWORK_ERROR"`.
 
-The wrapper is the only allowed `fetch` caller in the UI; ESLint rule `no-restricted-globals: ["fetch"]` enforces this. Pages and components MUST go through `features/<x>/use*.ts` composables, which in turn call this wrapper — they never call `fetch` directly.
+The wrapper is the only allowed `fetch` caller in the UI; ESLint rule `no-restricted-globals: ["fetch"]` enforces this. Pages and components MUST call the wrapper or typed data hooks; they never call `fetch` directly.
 
 ```ts
-// apps/opstage-ui/src/lib/api-client.ts (sketch)
-import { useAppStore } from "@/stores/app-store";
+// apps/opstage-ui/src/api.ts (sketch)
 import type { ErrorEnvelope } from "@xtrape/capsule-contracts-node";
 
 export class ApiError extends Error {
@@ -132,30 +102,33 @@ export class ApiError extends Error {
   ) { super(message); }
 }
 
+let csrfToken = "";
+export function setCsrfToken(token: string) { csrfToken = token; }
+export function clearCsrfToken() { csrfToken = ""; }
+
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const store = useAppStore();
   const isMutation = init.method && init.method !== "GET";
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
   if (init.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
-  if (isMutation && store.csrfToken) headers.set("X-CSRF-Token", store.csrfToken);
+  if (isMutation && csrfToken) headers.set("X-CSRF-Token", csrfToken);
 
   const res = await fetch(path, { ...init, headers, credentials: "include" });
   if (res.ok) return (res.status === 204 ? (undefined as T) : await res.json());
   const env = (await res.json().catch(() => undefined)) as ErrorEnvelope | undefined;
 
-  if (res.status === 401) { store.clearSession(); /* router push to /login handled by app shell */ }
-  if (res.status === 403 && env?.error.code === "CSRF_TOKEN_MISMATCH" && !init.headers?.["X-Retry"]) {
+  if (res.status === 401) { clearCsrfToken(); /* router navigation handled by app shell */ }
+  if (res.status === 403 && env?.error.code === "CSRF_INVALID" && !headers.has("X-Retry")) {
     const fresh = await fetch("/api/admin/auth/csrf", { credentials: "include" });
     const json = await fresh.json();
-    store.setCsrfToken(json.data.csrfToken);
-    return apiFetch<T>(path, { ...init, headers: { ...init.headers, "X-Retry": "1" } });
+    setCsrfToken(json.data.csrfToken);
+    return apiFetch<T>(path, { ...init, headers: { ...Object.fromEntries(headers), "X-Retry": "1" } });
   }
   throw new ApiError(res.status, env?.error.code ?? "INTERNAL_ERROR", env?.error.message ?? res.statusText, env?.error.details);
 }
 ```
 
-## TanStack Vue Query Conventions
+## TanStack React Query Conventions
 
 ```text
 queryKey shape          [<resource>, <id?>, <params?>]
@@ -171,18 +144,18 @@ retry                   1 (only on 5xx and NETWORK_ERROR)
 Mutations:
 
 - ALWAYS invalidate the relevant list key on success (`queryClient.invalidateQueries({ queryKey: ["agents"] })`);
-- show success/failure via Ant 设计 Vue `message` / `notification`;
+- show success/failure via antd `message` / `notification`;
 - never optimistically update lists in CE（社区版） v0.1 (keep it simple).
 
 ```ts
-// apps/opstage-ui/src/features/agents/use-agents.ts
-import { useQuery } from "@tanstack/vue-query";
+// apps/opstage-ui/src/hooks/use-agents.ts
+import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-client";
 
-export function useAgents(params: Ref<{ page: number; pageSize: number; status?: string[] }>) {
+export function useAgents(params: { page: number; pageSize: number; status?: string[] }) {
   return useQuery({
     queryKey: ["agents", params],
-    queryFn: () => apiFetch(`/api/admin/agents?${new URLSearchParams(params.value as any)}`),
+    queryFn: () => apiFetch(`/api/admin/agents?${new URLSearchParams(params as any)}`),
     staleTime: 30_000,
   });
 }
@@ -192,75 +165,81 @@ export function useAgents(params: Ref<{ page: number; pageSize: number; status?:
 
 ```text
 apps/opstage-ui/src/
-├── main.ts
-├── App.vue
+├── main.tsx
+├── App.tsx
 ├── router/
-│   └── index.ts                  (Vue Router routes; lazy-loaded views)
-├── views/                        (route components)
-│   ├── LoginView.vue
-│   ├── DashboardView.vue
+│   └── index.tsx                 (React Router routes; lazy-loaded pages)
+├── pages/                        (route components)
+│   ├── LoginPage.tsx
+│   ├── DashboardPage.tsx
 │   ├── agents/
-│   │   ├── AgentListView.vue
-│   │   └── AgentDetailView.vue
+│   │   ├── AgentListPage.tsx
+│   │   └── AgentDetailPage.tsx
 │   ├── registration-tokens/
-│   │   └── RegistrationTokenListView.vue
+│   │   └── RegistrationTokenListPage.tsx
 │   ├── capsule-services/
-│   │   ├── CapsuleServiceListView.vue
-│   │   ├── CapsuleServiceDetailView.vue
-│   │   └── tabs/{Overview,Manifest,Health,Configs,Actions,Commands,Audit}.vue
+│   │   ├── CapsuleServiceListPage.tsx
+│   │   ├── CapsuleServiceDetailPage.tsx
+│   │   └── tabs/{Overview,Manifest,Health,Configs,Actions,Commands,Audit}.tsx
 │   └── audit-events/
-│       ├── AuditEventListView.vue
-│       └── AuditEventDetailView.vue
+│       ├── AuditEventListPage.tsx
+│       └── AuditEventDetailPage.tsx
 ├── components/                   (shared presentational components)
-├── features/                     (feature-scoped composables + components)
+├── hooks/                        (feature-scoped query hooks + mutation hooks)
 │   ├── auth/                       useSession, useLogin, useLogout
 │   ├── agents/                     useAgents, useAgent, useDisableAgent, ...
 │   ├── capsule-services/
 │   ├── commands/
 │   └── audit-events/
-├── stores/
-│   └── app-store.ts
+├── context/
+│   └── session-context.tsx
 ├── lib/
 │   ├── api-client.ts
-│   ├── query-client.ts             (createQueryClient + VueQueryPlugin install)
+│   ├── query-client.ts             (createQueryClient + QueryClientProvider)
 │   └── format.ts
 └── styles/
 ```
 
 Rules:
 
-- Each `features/<x>/` directory exposes a small set of typed composables (`useAgents()`, etc.) that wrap TanStack Vue Query against the OpenAPI contract. Components MUST consume these composables; they MUST NOT call `apiFetch` directly.
-- Views are thin: they read URL params via `useRoute()`, call composables, and render Ant 设计 Vue components.
-- `<script setup lang="ts">` is the only Vue SFC variant used. Options API is forbidden.
+- CE v0.1 currently exposes a small `useQueryData()` helper backed by TanStack React Query. Larger modules may split into `hooks/use*.ts` files as the UI grows.
+- Pages are thin: they read URL params via `useSearchParams()`, call hooks, and render antd components.
 
 ## Forms
 
-All forms use **Vee-Validate 4** with Zod resolvers. The same Zod schemas exported by `@xtrape/capsule-contracts-node` are used for both Backend and UI validation, so the UI can short-circuit obvious errors before round-tripping the server.
+All forms use **antd Form** with Zod for schema validation. The same Zod schemas exported by `@xtrape/capsule-contracts-node` are used for both Backend and UI validation.
 
-```vue
-<!-- apps/opstage-ui/src/features/registration-tokens/CreateTokenForm.vue -->
-<script setup lang="ts">
-import { useForm } from "vee-validate";
-import { toTypedSchema } from "@vee-validate/zod";
+```tsx
+// apps/opstage-ui/src/features/registration-tokens/CreateTokenForm.tsx
+import { Form, Input, InputNumber, Button } from "antd";
 import { createRegistrationTokenRequestSchema } from "@xtrape/capsule-contracts-node";
 
-const { handleSubmit, errors, defineField } = useForm({
-  validationSchema: toTypedSchema(createRegistrationTokenRequestSchema),
-});
+export function CreateTokenForm({ onSubmit }: { onSubmit: (values: unknown) => void }) {
+  const [form] = Form.useForm();
 
-const [name] = defineField("name");
-const [expiresInSeconds] = defineField("expiresInSeconds");
+  const handleFinish = (values: unknown) => {
+    const parsed = createRegistrationTokenRequestSchema.safeParse(values);
+    if (!parsed.success) { form.setFields(/* map Zod errors */); return; }
+    onSubmit(parsed.data);
+  };
 
-const onSubmit = handleSubmit(async (values) => {
-  // values is fully typed from the Zod schema
-  // call useCreateRegistrationToken().mutateAsync(values)
-});
-</script>
+  return (
+    <Form form={form} onFinish={handleFinish} layout="vertical">
+      <Form.Item name="name" label="Name">
+        <Input />
+      </Form.Item>
+      <Form.Item name="expiresInSeconds" label="Expires in (seconds)">
+        <InputNumber min={60} />
+      </Form.Item>
+      <Button type="primary" htmlType="submit">Create</Button>
+    </Form>
+  );
+}
 ```
 
 ## Error Surface
 
-`ApiError` is converted to user-facing copy via a `useApiErrorMessage(err)` composable that maps `error.code` → friendly text (with a fallback to `error.message`). 认证-related codes (`UNAUTHORIZED`, `CSRF_TOKEN_MISMATCH`) are handled by the API client and never bubble to components.
+`ApiError` is converted to user-facing copy via a `useApiErrorMessage(err)` hook that maps `error.code` → friendly text (with a fallback to `error.message`). 认证-related codes (`UNAUTHORIZED`, `CSRF_INVALID`) are handled by the API client and never bubble to components.
 
 ```ts
 // apps/opstage-ui/src/lib/use-api-error-message.ts
@@ -286,19 +265,18 @@ The map MUST stay in sync with `09-contracts/errors.json`; a small script in CI 
 
 - WebSockets / SSE for live updates (UI polls; query refetch is sufficient);
 - Service Worker / offline mode;
-- i18n framework (English only — strings live inline, but MUST go through a thin `t("...")` wrapper so EE（企业版） can switch to vue-i18n without churn);
+- i18n framework (English only — strings live inline, but MUST go through a thin `t("...")` wrapper so EE（企业版） can switch to react-i18next without churn);
 - Theme builder UI;
-- Vuex (replaced by Pinia);
-- Options API (only `<script setup>`);
-- Any state library other than TanStack Vue Query + Pinia;
-- `pinia-plugin-persistedstate` (session is server-side, never local-cache);
-- Direct `fetch` calls outside `lib/api-client.ts`.
+- Any state library other than TanStack React Query plus local React state for CE v0.1;
+- Session state in `localStorage` or `sessionStorage` (session is server-side);
+- Direct `fetch` calls outside `api.ts`;
+- `dangerouslySetInnerHTML` (use React's default escaping).
 
 ## Acceptance Criteria
 
-- `apps/opstage-ui` boots, mounts the `VueQueryPlugin`, and bootstraps session via `GET /api/admin/auth/me`.
+- `apps/opstage-ui` boots, mounts `QueryClientProvider`, and bootstraps session via `GET /api/admin/auth/me`.
 - All non-GET requests carry `X-CSRF-Token`.
-- A 403 `CSRF_TOKEN_MISMATCH` triggers exactly one silent token refresh + retry; if that retry fails, the user sees an Ant 设计 Vue notification.
-- A 401 redirects to `/login` and clears the Pinia session.
+- A 403 `CSRF_INVALID` triggers exactly one silent token refresh + retry; if that retry fails, the user sees an antd notification.
+- A 401 redirects to `/login` and clears session context.
 - `localStorage`/`sessionStorage` is empty after login (verifiable via DevTools).
 - Every form imports its Zod schema from `@xtrape/capsule-contracts-node`; no schema is duplicated in the UI.

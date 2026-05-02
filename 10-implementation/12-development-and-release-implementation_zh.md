@@ -133,9 +133,9 @@ CE Docker build 使用 multi-stage image 编译 Backend/UI/packages，并以单 
 | `OPSTAGE_ADMIN_USERNAME` | none | 首次启动 bootstrap admin 需要。 |
 | `OPSTAGE_ADMIN_PASSWORD` | none | 至少 12 字符。 |
 | `OPSTAGE_SESSION_SECRET` | none | 至少 32 字符；必需。 |
-| `OPSTAGE_SESSION_TTL_SECONDS` | `86400` | Session max age。 |
+| `OPSTAGE_SESSION_TTL_SECONDS` | `28800` | Session max age。 |
 | `OPSTAGE_STATIC_DIR` | `apps/opstage-ui/dist` | Built UI directory。 |
-| `OPSTAGE_AGENT_STALE_SECONDS` | `120` | Agent freshness threshold。 |
+| `OPSTAGE_AGENT_OFFLINE_THRESHOLD_SECONDS` | `120` | Agent freshness threshold。 |
 | `OPSTAGE_AUDIT_RETENTION_DAYS` | `90` | Audit retention。 |
 | `OPSTAGE_MAINTENANCE_INTERVAL_SECONDS` | `60` | 后台维护间隔；`0` 关闭 timer。 |
 | `OPSTAGE_BACKUP_DIR` | `./data/backups` | SQLite backup 输出目录。 |
@@ -146,5 +146,5 @@ Demo/Agent 变量：
 | --- | --- |
 | `OPSTAGE_BACKEND_URL` | Agent SDK 访问 Backend 的 base URL。 |
 | `OPSTAGE_REGISTRATION_TOKEN` | 首次注册使用的一次性 raw registration token。 |
-| `CAPSULE_AGENT_TOKEN_FILE` | 本地 Agent token 文件路径。 |
+| `OPSTAGE_AGENT_TOKEN_FILE` | 本地 Agent token 文件路径。 |
 | `DEMO_MESSAGE` | Demo service config preview value。 |

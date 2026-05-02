@@ -133,9 +133,9 @@ Important CE environment variables:
 | `OPSTAGE_ADMIN_USERNAME` | none | Required on first boot for bootstrap admin. |
 | `OPSTAGE_ADMIN_PASSWORD` | none | Min 12 chars. |
 | `OPSTAGE_SESSION_SECRET` | none | Min 32 chars; required. |
-| `OPSTAGE_SESSION_TTL_SECONDS` | `86400` | Session max age. |
+| `OPSTAGE_SESSION_TTL_SECONDS` | `28800` | Session max age. |
 | `OPSTAGE_STATIC_DIR` | `apps/opstage-ui/dist` | Built UI directory. |
-| `OPSTAGE_AGENT_STALE_SECONDS` | `120` | Agent freshness threshold. |
+| `OPSTAGE_AGENT_OFFLINE_THRESHOLD_SECONDS` | `120` | Agent freshness threshold. |
 | `OPSTAGE_AUDIT_RETENTION_DAYS` | `90` | Audit retention. |
 | `OPSTAGE_MAINTENANCE_INTERVAL_SECONDS` | `60` | Background maintenance interval; `0` disables timer. |
 | `OPSTAGE_BACKUP_DIR` | `./data/backups` | SQLite backup output directory. |
@@ -146,5 +146,5 @@ Demo/Agent variables:
 | --- | --- |
 | `OPSTAGE_BACKEND_URL` | Backend base URL for Agent SDK. |
 | `OPSTAGE_REGISTRATION_TOKEN` | Raw one-time registration token for first registration. |
-| `CAPSULE_AGENT_TOKEN_FILE` | Local Agent token file path. |
+| `OPSTAGE_AGENT_TOKEN_FILE` | Local Agent token file path. |
 | `DEMO_MESSAGE` | Demo service config preview value. |

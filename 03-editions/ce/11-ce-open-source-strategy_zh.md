@@ -147,7 +147,7 @@ CE（社区版） v0.1 ships across **four repositories** under the `xtrape` Git
 ||`xtrape-capsule-docs`|shared|设计 docs, ADRs, and the language-agnostic Layer 1 contract SSOT (OpenAPI YAML, JSON enums, error codes).||
 ||`xtrape-capsule-contracts-node`|shared|Node bindings of the contracts (TypeScript types, Zod schemas, enum constants). Published as `@xtrape/capsule-contracts-node` on npm.||
 ||`xtrape-capsule-agent-node`|shared|Node Agent（代理） SDK. Published as `@xtrape/capsule-agent-node` on npm.||
-||**`xtrape-capsule-ce`**|**CE（社区版）**|The CE（社区版） control plane: Opstage（运维舞台） backend (Fastify), Opstage（运维舞台） UI (Vue 3 + Ant 设计 Vue), demo Capsule Service（胶囊服务）, and Docker deploy. The only edition-bound code repo.||
+||**`xtrape-capsule-ce`**|**CE（社区版）**|The CE（社区版） control plane: Opstage（运维舞台） backend (Fastify), Opstage（运维舞台） UI (React 18 + Ant Design (antd)), demo Capsule Service（胶囊服务）, and Docker deploy. The only edition-bound code repo.||
 
 ### 6.2 Why this split
 
@@ -173,7 +173,7 @@ Inside `xtrape-capsule-ce` (the CE（社区版） monorepo), pnpm workspace pack
 xtrape-capsule-ce/
 ├── apps/
 │   ├── opstage-backend/                @xtrape/opstage-backend         (private)
-│   ├── opstage-ui/                     @xtrape/opstage-ui              (private; Vue 3 + AntDV)
+│   ├── opstage-ui/                     @xtrape/opstage-ui              (private; React 18 + Ant Design)
 │   └── demo-capsule-service/           @xtrape/demo-capsule-service    (private)
 ├── packages/
 │   ├── db/                             @xtrape/capsule-db              (private)

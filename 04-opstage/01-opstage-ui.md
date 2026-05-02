@@ -168,14 +168,11 @@ These may be future EE or Cloud features.
 CE UI stack (decided by [ADR 0007](../08-decisions/0007-ui-state-and-data-fetching.md)):
 
 ```text
-Vue 3 + TypeScript + Vite + Ant Design Vue
-+ TanStack Vue Query (server state)
-+ Pinia (client UI state)
-+ Vue Router (URL state)
-+ Vee-Validate + Zod (forms)
+React 18 + TypeScript + Vite + Ant Design (antd 5.x)
++ TanStack React Query (server state)
++ React Router 7.x (URL state)
++ Zod (form validation)
 ```
-
-Ant Design Vue provides the same mature admin-console components as the React Ant Design ecosystem (tables, forms, drawers, tabs, layout) with feature parity for this product.
 
 The UI should remain a Web console. A native mobile app is not required for CE v0.1.
 

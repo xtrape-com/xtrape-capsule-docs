@@ -25,7 +25,7 @@
 
 ## 1. Goal
 
-Build the Opstage（运维舞台） CE（社区版） UI as a simple, useful governance console for the CE（社区版） v0.1 loop, using Vue 3 + Ant 设计 Vue.
+Build the Opstage（运维舞台） CE（社区版） UI as a simple, useful governance console for the CE（社区版） v0.1 loop, using React 18 + Ant Design (antd 5.x).
 
 The UI MUST conform to:
 
@@ -46,16 +46,13 @@ xtrape-capsule-ce/apps/opstage-ui          (workspace package: @xtrape/opstage-u
 Per [ADR 0007](../08-decisions/0007-ui-state-and-data-fetching.md):
 
 ```text
-Vue                     3.5.x   (Composition API + <script setup> only)
+React                   18.x
 TypeScript              5.x     (strict)
 Vite                    5.x
-Ant Design Vue          4.x
-@tanstack/vue-query     5.x
-Pinia                   2.x
-Vue Router              4.x
-Vee-Validate            4.x     (+ @vee-validate/zod)
+antd                    5.x     (Ant Design React)
+@tanstack/react-query   5.x
+react-router-dom        7.x
 Zod                     3.x     (re-exported from @xtrape/capsule-contracts-node)
-@vueuse/core            11.x
 Vitest                  2.x
 Playwright                        optional, for happy-path E2E
 ```
@@ -63,11 +60,11 @@ Playwright                        optional, for happy-path E2E
 State boundaries:
 
 ```text
-Server state    → TanStack Vue Query
-Form state      → Vee-Validate
-Client UI state → Pinia (session, csrfToken, theme)
-URL state       → Vue Router (page/pageSize/sort/filter)
-Component state → ref / reactive
+Server state    → TanStack React Query
+Form state      → antd Form（内置）+ Zod 用于 schema 验证
+Client UI state → React context（session, csrfToken）
+URL state       → React Router（page/pageSize/sort/filter 作为 search params）
+Component state → useState / useReducer
 ```
 
 ## 4. Dependencies on `@xtrape/capsule-contracts-node`
@@ -79,13 +76,11 @@ The UI MUST install the contracts package from npm (NEVER from a workspace `link
 {
   "dependencies": {
     "@xtrape/capsule-contracts-node": "^0.1.0",
-    "ant-design-vue": "^4.0.0",
-    "vue": "^3.5.0",
-    "vue-router": "^4.0.0",
-    "pinia": "^2.0.0",
-    "@tanstack/vue-query": "^5.0.0",
-    "vee-validate": "^4.0.0",
-    "@vee-validate/zod": "^4.0.0",
+    "antd": "^5.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^7.0.0",
+    "@tanstack/react-query": "^5.0.0",
     "zod": "^3.0.0"
   }
 }
@@ -101,37 +96,36 @@ The UI consumes from the contracts package:
 
 ## 5. Page Structure
 
-Routes are defined in `src/router/index.ts` using Vue Router 4 lazy loading:
+Routes are defined in `src/router/index.tsx` using React Router 7 lazy loading:
 
 ```text
-/login                              LoginView.vue
-/dashboard                          DashboardView.vue
-/agents                             AgentListView.vue
-/agents/:agentId                    AgentDetailView.vue
-/registration-tokens                RegistrationTokenListView.vue
-/capsule-services                   CapsuleServiceListView.vue
-/capsule-services/:serviceId        CapsuleServiceDetailView.vue
-/capsule-services/:serviceId/health CapsuleServiceDetailView.vue (tab=health)
+/login                              LoginPage.tsx
+/dashboard                          DashboardPage.tsx
+/agents                             AgentListPage.tsx
+/agents/:agentId                    AgentDetailPage.tsx
+/registration-tokens                RegistrationTokenListPage.tsx
+/capsule-services                   CapsuleServiceListPage.tsx
+/capsule-services/:serviceId        CapsuleServiceDetailPage.tsx
 /capsule-services/:serviceId/...    (tabs=overview|manifest|configs|actions|commands|audit)
-/commands                           CommandListView.vue
-/commands/:commandId                CommandDetailView.vue
-/audit-events                       AuditEventListView.vue
-/audit-events/:auditEventId         AuditEventDetailView.vue
-/settings                           SettingsView.vue
+/commands                           CommandListPage.tsx
+/commands/:commandId                CommandDetailPage.tsx
+/audit-events                       AuditEventListPage.tsx
+/audit-events/:auditEventId         AuditEventDetailPage.tsx
+/settings                           SettingsPage.tsx
 ```
 
-A guard composable `useRequireAuth()` redirects to `/login` if the Pinia session is empty after `GET /api/admin/auth/me` resolves.
+A `<RequireAuth>` wrapper component redirects to `/login` if the session context is empty after `GET /api/admin/auth/me` resolves.
 
 ## 6. Layout
 
-Common layout (`src/components/AppShell.vue`):
+Common layout (`src/components/AppShell.tsx`):
 
 ```text
-<a-layout>
-  <a-layout-header>      (top bar: logo, user dropdown, theme toggle)
-  <a-layout>
-    <a-layout-sider>     (sidebar navigation)
-    <a-layout-content>   (router-view + ErrorBoundary)
+<Layout>
+  <Layout.Header>      (top bar: logo, user dropdown)
+  <Layout>
+    <Layout.Sider>     (sidebar navigation)
+    <Layout.Content>   (router outlet + ErrorBoundary)
 ```
 
 Primary navigation:
@@ -151,40 +145,40 @@ Settings
 
 Responsibilities:
 
-- username/password login via Vee-Validate form;
-- on success: hydrate Pinia, redirect to dashboard;
-- on failure: show generic Ant 设计 Vue `a-alert` (do not reveal which field failed).
+- username/password login via antd `Form`;
+- on success: hydrate session context, redirect to dashboard;
+- on failure: show generic antd `Alert` (do not reveal which field failed).
 
 ### 7.2 Dashboard
 
 Show:
 
-- `<a-statistic>` cards: Agent（代理） counts by status, Capsule Service（胶囊服务） counts by status;
-- `<a-table>`: recent failed Commands (last 10);
-- `<a-table>`: recent AuditEvents (last 10);
-- `<a-card>`: quick start checklist (only when no Agents are registered yet).
+- `<Statistic>` cards: Agent（代理） counts by status, Capsule Service（胶囊服务） counts by status;
+- `<Table>`: recent failed Commands (last 10);
+- `<Table>`: recent AuditEvents (last 10);
+- `<Card>`: quick start checklist (only when no Agents are registered yet).
 
 ### 7.3 Agent（代理） List / Detail
 
-List columns (`<a-table>`):
+List columns (`<Table>`):
 
 ```text
 code
 name
 mode
 runtime
-status (with <a-tag color={statusColor}>)
+status (with <Tag color={statusColor}>)
 lastHeartbeatAt
 createdAt
 ```
 
-Detail sections (`<a-tabs>`):
+Detail sections (`<Tabs>`):
 
 - basic info;
 - status and heartbeat history;
 - related Capsule Services;
 - recent Commands;
-- admin actions: disable, enable, revoke (each behind `<a-popconfirm>` for confirmation).
+- admin actions: disable, enable, revoke (each behind `<Popconfirm>` for confirmation).
 
 ### 7.4 Capsule Service（胶囊服务） List / Detail
 
@@ -201,7 +195,7 @@ agent
 lastReportedAt
 ```
 
-Detail tabs (`<a-tabs>`):
+Detail tabs (`<Tabs>`):
 
 ```text
 Overview
@@ -219,10 +213,10 @@ This is the core CE（社区版） v0.1 page. Tab content is route-driven (`/cap
 
 Action execution flow:
 
-1. user opens action dialog (`<a-modal>`);
-2. UI displays action label, description, danger level (`<a-tag color="red|orange|blue">`), confirmation requirement, and input schema if available;
-3. user enters JSON payload via `<a-textarea>` (validated against `inputSchema` using `ajv`);
-4. HIGH or `requiresConfirmation` actions require an explicit second-step confirmation checkbox + `<a-popconfirm>`;
+1. user opens action dialog (`<Modal>`);
+2. UI displays action label, description, danger level (`<Tag color="red|orange|blue">`), confirmation requirement, and input schema if available;
+3. user enters JSON payload via `<Input.TextArea>` (validated against `inputSchema` using `ajv`);
+4. HIGH or `requiresConfirmation` actions require an explicit second-step confirmation checkbox + `<Popconfirm>`;
 5. UI calls `POST /api/admin/capsule-services/{serviceId}/actions/{actionName}` via `useExecuteAction()` mutation;
 6. UI links to the created Command's detail page.
 
@@ -272,7 +266,7 @@ Detail page shows the full metadata JSON with sensitive fields redacted (the bac
 
 CE（社区版） v0.1 settings should include:
 
-- create registration token (with one-time `rawToken` reveal in a `<a-modal>` after creation; can be copied once, never shown again);
+- create registration token (with one-time `rawToken` reveal in a `<Modal>` after creation; can be copied once, never shown again);
 - list/revoke registration tokens;
 - system version (read from `GET /api/system/version`);
 - system health (`GET /api/system/health`).
@@ -284,24 +278,24 @@ Avoid EE（企业版）/Cloud（云版） settings such as tenant, billing, SSO,
 - Do not show raw registration tokens after the initial creation modal closes.
 - Do not show raw Agent（代理） tokens, ever.
 - Mask sensitive config values (the backend does this server-side; UI just renders).
-- Require confirmation (`<a-popconfirm>` or HIGH-action modal) for dangerous actions.
-- Do not treat stale/offline services as healthy — `<a-tag color="orange">` for STALE.
+- Require confirmation (`<Popconfirm>` or HIGH-action modal) for dangerous actions.
+- Do not treat stale/offline services as healthy — `<Tag color="orange">` for STALE.
 - Do not call Agent（代理） endpoints (`/api/agents/*`) directly from the browser — UI uses `/api/admin/*` only.
-- Do not embed user-supplied HTML; Vue's default escaping is sufficient if `v-html` is never used (ESLint rule `vue/no-v-html` enforces this).
+- Do not embed user-supplied HTML; use React's default escaping (never use `dangerouslySetInnerHTML`).
 
 ## 8.1 API Client Rules
 
-A single fetch wrapper at `apps/opstage-ui/src/lib/api-client.ts` is the only allowed `fetch` caller (enforced by ESLint `no-restricted-globals: ["fetch"]`).
+A single fetch wrapper at `apps/opstage-ui/src/api.ts` is the only allowed `fetch` caller (enforced by ESLint `no-restricted-globals: ["fetch"]`).
 
 - always sends `credentials: "include"`;
-- adds `X-CSRF-Token` from the Pinia store on every non-GET request;
-- on `401`: clears the Pinia session, pushes `/login`;
-- on `403 CSRF_TOKEN_MISMATCH`: refreshes via `GET /api/admin/auth/csrf` and retries once;
+- adds `X-CSRF-Token` from session context on every non-GET request;
+- on `401`: clears session context, navigates to `/login`;
+- on `403 CSRF_INVALID`: refreshes via `GET /api/admin/auth/csrf` and retries once;
 - maps `ErrorEnvelope` to a typed `ApiError` instance with `httpStatus`, `code`, `message`, `details`.
 
 See ADR 0007 for the implementation sketch.
 
-## 8.2 TanStack Vue Query Conventions
+## 8.2 TanStack React Query Conventions
 
 ```text
 queryKey         [<resource>, <id?>, <params?>]
@@ -313,24 +307,17 @@ retry            1 (only on 5xx and NETWORK_ERROR)
 
 Mutations MUST invalidate the relevant list query on success. CE（社区版） v0.1 does NOT use optimistic updates.
 
-The `QueryClient` is configured in `src/lib/query-client.ts` and installed via `app.use(VueQueryPlugin, { queryClient })`.
+The `QueryClient` is configured in `src/lib/query-client.ts` and provided via `<QueryClientProvider>` in `src/main.tsx`.
 
 ## 9. Vite 配置
 
 ```ts
 // apps/opstage-ui/vite.config.ts (sketch)
 import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
-import Components from "unplugin-vue-components/vite";
-import { AntDesignVueResolver } from "unplugin-vue-components/resolvers";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  plugins: [
-    vue(),
-    Components({
-      resolvers: [AntDesignVueResolver({ importStyle: false })],
-    }),
-  ],
+  plugins: [react()],
   server: {
     proxy: {
       "/api": "http://localhost:8080",
@@ -342,8 +329,6 @@ export default defineConfig({
   },
 });
 ```
-
-`unplugin-vue-components` + `AntDesignVueResolver` auto-imports Ant 设计 Vue components, so SFC files don't need explicit `import { Button } from "ant-design-vue"`. CSS for AntDV is imported once in `main.ts` via `import "ant-design-vue/dist/reset.css"`.
 
 ## 10. Test Plan
 
@@ -358,14 +343,14 @@ Minimum UI tests (`vitest run`):
 - audit event list renders;
 - sensitive config value is masked.
 
-Component tests use `@vue/test-utils` + `@testing-library/vue` for user-interaction-style assertions. Avoid testing implementation details (do not snapshot computed refs).
+Component tests use `@testing-library/react` for user-interaction-style assertions. Avoid testing implementation details.
 
 ## 11. Migration Note (for future EE（企业版）)
 
 If EE（企业版） later requires:
 
 - i18n: wrap all strings in `t("...")` in CE（社区版） v0.1 already, so swapping in `vue-i18n` is purely additive;
-- RBAC: feature composables already accept the `user` from Pinia; gating logic added at the composable level only;
+- RBAC: feature hooks already accept the `user` from session context; gating logic added at the hook level only;
 - multi-tenant: every `useAgents()`-style composable already passes `workspaceId` to the URL — wiring multiple workspaces is route-level only.
 
 These hooks are documented to keep CE（社区版） v0.1 simple while not blocking EE（企业版）.

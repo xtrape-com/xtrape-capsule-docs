@@ -59,21 +59,24 @@ Open `http://localhost:8080`. The login screen accepts the `OPSTAGE_ADMIN_USERNA
 
 After login, the dashboard shows zero Agents and zero Capsule Services.
 
-## 4. Connecting the Demo Capsule Service（胶囊服务）
+## 4. 接入 Demo Capsule Service
+
+在 UI 中创建 registration token，然后在本地运行 demo service。当前 CE 仓库将 demo service 作为 Node workspace app 交付。
 
 ```bash
-# Still in deploy/compose
-# 1. In the UI, go to Settings → Registration Tokens → Create.
-#    Copy the rawToken value (shown ONCE).
-export OPSTAGE_REGISTRATION_TOKEN="opstage_reg_..."
+# 1. 在 UI 中进入 Settings → Registration Tokens → Create。
+#    复制 raw token；它只展示一次。
 
-# 2. Start the demo service container
-docker compose --profile demo up -d
+# 2. 在 CE 仓库根目录启动 demo service。
+OPSTAGE_BACKEND_URL=http://localhost:8080 \
+OPSTAGE_REGISTRATION_TOKEN=opstage_reg_... \
+OPSTAGE_AGENT_TOKEN_FILE=./data/demo-agent-token.json \
+pnpm --filter @xtrape/demo-capsule-service start
 ```
 
-The demo container (defined in `deploy/compose/compose.yaml` under the `demo` profile) reads `OPSTAGE_REGISTRATION_TOKEN` from `.env` and registers itself on first start. The Agent（代理） token is then persisted in the `demo-data` volume so subsequent restarts skip registration.
+Demo service 首次启动会完成注册。Agent token 会持久化到 `OPSTAGE_AGENT_TOKEN_FILE`，因此该文件有效时，后续重启会跳过注册。
 
-Within ~30 seconds (one heartbeat cycle), the demo service appears in the UI under Capsule Services with status `HEALTHY`.
+一个 heartbeat 周期内，demo service 会出现在 UI 的 Capsule Services 页面，并显示为 `HEALTHY`。
 
 ## 5. 执行 Action
 

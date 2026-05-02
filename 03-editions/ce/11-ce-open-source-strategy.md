@@ -131,7 +131,7 @@ CE v0.1 ships across **four repositories** under the `xtrape` GitHub organizatio
 | `xtrape-capsule-docs` | shared | Design docs, ADRs, and the language-agnostic Layer 1 contract SSOT (OpenAPI YAML, JSON enums, error codes). |
 | `xtrape-capsule-contracts-node` | shared | Node bindings of the contracts (TypeScript types, Zod schemas, enum constants). Published as `@xtrape/capsule-contracts-node` on npm. |
 | `xtrape-capsule-agent-node` | shared | Node Agent SDK. Published as `@xtrape/capsule-agent-node` on npm. |
-| **`xtrape-capsule-ce`** | **CE** | The CE control plane: Opstage backend (Fastify), Opstage UI (Vue 3 + Ant Design Vue), demo Capsule Service, and Docker deploy. The only edition-bound code repo. |
+| **`xtrape-capsule-ce`** | **CE** | The CE control plane: Opstage backend (Fastify), Opstage UI (React 18 + Ant Design (antd)), demo Capsule Service, and Docker deploy. The only edition-bound code repo. |
 
 ### 6.2 Why this split
 
@@ -157,7 +157,7 @@ Inside `xtrape-capsule-ce` (the CE monorepo), pnpm workspace packages are arrang
 xtrape-capsule-ce/
 ├── apps/
 │   ├── opstage-backend/                @xtrape/opstage-backend         (private)
-│   ├── opstage-ui/                     @xtrape/opstage-ui              (private; Vue 3 + AntDV)
+│   ├── opstage-ui/                     @xtrape/opstage-ui              (private; React 18 + Ant Design)
 │   └── demo-capsule-service/           @xtrape/demo-capsule-service    (private)
 ├── packages/
 │   ├── db/                             @xtrape/capsule-db              (private)

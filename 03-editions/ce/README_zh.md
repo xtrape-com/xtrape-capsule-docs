@@ -254,11 +254,10 @@ Rules:
 UI is a Web console. CE（社区版） v0.1 stack (decided by [ADR 0007](../../08-decisions/0007-ui-state-and-data-fetching.md)):
 
 ```text
-Vue 3 + TypeScript + Ant Design Vue
-+ TanStack Vue Query (server state)
-+ Pinia (client UI state)
-+ Vue Router (URL state)
-+ Vee-Validate + Zod (forms)
+React 18 + TypeScript + Ant Design (antd 5.x)
++ TanStack React Query (server state)
++ React Router 7.x (URL state)
++ Zod (form validation)
 + Vite (build)
 ```
 
@@ -318,7 +317,7 @@ The CE（社区版） monorepo `xtrape-capsule-ce` (see [`10-implementation/00-r
 
 ```text
 apps/opstage-backend
-apps/opstage-ui                   (Vue 3 + Ant Design Vue)
+apps/opstage-ui                   (React 18 + Ant Design)
 apps/demo-capsule-service
 packages/db
 packages/shared
@@ -361,7 +360,7 @@ Each repository should exhibit:
 xtrape-capsule-ce/
 ├── apps/
 │   ├── opstage-backend/
-│   ├── opstage-ui/                   (Vue 3 + Ant Design Vue)
+│   ├── opstage-ui/                   (React 18 + Ant Design)
 │   └── demo-capsule-service/
 ├── packages/
 │   ├── db/
