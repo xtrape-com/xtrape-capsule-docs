@@ -729,7 +729,7 @@ paths:
                   id: cmd_01HXYZCMD1234567
                   agentId: agt_01HXYZAGT1234567
                   serviceId: svc_01HXYZSVC1234567
-                  type: ACTION
+                  type: ACTION_EXECUTE
                   actionName: restart
                   payload:
                     graceful: true
@@ -801,7 +801,7 @@ paths:
                   - id: cmd_01HXYZCMD1234567
                     agentId: agt_01HXYZAGT1234567
                     serviceId: svc_01HXYZSVC1234567
-                    type: ACTION
+                    type: ACTION_EXECUTE
                     actionName: restart
                     status: SUCCEEDED
                     createdAt: '2026-05-01T12:00:00.000Z'
@@ -1137,7 +1137,7 @@ paths:
                   - id: cmd_01HXYZCMD1234567
                     agentId: agt_01HXYZAGT1234567
                     serviceId: svc_01HXYZSVC1234567
-                    type: ACTION
+                    type: ACTION_EXECUTE
                     actionName: restart
                     payload: {}
                     status: RUNNING
@@ -1730,7 +1730,7 @@ components:
           pattern: '^svc_'
         type:
           type: string
-          enum: [ACTION]
+          enum: [ACTION_PREPARE, ACTION_EXECUTE, ACTION]
         actionName:
           type: string
         status:

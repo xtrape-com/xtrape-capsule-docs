@@ -709,7 +709,52 @@ These detail endpoints may be implemented separately or included in the main det
 
 ## 14. Action Admin APIs
 
-### 14.1 Request action execution
+Action APIs use the same URL with different HTTP methods:
+
+```http
+GET  /api/admin/capsule-services/{serviceId}/actions/{actionName}
+POST /api/admin/capsule-services/{serviceId}/actions/{actionName}
+```
+
+### 14.1 Prepare action panel
+
+```http
+GET /api/admin/capsule-services/{serviceId}/actions/{actionName}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "action": {
+      "name": "echo",
+      "label": "Echo",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "default": "hello" }
+        }
+      }
+    },
+    "initialPayload": { "message": "hello" },
+    "currentState": {
+      "service": { "id": "svc_001", "status": "HEALTHY" },
+      "configs": []
+    },
+    "prepareCommand": {
+      "id": "cmd_prepare_001",
+      "type": "ACTION_PREPARE",
+      "status": "SUCCEEDED"
+    }
+  }
+}
+```
+
+Service report stores only the stable Action Catalog. `GET` records an `ACTION_PREPARE` Command, dispatches it to the Agent prepare handler, waits for dynamic form/current-state data, and returns it. It must not execute the action execution handler.
+
+### 14.2 Request action execution
 
 ```http
 POST /api/admin/capsule-services/{serviceId}/actions/{actionName}
@@ -734,7 +779,7 @@ Response (matches OpenAPI `Command`):
     "id": "cmd_001",
     "agentId": "agt_001",
     "serviceId": "svc_001",
-    "type": "ACTION",
+    "type": "ACTION_EXECUTE",
     "actionName": "echo",
     "payload": { "message": "hello" },
     "status": "PENDING",
@@ -823,7 +868,7 @@ Response (matches OpenAPI `CommandDetail`):
     "id": "cmd_001",
     "agentId": "agt_001",
     "serviceId": "svc_001",
-    "type": "ACTION",
+    "type": "ACTION_EXECUTE",
     "actionName": "echo",
     "payload": { "message": "hello" },
     "status": "SUCCEEDED",

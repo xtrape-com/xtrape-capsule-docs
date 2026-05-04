@@ -345,15 +345,61 @@ The Agent（代理） polls this Command (transitioning it to `RUNNING`), maps `
 
 ## 7. Action Request
 
-The UI should not call Agent（代理） directly.
+UI 不应直接调用 Agent（代理）。
 
-The UI requests action execution from Backend.
-
-Example Admin API:
+UI 使用同一个 Action 资源 URL，并通过 HTTP method 区分两个阶段。
 
 ```http
+GET  /api/admin/capsule-services/{serviceId}/actions/{actionName}
 POST /api/admin/capsule-services/{serviceId}/actions/{actionName}
 ```
+
+| Method | 阶段 | 是否创建 Command | 用途 |
+|---|---|---:|---|
+| `GET` | 准备 / 打开 Action 面板 | 是：`ACTION_PREPARE` | 记录准备阶段 Command，返回 action metadata、`inputSchema`、`initialPayload` 和可选当前状态，用于 UI 渲染。 |
+| `POST` | 执行 / Run Action | 是：`ACTION_EXECUTE` | 校验 payload，创建持久化执行 Command，并由 Agent 执行。 |
+
+Service report 中的 `actions` 应视为 **Action Catalog**。Catalog 应保持稳定，只包含按钮/列表展示所需信息：`name`、`label`、`description`、`dangerLevel`、`requiresConfirmation` 以及可选 timeout/display metadata。动态表单细节，例如 `inputSchema`、枚举选项、默认值、账号列表和当前运行状态，应由 `GET` prepare 阶段返回，而不是由周期性 service report 上报。
+
+### 7.1 准备 Action 面板
+
+`GET` 对服务操作必须是无副作用的。它会记录一条 `ACTION_PREPARE` Command，并分发给 Agent 的 prepare handler，以便在打开面板时生成动态 metadata。prepare handler 对服务业务操作必须无副作用，且不能运行真正的 action execution handler。
+
+示例响应：
+
+```json
+{
+  "action": {
+    "name": "refreshSession",
+    "label": "Refresh Session",
+    "requiresConfirmation": true,
+    "inputSchema": {
+      "type": "object",
+      "required": ["sessionId"],
+      "properties": {
+        "sessionId": { "type": "string", "title": "Session ID" }
+      }
+    }
+  },
+  "initialPayload": {
+    "sessionId": ""
+  },
+  "currentState": {
+    "service": { "id": "svc_001", "status": "HEALTHY" }
+  },
+  "prepareCommand": {
+    "id": "cmd_prepare_001",
+    "type": "ACTION_PREPARE",
+    "status": "SUCCEEDED"
+  }
+}
+```
+
+`initialPayload` 应由 Agent prepare handler 结合当前状态和 `inputSchema` 默认值生成。动态枚举值、账号选择和上下文提示都应放在 prepare 响应中。
+
+### 7.2 执行 Action
+
+UI 使用 `POST` 向 Backend 请求执行 Action。`POST` 创建一条可被 Agent 轮询和执行的 `ACTION_EXECUTE` Command。
 
 Request body:
 

@@ -685,16 +685,26 @@ Good result:
 
 ## 23. Action Execution Flow
 
-End-to-end action execution flow:
+End-to-end action flow has three visible layers: Action Catalog, prepare, and execute. Service report only publishes the stable Action Catalog for button/list display. Opening an action panel creates an `ACTION_PREPARE` Command; the Agent prepare handler returns dynamic metadata, `inputSchema`, current options, and initial payload. Running an action creates an `ACTION_EXECUTE` Command that is eligible for business execution.
 
 ```text
 User opens Capsule Service Detail
     ↓
-UI displays ActionDefinitions
+UI displays Action Catalog from latest service report
     ↓
-User selects action and submits payload
+User selects action
     ↓
-UI calls Admin API
+UI calls GET /actions/{actionName}
+    ↓
+Backend creates ACTION_PREPARE Command -> Agent prepare handler returns CommandResult
+    ↓
+Backend returns action metadata, inputSchema, initialPayload, currentState, prepareCommand
+    ↓
+UI renders action panel
+    ↓
+User submits payload
+    ↓
+UI calls POST /actions/{actionName}
     ↓
 Backend authenticates user
     ↓
@@ -742,7 +752,7 @@ sequenceDiagram
     BE->>DB: Tx start
     BE->>DB: Lookup service, action, agent
     BE->>BE: Validate session, CSRF, payload (Zod + JSON Schema)
-    BE->>DB: INSERT Command (PENDING)
+    BE->>DB: INSERT Command (ACTION_EXECUTE, PENDING)
     BE->>DB: INSERT AuditEvent (action=COMMAND.CREATE, result=SUCCESS)
     BE->>DB: Tx commit
     BE-->>UI: 200 { data: Command(PENDING) }

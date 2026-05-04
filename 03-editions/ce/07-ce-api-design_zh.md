@@ -725,7 +725,52 @@ These detail endpoints may be implemented separately or included in the main det
 
 ## 14. Action Admin APIs
 
-### 14.1 Request action execution
+Action API 使用同一个 URL，并通过不同 HTTP method 区分语义：
+
+```http
+GET  /api/admin/capsule-services/{serviceId}/actions/{actionName}
+POST /api/admin/capsule-services/{serviceId}/actions/{actionName}
+```
+
+### 14.1 准备 Action 面板
+
+```http
+GET /api/admin/capsule-services/{serviceId}/actions/{actionName}
+```
+
+响应：
+
+```json
+{
+  "success": true,
+  "data": {
+    "action": {
+      "name": "echo",
+      "label": "Echo",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "default": "hello" }
+        }
+      }
+    },
+    "initialPayload": { "message": "hello" },
+    "currentState": {
+      "service": { "id": "svc_001", "status": "HEALTHY" },
+      "configs": []
+    },
+    "prepareCommand": {
+      "id": "cmd_prepare_001",
+      "type": "ACTION_PREPARE",
+      "status": "SUCCEEDED"
+    }
+  }
+}
+```
+
+Service report 只保存稳定 Action Catalog。`GET` 记录一条 `ACTION_PREPARE` Command，分发给 Agent 的 prepare handler，等待动态表单/当前状态数据并返回；但不能执行真正的 action execution handler。
+
+### 14.2 请求执行 Action
 
 ```http
 POST /api/admin/capsule-services/{serviceId}/actions/{actionName}
@@ -750,7 +795,7 @@ Response (matches OpenAPI `Command`):
     "id": "cmd_001",
     "agentId": "agt_001",
     "serviceId": "svc_001",
-    "type": "ACTION",
+    "type": "ACTION_EXECUTE",
     "actionName": "echo",
     "payload": { "message": "hello" },
     "status": "PENDING",
@@ -839,7 +884,7 @@ Response (matches OpenAPI `CommandDetail`):
     "id": "cmd_001",
     "agentId": "agt_001",
     "serviceId": "svc_001",
-    "type": "ACTION",
+    "type": "ACTION_EXECUTE",
     "actionName": "echo",
     "payload": { "message": "hello" },
     "status": "SUCCEEDED",
