@@ -883,3 +883,21 @@ AuditEvent
 ```
 
 This loop proves that Capsule Services can be operated through Opstage（运维舞台） without exposing arbitrary remote command execution.
+
+---
+
+## 10. CE v0.1 实现补充：Action Prepare / Execute 与表单字段
+
+Action Catalog 只上报稳定列表和展示元数据，例如 `name`、`label`、`category`、`order`、`dangerLevel`、`requiresConfirmation`、`timeoutSeconds`。打开 action 面板时，UI 通过 GET prepare 创建 `ACTION_PREPARE` Command，并使用 Agent 返回的动态 `inputSchema` 和 `initialPayload` 渲染表单。
+
+敏感字段建议在 JSON Schema 中提供更宽松的长度上限，例如密码、token、API key、private key 等字段可使用：
+
+```json
+{
+  "type": "string",
+  "title": "Password / Token / API Key",
+  "maxLength": 4096
+}
+```
+
+执行 action 时，POST execute 创建 `ACTION_EXECUTE` Command。Backend 对 Admin 展示脱敏 payload，但发送给 Agent 的 payload 必须保留原始值。

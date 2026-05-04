@@ -918,3 +918,48 @@ AuditEvent
 ```
 
 This makes Capsule Service operations visible, safe, and auditable while keeping CE lightweight.
+
+---
+
+## 11. CE v0.1 Implementation Note: Sensitive Payloads and Long-running Commands
+
+### 11.1 Payload storage and display
+
+When Backend creates an `ACTION_EXECUTE` Command, it must persist the raw payload in `commands.payloadJson`; otherwise the Agent cannot receive secrets such as passwords, tokens, or API keys.
+
+Admin APIs and UI views must redact payloads for display. Recommended rule:
+
+```text
+agent polling response: raw payload, execution only
+admin command response: redacted payload, display/audit only
+```
+
+Example display payload:
+
+```json
+{
+  "actionName": "setEmailOtpConfig",
+  "payload": {
+    "imapUser": "your-inbox@gmail.com",
+    "imapPassword": "[REDACTED]"
+  }
+}
+```
+
+### 11.2 Long-running Commands
+
+Login, browser-context rebuild, and account checks may take longer than a normal UI wait. UI should not block until these Commands finish. Instead it should:
+
+1. create the Command and show the Command id immediately;
+2. poll Command list or service health details in the background;
+3. show account-level `RUNNING` / `SUCCEEDED` / `FAILED` state from Capsule Service health details;
+4. allow cancellation, retry, and result inspection from Commands UI when applicable.
+
+Long-running actions should set a practical `timeoutSeconds`, for example:
+
+```json
+{
+  "name": "rebuildAccountContext",
+  "timeoutSeconds": 900
+}
+```

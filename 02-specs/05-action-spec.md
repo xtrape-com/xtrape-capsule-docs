@@ -867,3 +867,21 @@ AuditEvent
 ```
 
 This loop proves that Capsule Services can be operated through Opstage without exposing arbitrary remote command execution.
+
+---
+
+## 10. CE v0.1 Implementation Note: Action Prepare / Execute and Form Fields
+
+The Action Catalog should report only stable list and display metadata, such as `name`, `label`, `category`, `order`, `dangerLevel`, `requiresConfirmation`, and `timeoutSeconds`. When an action panel is opened, UI uses GET prepare to create an `ACTION_PREPARE` Command, then renders the dynamic `inputSchema` and `initialPayload` returned by the Agent.
+
+Sensitive fields should allow sufficiently long values. Passwords, tokens, API keys, and private keys may use:
+
+```json
+{
+  "type": "string",
+  "title": "Password / Token / API Key",
+  "maxLength": 4096
+}
+```
+
+When executing an action, POST execute creates an `ACTION_EXECUTE` Command. Backend should redact payloads for Admin display, but payloads delivered to the Agent must retain raw values.

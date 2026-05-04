@@ -670,7 +670,7 @@ CE（社区版） v0.1 has no `DISPATCHED` state — polling transitions Command
 - Action commands must target a Capsule Service（胶囊服务）.
 - Expired pending commands must not be delivered to Agents.
 - Commands should be audited (`command.created`, `command.completed`, `command.failed`, `command.expired`).
-- Command payloads must not contain raw secrets.
+- `commands.payloadJson` stores the raw execution payload so the Agent can receive required secrets. Admin/API display responses must redact sensitive fields such as password, token, secret, cookie, authorization, and apiKey.
 
 ---
 
@@ -1116,3 +1116,32 @@ AuditEvent
 The most important data model rule is:
 
 > Store enough structure to operate safely, and use JSON for flexible metadata until the model proves itself.
+
+---
+
+## 22. CE v0.1 SQL 注意事项：Command Payload 脱敏边界
+
+`commands.payloadJson` 必须保存原始执行 payload，Agent polling API 才能获得密码、token、API key 等必要字段。Admin 展示 API 和 UI 必须在返回前脱敏。
+
+创建 Command 的 SQL 应使用原始 payload：
+
+```sql
+insert into commands (
+  id, workspaceId, agentId, serviceId, type, actionName, status, payloadJson,
+  createdByUserId, createdAt, updatedAt, expiresAt
+) values (?, ?, ?, ?, ?, ?, 'PENDING', ?, ?, ?, ?, ?);
+```
+
+其中 `payloadJson` 是 `safeJsonStringify(body.payload ?? {})`，不要在写入前调用 `redactSecrets()`。
+
+Admin 查询返回时再脱敏：
+
+```ts
+payload: redactSecrets(jsonParse(row.payloadJson))
+```
+
+Agent polling 返回时不脱敏：
+
+```ts
+payload: jsonParse(row.payloadJson)
+```

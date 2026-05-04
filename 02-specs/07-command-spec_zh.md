@@ -934,3 +934,48 @@ AuditEvent
 ```
 
 This makes Capsule Service（胶囊服务） operations visible, safe, and auditable while keeping CE（社区版） lightweight.
+
+---
+
+## 11. CE v0.1 实现补充：敏感 Payload 与长耗时 Command
+
+### 11.1 Payload 保存与展示
+
+Backend 创建 `ACTION_EXECUTE` Command 时，必须把原始 payload 保存到 `commands.payloadJson`，否则 Agent 无法收到密码、token、API key 等敏感字段。
+
+但 Admin API / UI 展示 Command 时，必须对 payload 做脱敏展示。推荐规则：
+
+```text
+agent polling response: raw payload, for execution only
+admin command response: redacted payload, for display/audit only
+```
+
+示例：
+
+```json
+{
+  "actionName": "setEmailOtpConfig",
+  "payload": {
+    "imapUser": "your-inbox@gmail.com",
+    "imapPassword": "[REDACTED]"
+  }
+}
+```
+
+### 11.2 长耗时 Command
+
+登录、重建浏览器上下文、账号巡检等动作可能超过普通 UI 等待时间。UI 不应一直阻塞等待这类 Command 完成，而应：
+
+1. 创建 Command 后立即显示 Command id；
+2. 后台轮询 Command 列表或服务健康详情；
+3. 通过 Capsule Service health details 中的账号状态展示 `RUNNING` / `SUCCEEDED` / `FAILED`；
+4. 必要时允许用户在 Commands 页面取消、重试或查看结果。
+
+长耗时 action 应设置合理的 `timeoutSeconds`，例如：
+
+```json
+{
+  "name": "rebuildAccountContext",
+  "timeoutSeconds": 900
+}
+```

@@ -654,7 +654,7 @@ CE v0.1 has no `DISPATCHED` state — polling transitions Commands directly from
 - Action commands must target a Capsule Service.
 - Expired pending commands must not be delivered to Agents.
 - Commands should be audited (`command.created`, `command.completed`, `command.failed`, `command.expired`).
-- Command payloads must not contain raw secrets.
+- `commands.payloadJson` stores the raw execution payload so the Agent can receive required secrets. Admin/API display responses must redact sensitive fields such as password, token, secret, cookie, authorization, and apiKey.
 
 ---
 
@@ -1100,3 +1100,32 @@ AuditEvent
 The most important data model rule is:
 
 > Store enough structure to operate safely, and use JSON for flexible metadata until the model proves itself.
+
+---
+
+## 22. CE v0.1 SQL Note: Command Payload Redaction Boundary
+
+`commands.payloadJson` must store the raw execution payload so Agent polling APIs can receive required secrets such as passwords, tokens, and API keys. Admin display APIs and UI must redact before returning payloads.
+
+Command creation SQL should use the raw payload:
+
+```sql
+insert into commands (
+  id, workspaceId, agentId, serviceId, type, actionName, status, payloadJson,
+  createdByUserId, createdAt, updatedAt, expiresAt
+) values (?, ?, ?, ?, ?, ?, 'PENDING', ?, ?, ?, ?, ?);
+```
+
+`payloadJson` is `safeJsonStringify(body.payload ?? {})`; do not call `redactSecrets()` before persistence.
+
+Admin responses redact at read time:
+
+```ts
+payload: redactSecrets(jsonParse(row.payloadJson))
+```
+
+Agent polling responses are not redacted:
+
+```ts
+payload: jsonParse(row.payloadJson)
+```
