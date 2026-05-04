@@ -343,7 +343,14 @@ POST /api/admin/capsule-services/{serviceId}/actions/{actionName}
 | `GET` | Prepare / open action panel | Yes: `ACTION_PREPARE` | Record the preparation command, return action metadata, `inputSchema`, `initialPayload`, and optional current state for UI rendering. |
 | `POST` | Execute / run action | Yes: `ACTION_EXECUTE` | Validate payload, create a durable execution Command, and let the Agent execute it. |
 
-Service reports should treat `actions` as an **Action Catalog**. The catalog is intentionally stable and should only contain button/list metadata: `name`, `label`, `description`, `dangerLevel`, `requiresConfirmation`, and optional timeout/display metadata. Dynamic form details such as `inputSchema`, enum options, default values, account lists, and current runtime state should be returned by the `GET` prepare phase, not by periodic service report.
+Service reports should treat `actions` as an **Action Catalog**. The catalog is intentionally stable and should only contain button/list metadata: `name`, `label`, `description`, `dangerLevel`, `requiresConfirmation`, `category`, `order`, and optional timeout/display metadata. Dynamic form details such as `inputSchema`, enum options, default values, account lists, and current runtime state should be returned by the `GET` prepare phase, not by periodic service report.
+
+Recommended catalog display fields:
+
+| Field | Purpose |
+|---|---|
+| `category` | Stable UI grouping key, e.g. `account`, `session`, `runtime-config`, `diagnostics`, `advanced`. |
+| `order` | Stable numeric order within a category. Lower values appear first. |
 
 ### 7.1 Prepare Action Panel
 

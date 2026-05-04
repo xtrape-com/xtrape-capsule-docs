@@ -359,7 +359,14 @@ POST /api/admin/capsule-services/{serviceId}/actions/{actionName}
 | `GET` | 准备 / 打开 Action 面板 | 是：`ACTION_PREPARE` | 记录准备阶段 Command，返回 action metadata、`inputSchema`、`initialPayload` 和可选当前状态，用于 UI 渲染。 |
 | `POST` | 执行 / Run Action | 是：`ACTION_EXECUTE` | 校验 payload，创建持久化执行 Command，并由 Agent 执行。 |
 
-Service report 中的 `actions` 应视为 **Action Catalog**。Catalog 应保持稳定，只包含按钮/列表展示所需信息：`name`、`label`、`description`、`dangerLevel`、`requiresConfirmation` 以及可选 timeout/display metadata。动态表单细节，例如 `inputSchema`、枚举选项、默认值、账号列表和当前运行状态，应由 `GET` prepare 阶段返回，而不是由周期性 service report 上报。
+Service report 中的 `actions` 应视为 **Action Catalog**。Catalog 应保持稳定，只包含按钮/列表展示所需信息：`name`、`label`、`description`、`dangerLevel`、`requiresConfirmation`、`category`、`order` 以及可选 timeout/display metadata。动态表单细节，例如 `inputSchema`、枚举选项、默认值、账号列表和当前运行状态，应由 `GET` prepare 阶段返回，而不是由周期性 service report 上报。
+
+推荐的 catalog 展示字段：
+
+| 字段 | 用途 |
+|---|---|
+| `category` | 稳定 UI 分组 key，例如 `account`、`session`、`runtime-config`、`diagnostics`、`advanced`。 |
+| `order` | category 内的稳定数字排序，数值越小越靠前。 |
 
 ### 7.1 准备 Action 面板
 
