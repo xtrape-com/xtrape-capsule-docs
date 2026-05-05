@@ -989,4 +989,6 @@ Example payload substitution:
 
 If the UI does not support `list`, `columns`, or `rowActions`, it MUST still display the raw JSON result. Services MUST NOT depend on row actions for correctness; they are UI affordances over normal actions.
 
+After a row action finishes, UI MAY re-run the current list action with the current filters/payload to refresh `list.data`. For long-running row actions, UI MAY keep polling the created Command and refresh the list after the Command reaches a terminal status.
+
 GET prepare MAY expose list filters through the existing `inputSchema` and `initialPayload`; execute receives the filter values as its normal payload and may return a filtered `list.data`.

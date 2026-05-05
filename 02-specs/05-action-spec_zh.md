@@ -1004,4 +1004,6 @@ Payload 替换示例：
 
 如果 UI 暂不支持 `list`、`columns` 或 `rowActions`，仍必须展示原始 JSON result。Service 不能依赖 row actions 保证业务正确性；它们只是普通 action 之上的 UI 便利层。
 
+行级 operator 完成后，UI 可以使用当前筛选条件/payload 重新执行当前 list action，以刷新 `list.data`。对于长任务 row action，UI 可以持续轮询创建出的 Command，并在 Command 进入终态后刷新列表。
+
 GET prepare 可以通过现有 `inputSchema` 和 `initialPayload` 暴露列表筛选条件；execute 会收到这些筛选值作为普通 payload，并可返回过滤后的 `list.data`。
