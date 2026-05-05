@@ -220,7 +220,10 @@ in the service table. The Agents page includes copyable Agent IDs, a reset
 filter action, and a **View services** shortcut that opens the Services page
 with the Agent filter pre-applied, including for revoked Agents. Applying or
 resetting the Agent filter on the Services page updates the URL so the filtered
-view can be shared or refreshed safely.
+view can be shared or refreshed safely. Agents, Commands, and Audit Events also
+sync their operational filters into the URL, including Command type/status/ID
+filters and Audit action/actor/result/time filters. This makes incident
+triage links stable across refreshes and easy to share between operators.
 
 ### Command History Filters
 
