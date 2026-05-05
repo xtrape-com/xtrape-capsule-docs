@@ -150,7 +150,7 @@ owner 可以在 Settings 中创建 SQLite 备份。Backend 会将备份写入：
 OPSTAGE_BACKUP_DIR=./data/backups
 ```
 
-Audit Events 页面/API 支持 CSV 或 JSON 导出。
+Audit Events 页面/API 支持 CSV 或 JSON 导出。Audit Events 页面提供 action、actor、result、target type，以及显式 ISO `from` / `to` 时间范围筛选；CSV 导出会复用当前筛选条件。Audit list 和 export 的筛选条件会被校验；非法 `actorType`、`result` 或日期范围会返回 `422 VALIDATION_FAILED`。日期范围筛选使用 `from` / `to` 对 `createdAt` 做闭区间过滤。
 
 运维建议：
 
@@ -189,6 +189,21 @@ Settings 页面会以摘要卡片和稳定表格展示 operational metrics，并
 | Row action 成功但列表看起来未更新 | list refresh 失败或 service 状态尚未更新 | 点击 Refresh 或重新执行 list action；检查 row action Command。 |
 | POST 返回 `CSRF_INVALID` | 缺少 `X-CSRF-Token` 或 cookie 问题 | 确保代理保留 cookie 和请求头。 |
 | Backup endpoint forbidden | 当前用户不是 owner | 使用 owner 角色登录。 |
+
+
+
+
+### User 列表筛选
+
+Users 页面仅 owner 可访问，支持搜索 username/display name，并支持按 role 和 status 筛选。非法 role/status 筛选或空搜索值会返回 `422 VALIDATION_FAILED`。用户创建、更新和重置密码已经纳入 OpenAPI contract；所有变更请求都需要 CSRF。Backend 会返回 `409 LAST_OWNER_REQUIRED`，而不是允许禁用或降级最后一个 active owner。
+
+### Registration Token 筛选
+
+Registration Token 列表支持按状态筛选（`ACTIVE`、`USED`、`REVOKED`、`EXPIRED`）。非法状态筛选会返回 `422 VALIDATION_FAILED`。CE UI 提供该筛选，并且在创建响应的一次性展示之后继续隐藏 raw token。
+
+### Agent 和 Capsule Service 列表筛选
+
+Agent 和 Capsule Service 列表筛选会先校验再进入数据层。非法 status/health 枚举、格式错误的 Agent ID、空搜索值会返回 `422 VALIDATION_FAILED`。Capsule Service 列表支持按 `agentId` 筛选，便于排查某个 Agent 上报的服务。CE UI 通过显式 **应用 Agent 筛选** 操作触发该筛选，并在服务表格中展示可复制的 Agent ID。Agents 页面会展示可复制的 Agent ID，提供重置筛选操作，并通过 **查看服务** 快捷入口打开已预设 Agent 筛选的 Services 页面；该入口对 revoked Agents 也可用。Services 页面应用或重置 Agent 筛选时会同步更新 URL，便于分享或刷新后保持一致。
 
 ### Command 历史筛选
 

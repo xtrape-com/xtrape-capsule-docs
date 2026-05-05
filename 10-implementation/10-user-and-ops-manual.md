@@ -150,7 +150,7 @@ Owners can create SQLite backups from Settings. The backend writes backup files 
 OPSTAGE_BACKUP_DIR=./data/backups
 ```
 
-Audit events can be exported as CSV or JSON from the Audit Events page or the export API.
+Audit events can be exported as CSV or JSON from the Audit Events page or the export API. The Audit Events page exposes action, actor, result, target type, and explicit ISO `from` / `to` time range filters; CSV export uses the same active filters. Audit list and export filters are validated; invalid `actorType`, `result`, or date ranges return `422 VALIDATION_FAILED`. Date range filters use inclusive `from` / `to` bounds on `createdAt`.
 
 Operational recommendations:
 
@@ -189,6 +189,38 @@ The Settings page renders operational metrics as summary cards plus a stable tab
 | Row action succeeds but list looks stale | List refresh failed or service state not updated yet | Click Refresh or run the list action again; inspect the row action Command. |
 | `CSRF_INVALID` on POST | Missing `X-CSRF-Token` or cookie issue | Ensure proxy preserves cookies and request headers. |
 | Backup endpoint forbidden | User is not owner | Login with owner role. |
+
+
+
+
+### User List Filters
+
+The Users page is owner-only and supports searching username/display name plus
+role and status filters. Invalid role/status filters or empty search values
+return `422 VALIDATION_FAILED`. User create, update, and password reset are
+covered in the OpenAPI contract; all state-changing calls require CSRF, and
+the backend returns `409 LAST_OWNER_REQUIRED` rather than allowing the last
+active owner to be disabled or demoted.
+
+### Registration Token Filters
+
+Registration Token lists support status filtering (`ACTIVE`, `USED`, `REVOKED`,
+`EXPIRED`). Invalid status filters return `422 VALIDATION_FAILED`. The CE UI
+exposes this filter and keeps raw token values hidden after the one-time create
+response.
+
+### Agent and Capsule Service List Filters
+
+Agent and Capsule Service list filters are validated before reaching the data
+layer. Invalid status/health enums, malformed Agent IDs, or empty search values
+return `422 VALIDATION_FAILED`. Capsule Service lists support filtering by
+`agentId` for debugging a specific Agent's reported services. The CE UI exposes
+this as an explicit **Apply Agent filter** action and shows copyable Agent IDs
+in the service table. The Agents page includes copyable Agent IDs, a reset
+filter action, and a **View services** shortcut that opens the Services page
+with the Agent filter pre-applied, including for revoked Agents. Applying or
+resetting the Agent filter on the Services page updates the URL so the filtered
+view can be shared or refreshed safely.
 
 ### Command History Filters
 

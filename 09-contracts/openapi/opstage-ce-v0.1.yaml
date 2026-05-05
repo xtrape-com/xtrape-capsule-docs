@@ -71,6 +71,8 @@ tags:
     description: Admin login, logout, session inspection, and CSRF refresh.
   - name: AdminDashboard
     description: Aggregate counters for the CE governance loop.
+  - name: AdminUsers
+    description: Owner-only user administration.
   - name: AdminAgents
     description: List, inspect, and manage Agents bound to Capsule Services.
   - name: AdminRegistrationTokens
@@ -242,6 +244,185 @@ paths:
                   csrfToken: 7f3c1e8e9b2c4a8c91a0a7c2e1d3b5f6
         '401':
           $ref: '#/components/responses/Unauthorized'
+  /api/admin/users:
+    get:
+      tags: [AdminUsers]
+      summary: List admin users.
+      description: |
+        Owner-only endpoint. Filters `role`, `status`, and `q` narrow the list;
+        invalid enum values or empty search values return `422 VALIDATION_FAILED`.
+      operationId: listUsers
+      security:
+        - AdminSessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [owner, operator, viewer]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, DISABLED]
+        - name: q
+          in: query
+          description: Case-sensitive SQLite LIKE search over username/displayName.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 160
+      responses:
+        '200':
+          description: User list.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    post:
+      tags: [AdminUsers]
+      summary: Create an admin user.
+      description: |
+        Owner-only endpoint. Creates an ACTIVE user with role `owner`,
+        `operator`, or `viewer`; duplicate usernames return `409`.
+      operationId: createUser
+      security:
+        - AdminSessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+            example:
+              username: operator@example.local
+              password: change-me-before-running
+              displayName: Operator
+              role: operator
+      responses:
+        '200':
+          description: User created.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /api/admin/users/{userId}:
+    patch:
+      tags: [AdminUsers]
+      summary: Update an admin user.
+      description: |
+        Owner-only endpoint. Updates display name, role, and/or status.
+        Disabling or demoting the last active owner returns
+        `409 LAST_OWNER_REQUIRED`.
+      operationId: updateUser
+      security:
+        - AdminSessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+            example:
+              displayName: Operator 1
+              role: operator
+              status: ACTIVE
+      responses:
+        '200':
+          description: User updated.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /api/admin/users/{userId}/reset-password:
+    post:
+      tags: [AdminUsers]
+      summary: Reset an admin user's password.
+      description: Owner-only endpoint. Replaces the target user's password hash.
+      operationId: resetUserPassword
+      security:
+        - AdminSessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetUserPasswordRequest'
+            example:
+              password: another-change-me-password
+      responses:
+        '200':
+          description: Password reset.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /api/admin/dashboard/summary:
     get:
       tags: [AdminDashboard]
@@ -292,8 +473,8 @@ paths:
       summary: List Agents.
       description: |
         Allowed `sort` fields: `createdAt`, `lastSeenAt`, `name`. Default
-        sort: `-createdAt`. Filter `status` accepts multiple values
-        (OR'ed).
+        sort: `-createdAt`. Filters `status` and `q` narrow the list; invalid
+        enum values return `422 VALIDATION_FAILED`.
       operationId: listAgents
       security:
         - AdminSessionCookie: []
@@ -308,6 +489,13 @@ paths:
             type: array
             items:
               $ref: '#/components/schemas/AgentStatus'
+        - name: q
+          in: query
+          description: Case-sensitive SQLite LIKE search over Agent code/name.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 120
       responses:
         '200':
           description: Agent list.
@@ -554,11 +742,22 @@ paths:
             type: array
             items:
               $ref: '#/components/schemas/CapsuleServiceStatus'
+        - name: healthStatus
+          in: query
+          schema:
+            $ref: '#/components/schemas/HealthStatus'
         - name: agentId
           in: query
           schema:
             type: string
             pattern: '^agt_'
+        - name: q
+          in: query
+          description: Case-sensitive SQLite LIKE search over Capsule Service code/name.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 120
       responses:
         '200':
           description: Capsule Service list.
@@ -1347,6 +1546,13 @@ components:
         minimum: 1
         maximum: 100
         default: 20
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^usr_'
     AgentId:
       name: agentId
       in: path
@@ -1534,6 +1740,43 @@ components:
           description: |
             Absolute expiry of the current session cookie. UI may use this
             to schedule a silent refresh or warn the user before logout.
+    CreateUserRequest:
+      type: object
+      required: [username, password, role]
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 320
+        password:
+          type: string
+          format: password
+          minLength: 8
+        displayName:
+          type: string
+        role:
+          type: string
+          enum: [owner, operator, viewer]
+    UpdateUserRequest:
+      type: object
+      minProperties: 1
+      properties:
+        displayName:
+          type: string
+        role:
+          type: string
+          enum: [owner, operator, viewer]
+        status:
+          type: string
+          enum: [ACTIVE, DISABLED]
+    ResetUserPasswordRequest:
+      type: object
+      required: [password]
+      properties:
+        password:
+          type: string
+          format: password
+          minLength: 8
     User:
       type: object
       required: [id, username, role, status]
@@ -1547,7 +1790,7 @@ components:
           type: [string, 'null']
         role:
           type: string
-          enum: [owner]
+          enum: [owner, operator, viewer]
         status:
           type: string
           enum: [ACTIVE, DISABLED]
