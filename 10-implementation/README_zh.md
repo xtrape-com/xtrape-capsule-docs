@@ -50,6 +50,8 @@ Read this directory after:
 10-implementation/13-service-action-design-guide_zh.md
 10-implementation/14-ce-smoke-test_zh.md
 10-implementation/15-docs-implementation-consistency-check_zh.md
+10-implementation/16-backup-restore-runbook_zh.md
+10-implementation/17-security-hardening-checklist_zh.md
 ```
 
 ## 2. 实现 Rule

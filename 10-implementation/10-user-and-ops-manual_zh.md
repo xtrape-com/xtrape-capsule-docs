@@ -168,6 +168,15 @@ Audit Events 页面/API 支持 CSV 或 JSON 导出。
 
 不要在无认证和 TLS 的情况下公开 diagnostics。
 
+Operational metrics 包含事故排查时有用的 command/action 计数：
+
+- `operational.agentCommandPolls`：backend 启动以来 Agent command poll 请求的内存计数。
+- `operational.commandsDispatched`：已分发给 Agent 的 Commands 数量。
+- `operational.commandsCompleted` / `operational.commandsFailed`：来自 audit events 的终态 CommandResult 计数。
+- `operational.actionPrepareRequested`：action panel prepare 请求数。
+- `operational.actionPrepareTimeouts` / `operational.actionPrepareFailures`：prepare 失败相关指标。
+- `operational.oversizedCommandResultsRejected`：backend 启动以来被拒绝的超大 CommandResult 内存计数。
+
 ## 11. 快速排障表
 
 | 现象 | 可能原因 | 修复 |

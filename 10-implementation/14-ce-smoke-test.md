@@ -229,3 +229,20 @@ The smoke test passes when:
 - Command result is visible.
 - Audit events are produced.
 - Failure diagnostics are understandable for at least one negative scenario.
+
+## 12. Browser UI Smoke Extension
+
+Use this extension after the automated script passes and when UI behavior changed. A human tester or browser automation tool should verify:
+
+1. Login page renders and rejects an invalid password.
+2. Login succeeds with the owner account.
+3. Capsule Services list refresh button updates data.
+4. Opening an action shows the prepare loading state.
+5. Prepare failure keeps the panel open and displays diagnostics.
+6. A list action renders table rows, empty state, row count, and raw JSON.
+7. A row action shows row-level loading and disables sibling row buttons.
+8. A long-running action shows command status updates and refreshes service/account status after completion.
+9. Commands page can open the command detail and show result/error JSON.
+10. Audit Events page shows command lifecycle events.
+
+For local browser automation in Codex sessions, use the Browser Use plugin against `http://localhost:8080` after starting CE and a test Agent.

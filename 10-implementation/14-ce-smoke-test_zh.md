@@ -229,3 +229,20 @@ docker compose down -v
 - Command result 可见。
 - Audit events 被生成。
 - 至少一个负向场景的诊断信息可理解。
+
+## 12. 浏览器 UI Smoke 扩展
+
+自动化脚本通过后，且 UI 行为发生变化时，使用本扩展进行验证。人工测试或浏览器自动化工具应检查：
+
+1. 登录页可渲染，并拒绝错误密码。
+2. 使用 owner 账号可登录。
+3. Capsule Services 列表刷新按钮能更新数据。
+4. 打开 action 时显示 prepare loading 状态。
+5. Prepare 失败时面板保持打开并展示 diagnostics。
+6. List action 渲染 table rows、empty state、row count 和 raw JSON。
+7. Row action 显示行级 loading，并禁用同一行其他按钮。
+8. 长任务 action 显示 command 状态更新，并在完成后刷新 service/account 状态。
+9. Commands 页面可以打开 command detail 并展示 result/error JSON。
+10. Audit Events 页面展示 command lifecycle events。
+
+在 Codex 本地会话中，可以在启动 CE 和测试 Agent 后，使用 Browser Use plugin 访问 `http://localhost:8080` 进行浏览器自动化验证。

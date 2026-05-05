@@ -168,6 +168,15 @@ The console exposes runtime diagnostics and metrics for operators:
 
 Do not expose diagnostics publicly without authentication and TLS.
 
+Operational metrics include command/action counters useful during incident response:
+
+- `operational.agentCommandPolls`: in-memory count of Agent command poll requests since backend start.
+- `operational.commandsDispatched`: number of Commands dispatched to Agents.
+- `operational.commandsCompleted` / `operational.commandsFailed`: terminal CommandResult counts from audit events.
+- `operational.actionPrepareRequested`: action panel prepare requests.
+- `operational.actionPrepareTimeouts` / `operational.actionPrepareFailures`: prepare failure indicators.
+- `operational.oversizedCommandResultsRejected`: in-memory count of rejected oversized CommandResults since backend start.
+
 ## 11. Troubleshooting quick table
 
 | Symptom | Likely cause | Fix |

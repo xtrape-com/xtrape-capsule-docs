@@ -34,6 +34,8 @@ Read this directory after:
 10-implementation/13-service-action-design-guide.md
 10-implementation/14-ce-smoke-test.md
 10-implementation/15-docs-implementation-consistency-check.md
+10-implementation/16-backup-restore-runbook.md
+10-implementation/17-security-hardening-checklist.md
 ```
 
 ## 2. Implementation Rule
