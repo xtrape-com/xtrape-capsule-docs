@@ -685,6 +685,54 @@ paths:
                         items:
                           $ref: '#/components/schemas/ActionDefinition'
   /api/admin/capsule-services/{serviceId}/actions/{actionName}:
+    get:
+      tags: [AdminCapsuleServices]
+      summary: Prepare action panel.
+      description: |
+        Creates an `ACTION_PREPARE` Command and waits for the Agent to return
+        dynamic action metadata, `inputSchema`, `initialPayload`, and optional
+        current state. Prepare handlers must be side-effect free with respect
+        to the service business operation.
+      operationId: prepareActionPanel
+      security:
+        - AdminSessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/ServiceId'
+        - $ref: '#/components/parameters/ActionName'
+      responses:
+        '200':
+          description: Prepared action metadata.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ActionPrepareResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '408':
+          description: Prepare timed out waiting for Agent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '424':
+          description: Agent failed to prepare the action panel.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        default:
+          $ref: '#/components/responses/InternalError'
     post:
       tags: [AdminCapsuleServices]
       summary: Request predefined action execution.
@@ -743,6 +791,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
         default:
@@ -1111,11 +1161,11 @@ paths:
         - $ref: '#/components/parameters/AgentId'
         - name: limit
           in: query
-          description: Maximum number of commands to return per poll. Default 10, max 50.
+          description: Maximum number of commands to return per poll. Default 10, max 10. Backend clamps invalid values to the safe range 1..10.
           schema:
             type: integer
             minimum: 1
-            maximum: 50
+            maximum: 10
             default: 10
       responses:
         '200':
@@ -1194,6 +1244,8 @@ paths:
           $ref: '#/components/responses/Conflict'
         '410':
           $ref: '#/components/responses/Gone'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
         default:
@@ -1365,6 +1417,12 @@ components:
             $ref: '#/components/schemas/ErrorEnvelope'
     UnprocessableEntity:
       description: Validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    PayloadTooLarge:
+      description: Request payload or serialized CommandResult exceeds the configured limit.
       content:
         application/json:
           schema:
@@ -1702,6 +1760,20 @@ components:
           additionalProperties: true
         timeoutSeconds:
           type: integer
+    ActionPrepareResponse:
+      type: object
+      required: [action, initialPayload]
+      properties:
+        action:
+          $ref: '#/components/schemas/ActionDefinition'
+        initialPayload:
+          type: object
+          additionalProperties: true
+        currentState:
+          type: object
+          additionalProperties: true
+        prepareCommand:
+          $ref: '#/components/schemas/CommandDetail'
     CreateActionCommandRequest:
       type: object
       properties:
@@ -1785,6 +1857,10 @@ components:
           format: date-time
     ReportCommandResultRequest:
       type: object
+      description: |
+        Agent-reported terminal result. Backend enforces a maximum serialized
+        `message` + `data` + `error` payload size via
+        `OPSTAGE_COMMAND_RESULT_MAX_BYTES` (CE default: 1000000 bytes).
       required: [success]
       properties:
         success:
