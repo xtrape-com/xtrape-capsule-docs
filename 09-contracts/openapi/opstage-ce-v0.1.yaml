@@ -261,6 +261,31 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/DashboardSummary'
+  /api/admin/metrics:
+    get:
+      tags: [AdminDashboard]
+      summary: Get CE operational metrics.
+      description: |
+        Returns aggregate state counters plus operational counters used by the
+        Settings diagnostics view and incident response runbooks. Some
+        operational counters are in-memory and reset when the backend restarts.
+      operationId: getAdminMetrics
+      security:
+        - AdminSessionCookie: []
+      responses:
+        '200':
+          description: Metrics snapshot.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AdminMetrics'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /api/admin/agents:
     get:
       tags: [AdminAgents]
@@ -803,8 +828,9 @@ paths:
       summary: List Commands.
       description: |
         Allowed `sort` fields: `createdAt`, `finishedAt`. Default: `-createdAt`.
-        Filter `status` accepts multiple values (OR'ed). `serviceId` and
-        `agentId` filter by Capsule Service / Agent ownership.
+        Filter `type`, `status`, `actionName`, `serviceId`, and `agentId` narrow
+        the command history. The CE UI defaults to `type=ACTION_EXECUTE` so
+        internal prepare commands do not dominate the operator view.
       operationId: listCommands
       security:
         - AdminSessionCookie: []
@@ -819,6 +845,15 @@ paths:
             type: array
             items:
               $ref: '#/components/schemas/CommandStatus'
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [ACTION_EXECUTE, ACTION_PREPARE]
+        - name: actionName
+          in: query
+          schema:
+            type: string
         - name: serviceId
           in: query
           schema:
@@ -1211,6 +1246,8 @@ paths:
         `SUCCEEDED` (when `success: true`) or `FAILED`. A second result for
         the same Command is a `409 COMMAND_TERMINAL`. A result reported after
         the TTL has expired is a `410 COMMAND_EXPIRED` and is ignored.
+        Payloads larger than `OPSTAGE_COMMAND_RESULT_MAX_BYTES` are rejected
+        with `413 COMMAND_RESULT_TOO_LARGE`.
       operationId: reportCommandResult
       security:
         - AgentBearerToken: []
@@ -1538,6 +1575,58 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AuditEvent'
+    AdminMetrics:
+      type: object
+      required: [totals, byStatus, operational]
+      properties:
+        totals:
+          type: object
+          additionalProperties:
+            type: integer
+        byStatus:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: integer
+        operational:
+          $ref: '#/components/schemas/OperationalMetrics'
+    OperationalMetrics:
+      type: object
+      required:
+        - agentCommandPolls
+        - commandsDispatched
+        - commandsCompleted
+        - commandsFailed
+        - actionPrepareRequested
+        - actionPrepareTimeouts
+        - actionPrepareFailures
+        - oversizedCommandResultsRejected
+      properties:
+        agentCommandPolls:
+          type: integer
+          description: In-memory Agent command poll count since backend start.
+        commandsDispatched:
+          type: integer
+          description: Commands dispatched to Agents, derived from audit events.
+        commandsCompleted:
+          type: integer
+          description: Successful CommandResult count, derived from audit events.
+        commandsFailed:
+          type: integer
+          description: Failed CommandResult count, derived from audit events.
+        actionPrepareRequested:
+          type: integer
+          description: Action panel prepare request count, derived from audit events.
+        actionPrepareTimeouts:
+          type: integer
+          description: ACTION_PREPARE timeout count.
+        actionPrepareFailures:
+          type: integer
+          description: Failed ACTION_PREPARE command count.
+        oversizedCommandResultsRejected:
+          type: integer
+          description: In-memory count of CommandResults rejected for exceeding OPSTAGE_COMMAND_RESULT_MAX_BYTES since backend start.
     AgentStatus:
       type: string
       enum: [PENDING, ONLINE, OFFLINE, DISABLED, REVOKED]

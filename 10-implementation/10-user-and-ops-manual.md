@@ -168,7 +168,7 @@ The console exposes runtime diagnostics and metrics for operators:
 
 Do not expose diagnostics publicly without authentication and TLS.
 
-Operational metrics include command/action counters useful during incident response:
+The Settings page renders operational metrics as summary cards plus a stable table, with raw JSON available in a collapsed diagnostics block. Runtime diagnostics are also rendered as a categorized table (`runtime`, `memory`, `config`, `maintenance`) with raw JSON collapsed by default. Operational metrics include command/action counters useful during incident response:
 
 - `operational.agentCommandPolls`: in-memory count of Agent command poll requests since backend start.
 - `operational.commandsDispatched`: number of Commands dispatched to Agents.
@@ -189,3 +189,17 @@ Operational metrics include command/action counters useful during incident respo
 | Row action succeeds but list looks stale | List refresh failed or service state not updated yet | Click Refresh or run the list action again; inspect the row action Command. |
 | `CSRF_INVALID` on POST | Missing `X-CSRF-Token` or cookie issue | Ensure proxy preserves cookies and request headers. |
 | Backup endpoint forbidden | User is not owner | Login with owner role. |
+
+### Command History Filters
+
+The Commands page defaults to `ACTION_EXECUTE` so operator workflows focus on
+user-requested action runs. Use **Show all types** to include internal
+`ACTION_PREPARE` commands when debugging action panel prepare timeouts or
+prepare failures. The page supports filters for type, status, action name,
+Agent ID, and Service ID. Agent ID / Service ID filters are applied explicitly
+with **Apply ID filters** to avoid firing a request on every typed character.
+Use **Reset filters** to return to the default `ACTION_EXECUTE` view. Command
+details show type, Agent, Service, error code, error message, payload, and
+result. Invalid command query filters return `422 VALIDATION_FAILED` instead of
+being silently ignored. The command table supports horizontal scrolling for
+narrow screens.

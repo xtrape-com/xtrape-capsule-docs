@@ -232,6 +232,17 @@ The smoke test passes when:
 
 ## 12. Browser UI Smoke Extension
 
+CE now exposes a lightweight UI smoke entry point:
+
+```bash
+pnpm smoke:ui
+```
+
+This builds the Opstage UI and runs the UI smoke/unit checks that cover reusable
+action-result rendering helpers, metrics/diagnostics display helpers, metric warning
+state helpers, and shared status components. For end-to-end browser checks, use the manual/Browser Use checklist
+below against a running backend and UI.
+
 Use this extension after the automated script passes and when UI behavior changed. A human tester or browser automation tool should verify:
 
 1. Login page renders and rejects an invalid password.

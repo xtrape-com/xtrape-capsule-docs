@@ -55,6 +55,7 @@
 - [ ] Command spec 生命周期仍与实现一致。
 - [ ] Ops manual 说明了操作员可见行为。
 - [ ] Smoke test runbook 仍可执行。
+- [ ] 任意 OpenAPI/error-code 变化后，`pnpm contracts:check` 通过。
 - [ ] 敏感数据和 error details 仍被脱敏。
 - [ ] 文档中的默认值与代码默认值一致。
 - [ ] 新增环境变量已记录。
@@ -70,6 +71,8 @@ pnpm --filter @xtrape/opstage-backend typecheck
 pnpm --filter @xtrape/opstage-backend test
 pnpm --filter @xtrape/opstage-ui typecheck
 pnpm --filter @xtrape/opstage-ui test
+pnpm smoke:ui
+pnpm contracts:check
 ```
 
 在 `xtrape-capsule-docs` 中：

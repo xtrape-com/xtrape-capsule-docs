@@ -168,7 +168,7 @@ Audit Events 页面/API 支持 CSV 或 JSON 导出。
 
 不要在无认证和 TLS 的情况下公开 diagnostics。
 
-Operational metrics 包含事故排查时有用的 command/action 计数：
+Settings 页面会以摘要卡片和稳定表格展示 operational metrics，并在折叠的 diagnostics 区域提供原始 JSON。Runtime diagnostics 也会以分类表格展示（`runtime`、`memory`、`config`、`maintenance`），原始 JSON 默认折叠。Operational metrics 包含事故排查时有用的 command/action 计数：
 
 - `operational.agentCommandPolls`：backend 启动以来 Agent command poll 请求的内存计数。
 - `operational.commandsDispatched`：已分发给 Agent 的 Commands 数量。
@@ -189,3 +189,7 @@ Operational metrics 包含事故排查时有用的 command/action 计数：
 | Row action 成功但列表看起来未更新 | list refresh 失败或 service 状态尚未更新 | 点击 Refresh 或重新执行 list action；检查 row action Command。 |
 | POST 返回 `CSRF_INVALID` | 缺少 `X-CSRF-Token` 或 cookie 问题 | 确保代理保留 cookie 和请求头。 |
 | Backup endpoint forbidden | 当前用户不是 owner | 使用 owner 角色登录。 |
+
+### Command 历史筛选
+
+Commands 页面默认只展示 `ACTION_EXECUTE`，让操作员优先关注用户主动执行的 action。排查 action panel prepare timeout 或 prepare failure 时，可以点击 **显示全部类型** 查看内部 `ACTION_PREPARE` command。页面支持按 type、status、action name、Agent ID、Service ID 筛选。Agent ID / Service ID 通过 **应用 ID 筛选** 显式生效，避免每输入一个字符就触发请求。点击 **重置筛选** 可回到默认 `ACTION_EXECUTE` 视图。Command detail 会展示 type、Agent、Service、错误码、错误信息、payload 和 result。非法 command 查询筛选会返回 `422 VALIDATION_FAILED`，而不是被静默忽略；Command 表格在窄屏下支持横向滚动。

@@ -55,6 +55,7 @@ For every related implementation change:
 - [ ] Command spec lifecycle still matches implementation.
 - [ ] Ops manual explains operator-facing behavior.
 - [ ] Smoke test runbook still works.
+- [ ] `pnpm contracts:check` passes after any OpenAPI/error-code change.
 - [ ] Sensitive data and error details remain redacted.
 - [ ] Default values in docs match default values in code.
 - [ ] Any new environment variable is documented.
@@ -70,6 +71,8 @@ pnpm --filter @xtrape/opstage-backend typecheck
 pnpm --filter @xtrape/opstage-backend test
 pnpm --filter @xtrape/opstage-ui typecheck
 pnpm --filter @xtrape/opstage-ui test
+pnpm smoke:ui
+pnpm contracts:check
 ```
 
 From `xtrape-capsule-docs`:

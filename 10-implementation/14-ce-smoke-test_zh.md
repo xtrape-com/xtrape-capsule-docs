@@ -232,6 +232,14 @@ docker compose down -v
 
 ## 12. 浏览器 UI Smoke 扩展
 
+CE 现在提供轻量 UI smoke 入口：
+
+```bash
+pnpm smoke:ui
+```
+
+该命令会构建 Opstage UI，并运行 UI smoke/unit 检查，覆盖 action result 列表渲染辅助逻辑、metrics/diagnostics 展示辅助逻辑、metric 告警状态辅助逻辑和通用状态组件。端到端浏览器检查仍按下面的手工/Browser Use checklist，在已启动的 backend 与 UI 上执行。
+
 自动化脚本通过后，且 UI 行为发生变化时，使用本扩展进行验证。人工测试或浏览器自动化工具应检查：
 
 1. 登录页可渲染，并拒绝错误密码。
