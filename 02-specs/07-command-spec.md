@@ -535,7 +535,8 @@ Request body (matches OpenAPI `ReportCommandResultRequest`):
 }
 ```
 
-Agents SHOULD add jitter and idle backoff to command polling. For CE-scale deployments, a typical policy is: poll quickly when commands are returned, add a small random jitter to every poll, and back off gradually when consecutive polls return no commands. This avoids synchronized polling spikes while keeping the CE implementation simple.
+
+Backend SHOULD enforce a maximum serialized CommandResult payload size. CE v0.1 uses `OPSTAGE_COMMAND_RESULT_MAX_BYTES` (default `1000000`). If the serialized `message` + `data` + `error` payload exceeds the limit, Backend rejects the report with `413 COMMAND_RESULT_TOO_LARGE`. CommandResult should remain concise; large logs or artifacts belong to future log/artifact collection capabilities.
 
 Backend responsibilities:
 

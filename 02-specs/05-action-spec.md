@@ -234,9 +234,24 @@ If `enabled` is false, UI should display the action as disabled or hide it.
 
 Optional JSON-schema-like definition for action input.
 
-CE v0.1 may support only simple object input or no input.
+CE v0.1 supports simple object input and common UI hints for generated forms. Services MAY include these field-level hints in `inputSchema.properties`:
 
-Future versions may use this schema to generate dynamic UI forms.
+| Hint | Type | Meaning |
+|---|---|---|
+| `title` | string | Human-readable field label. |
+| `description` | string | Tooltip/help text. |
+| `default` | any | Initial value used by prepare/UI. |
+| `enum` + `enumLabels` | array | Select options and optional display labels. |
+| `format: "password"` | string | Render as a password/secret input. |
+| `format: "textarea"` | string | Render as a multi-line text input. |
+| `placeholder` | string | Input placeholder. |
+| `readOnly` | boolean | Render as read-only where supported. |
+| `maxLength` | number | Input maximum length where supported. |
+
+Future versions may use this schema to generate richer dynamic UI forms.
+
+These hints only affect the console rendering and operator experience. The
+service MUST still validate all submitted payloads when executing the action.
 
 ### 4.7 `resultSchema`
 

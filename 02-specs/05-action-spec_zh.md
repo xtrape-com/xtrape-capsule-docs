@@ -250,9 +250,23 @@ If `enabled` is false, UI should display the action as disabled or hide it.
 
 Optional JSON-schema-like definition for action input.
 
-CE（社区版） v0.1 may support only simple object input or no input.
+CE（社区版） v0.1 支持简单 object input，以及生成表单常用的 UI hints。Service（服务） MAY 在 `inputSchema.properties` 中包含以下字段级提示：
 
-Future versions may use this schema to generate dynamic UI forms.
+| 提示 | 类型 | 含义 |
+|---|---|---|
+| `title` | string | 字段显示名称。 |
+| `description` | string | tooltip/help 文案。 |
+| `default` | any | prepare/UI 使用的初始值。 |
+| `enum` + `enumLabels` | array | 下拉选项以及可选显示名称。 |
+| `format: "password"` | string | 以密码/secret 输入框展示。 |
+| `format: "textarea"` | string | 以多行文本输入框展示。 |
+| `placeholder` | string | 输入框 placeholder。 |
+| `readOnly` | boolean | 支持时以只读方式展示。 |
+| `maxLength` | number | 支持时限制输入最大长度。 |
+
+Future versions may use this schema to generate richer dynamic UI forms.
+
+这些提示只影响控制台渲染和操作体验。Service（服务）在执行 action 时仍 MUST 对提交 payload 做完整校验。
 
 ### 4.7 `resultSchema`
 

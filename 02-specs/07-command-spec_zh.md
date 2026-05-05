@@ -551,7 +551,8 @@ Request body (matches OpenAPI `ReportCommandResultRequest`):
 }
 ```
 
-Agent（代理） SHOULD 为 command polling 增加 jitter 和空闲退避。对于 CE（社区版）规模部署，一个典型策略是：有 command 时快速轮询，每次轮询增加少量随机 jitter，连续空轮询时逐步退避。这样可以避免多个 Agent（代理）同步请求形成尖峰，同时保持 CE（社区版）实现简单。
+
+Backend SHOULD 限制序列化后的 CommandResult payload 大小。CE（社区版） v0.1 使用 `OPSTAGE_COMMAND_RESULT_MAX_BYTES`（默认 `1000000`）。如果序列化后的 `message` + `data` + `error` payload 超过限制，Backend 会以 `413 COMMAND_RESULT_TOO_LARGE` 拒绝本次上报。CommandResult 应保持简洁；大型日志或产物应由未来的日志/产物采集能力承载。
 
 Backend responsibilities:
 

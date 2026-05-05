@@ -481,6 +481,8 @@ Authorization: Bearer <agentToken>
 
 `code` and `name` are sibling fields of `manifest` (not nested inside it). `health`, `configs`, and `actions` are optional but recommended.
 
+For CE-scale deployments, Agents SHOULD avoid repeatedly uploading unchanged manifest/actions/configs. A recommended pattern is: send a full service report at startup and whenever manifest/actions/config definitions change; during steady state, report service health through `POST /api/agents/{agentId}/heartbeat` with `serviceId` and `health`.
+
 ### 10.3 Backend Responsibilities
 
 Backend must:

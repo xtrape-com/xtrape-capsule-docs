@@ -497,6 +497,8 @@ Authorization: Bearer <agentToken>
 
 `code` and `name` are sibling fields of `manifest` (not nested inside it). `health`, `configs`, and `actions` are optional but recommended.
 
+对于 CE（社区版）规模部署，Agent（代理） SHOULD 避免反复上传未变化的 manifest/actions/configs。推荐模式是：启动时以及 manifest/actions/config 定义变化时发送完整 service report；稳定运行期间，通过 `POST /api/agents/{agentId}/heartbeat` 携带 `serviceId` 和 `health` 上报 service health。
+
 ### 10.3 Backend Responsibilities
 
 Backend must:
