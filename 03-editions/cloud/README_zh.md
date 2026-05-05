@@ -96,7 +96,7 @@ Opstage（运维舞台） Cloud（云版） is intended for:
 
 - small teams that do not want to self-host;
 - AI automation teams;
-- CAPI service operators;
+- integration service operators;
 - agencies managing services for multiple customers;
 - startups running many lightweight internal services;
 - teams that need audit and visibility but not full enterprise private deployment;
@@ -110,9 +110,9 @@ Opstage（运维舞台） Cloud（云版） is intended for:
 
 A team runs many Capsule Services across local servers, VPS instances, or private networks, and wants a hosted control plane.
 
-### 5.2 CAPI operations across environments
+### 5.2 Integration operations across environments
 
-A team operates multiple CAPI services and wants centralized visibility for Agents, services, health, commands, and audits.
+A team operates multiple integration services and wants centralized visibility for Agents, services, health, commands, and audits.
 
 ### 5.3 Agency or customer workspace management
 

@@ -114,8 +114,8 @@ Example future target configuration:
 
 ```yaml
 kind: CapsuleTarget
-code: capi-chatgpt
-name: ChatGPT CAPI Service
+code: integration-worker
+name: Example integration service
 runtime: nodejs
 agentMode: external
 
@@ -124,10 +124,10 @@ connect:
   managementPath: /_capsule
 
 filesystem:
-  workDir: /opt/capsules/capi-chatgpt
-  configDir: /opt/capsules/capi-chatgpt/config
-  logDir: /opt/capsules/capi-chatgpt/logs
-  dataDir: /opt/capsules/capi-chatgpt/data
+  workDir: /opt/capsules/integration-worker
+  configDir: /opt/capsules/integration-worker/config
+  logDir: /opt/capsules/integration-worker/logs
+  dataDir: /opt/capsules/integration-worker/data
 ```
 
 This is a future target and is not required for CE v0.1.

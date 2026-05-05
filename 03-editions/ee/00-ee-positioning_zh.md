@@ -35,7 +35,7 @@ Opstage（运维舞台） EE（企业版） is:
 
 > An enterprise-grade private deployment edition of Opstage（运维舞台） for governing Capsule Services inside customer-controlled environments.
 
-It helps organizations make lightweight services, AI automation services, CAPI services, and operational workers visible, manageable, auditable, and secure without moving the control plane to a hosted SaaS provider.
+It helps organizations make lightweight services, AI automation services, integration services, and operational workers visible, manageable, auditable, and secure without moving the control plane to a hosted SaaS provider.
 
 ---
 
@@ -102,7 +102,7 @@ Typical customers:
 - enterprises that cannot send governance metadata to a hosted Cloud（云版） service;
 - companies operating many internal lightweight services;
 - AI automation teams with sensitive accounts and sessions;
-- CAPI service operators managing private platform accounts;
+- integration service operators managing private platform accounts;
 - internal developer platform teams;
 - platform engineering teams;
 - security-conscious organizations;
@@ -131,7 +131,7 @@ Potential EE（企业版） users:
 - platform engineers;
 - backend developers;
 - AI automation engineers;
-- CAPI service developers;
+- Integration service developers;
 - operators;
 - SRE teams;
 - security reviewers;
@@ -146,9 +146,9 @@ Potential EE（企业版） users:
 
 An enterprise runs many Capsule Services in private infrastructure and wants a unified control plane without using SaaS.
 
-### 6.2 Enterprise CAPI operations
+### 6.2 Enterprise Integration operations
 
-A company builds CAPI services for platforms such as LLM providers, browsers, messaging systems, or internal tools and needs governed access, status, actions, and audit.
+A company builds integration services for platforms such as LLM providers, browsers, messaging systems, or internal tools and needs governed access, status, actions, and audit.
 
 ### 6.3 Sensitive account and session operations
 
@@ -376,7 +376,7 @@ Keep the control plane and governance metadata inside your own environment while
 ### 12.4 Platform-facing message
 
 ```text
-Give platform teams a governed way to manage lightweight services, AI automation workers, CAPI services, and operational agents without forcing them into a heavy microservice platform.
+Give platform teams a governed way to manage lightweight services, AI automation workers, integration services, and operational agents without forcing them into a heavy microservice platform.
 ```
 
 ---
@@ -482,7 +482,7 @@ EE（企业版） should be framed around the AI-era service sprawl problem.
 Problem statement:
 
 ```text
-AI-era teams will create more small services, agents, workers, connectors, CAPI adapters, account/session managers, and automation runtimes. These are easy to create but hard to govern over time.
+AI-era teams will create more small services, agents, workers, connectors, integration adapters, account/session managers, and automation runtimes. These are easy to create but hard to govern over time.
 ```
 
 EE（企业版） answer:

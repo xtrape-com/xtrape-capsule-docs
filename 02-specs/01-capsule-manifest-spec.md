@@ -99,8 +99,8 @@ Example:
 
 ```yaml
 kind: CapsuleService
-code: capi-chatgpt
-name: ChatGPT CAPI Service
+code: integration-worker
+name: Example integration service
 runtime: nodejs
 agentMode: external
 ```
@@ -153,8 +153,8 @@ A future-ready manifest may look like this:
 {
   "kind": "CapsuleService",
   "schemaVersion": "1.0",
-  "code": "capi-chatgpt",
-  "name": "ChatGPT CAPI Service",
+  "code": "integration-worker",
+  "name": "Example integration service",
   "description": "A Capsule Service that wraps ChatGPT web capabilities.",
   "version": "0.1.0",
   "runtime": "nodejs",
@@ -208,11 +208,11 @@ A future-ready manifest may look like this:
     ]
   },
   "links": {
-    "documentation": "https://example.com/docs/capi-chatgpt",
-    "repository": "https://example.com/repo/capi-chatgpt"
+    "documentation": "https://example.com/docs/integration-worker",
+    "repository": "https://example.com/repo/integration-worker"
   },
   "metadata": {
-    "category": "capi",
+    "category": "integration",
     "tags": ["chatgpt", "browser", "automation"]
   }
 }
@@ -269,7 +269,7 @@ Rules:
 Good examples:
 
 ```text
-capi-chatgpt
+integration-worker
 account-pool
 browser-session-worker
 otp-mail-reader
@@ -413,7 +413,7 @@ Examples:
 
 ```json
 {
-  "category": "capi",
+  "category": "integration",
   "tags": ["chatgpt", "automation"]
 }
 ```
@@ -916,7 +916,7 @@ Avoid these manifest anti-patterns.
 Bad:
 
 ```text
-capi-chatgpt-local-20260430-random
+integration-worker-local-20260430-random
 ```
 
 The service code should be stable.

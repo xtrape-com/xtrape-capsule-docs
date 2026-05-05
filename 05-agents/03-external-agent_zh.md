@@ -185,12 +185,12 @@ agent:
   tokenStore: /var/lib/opstage-agent/token.json
 
 targets:
-  - code: capi-chatgpt-accounts
-    name: CAPI ChatGPT Account Manager
+  - code: integration-worker-accounts
+    name: Integration account manager
     type: local-http
     service:
-      code: capi-chatgpt-account-service
-      name: CAPI ChatGPT Account Service
+      code: integration-worker-account-service
+      name: Integration account service
       runtime: nodejs
       version: 0.1.0
     localHttp:
@@ -364,7 +364,7 @@ reloadService
 
 ## 12. Browser or Account Runtime Target
 
-External Agent（代理） may be useful for CAPI-style services that manage accounts, sessions, browser profiles, or automation contexts.
+External Agent（代理） may be useful for integration-oriented services that manage accounts, sessions, browser profiles, or automation contexts.
 
 Possible targets:
 
@@ -629,7 +629,7 @@ Examples:
 
 ```text
 agent-local://external-agent/secrets/account-001
-vault://kv/capi/chatgpt/account-001
+vault://kv/integration/chatgpt/account-001
 browser-profile://local/profile-001
 ```
 

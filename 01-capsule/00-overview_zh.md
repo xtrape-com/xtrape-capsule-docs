@@ -33,7 +33,7 @@ The current implementation focus is **CE（社区版） / Community 版本**. EE
 
 AI-era applications are producing more and more small service units:
 
-- CAPI services for wrapping web or platform capabilities;
+- integration services for wrapping web or platform capabilities;
 - account pool services for managing registered accounts;
 - browser automation workers;
 - OTP readers;
@@ -89,7 +89,7 @@ If every service implements its own admin UI, the system becomes difficult to ma
 
 ### 2.3 Runtime Blindness
 
-For AI automation and CAPI services, runtime state is often more important than static configuration:
+For AI automation and integration services, runtime state is often more important than static configuration:
 
 - whether an account is still valid;
 - whether a browser session is alive;
@@ -212,7 +212,7 @@ They are intended for smaller, lighter, capability-oriented service units.
 ||Lifecycle|Long-running business service|Long-running, short-running, task-like, or worker-like||
 ||Technology stack|Often standardized|Multi-language and multi-runtime||
 ||Governance|Service registry, gateway, config, tracing|Agent（代理） registration, runtime status, actions, audit, config visibility||
-||Typical examples|payment service, order service, user service|CAPI wrapper, account pool, browser worker, OTP reader, proxy checker||
+||Typical examples|payment service, order service, user service|integration adapter, account pool, browser worker, OTP reader, proxy checker||
 
 A traditional microservice may also be registered as a Capsule Service（胶囊服务） if it exposes or integrates with the Capsule governance contract.
 

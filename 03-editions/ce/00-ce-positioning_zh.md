@@ -50,7 +50,7 @@ CE（社区版） is designed for:
 - open-source users;
 - self-hosted users;
 - AI automation developers;
-- CAPI service developers;
+- Integration service developers;
 - internal tooling teams;
 - early adopters of the Capsule Service（胶囊服务） model.
 
@@ -68,11 +68,11 @@ A developer runs several local Capsule Services and wants a simple UI to see sta
 
 ### 3.2 Small self-hosted deployment
 
-A small team runs Opstage（运维舞台） CE（社区版） on a private server to manage internal tools, workers, connectors, and CAPI services.
+A small team runs Opstage（运维舞台） CE（社区版） on a private server to manage internal tools, workers, connectors, and integration services.
 
-### 3.3 CAPI service governance
+### 3.3 Lightweight service governance
 
-A team builds multiple CAPI services for platforms such as ChatGPT, Gemini, Gmail, Telegram, or other web capabilities, and needs a shared operational console.
+A team builds multiple integration services for platforms such as ChatGPT, Gemini, Gmail, Telegram, or other web capabilities, and needs a shared operational console.
 
 ### 3.4 Account and session service visibility
 

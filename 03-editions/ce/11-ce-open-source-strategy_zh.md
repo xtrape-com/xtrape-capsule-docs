@@ -33,7 +33,7 @@ CE（社区版） should be a real, useful, self-hosted open-source product. It 
 
 The goal of the CE（社区版） open-source strategy is:
 
-> Use CE（社区版） to establish `xtrape-capsule` as a credible lightweight governance model for small services, AI tools, CAPI services, and automation workers.
+> Use CE（社区版） to establish `xtrape-capsule` as a credible lightweight governance model for small services, AI tools, integration services, and automation workers.
 
 CE（社区版） should help users understand and adopt the core idea:
 
@@ -62,7 +62,7 @@ It is intended for:
 - small teams;
 - self-hosted users;
 - AI automation builders;
-- CAPI service developers;
+- Integration service developers;
 - internal tooling teams;
 - open-source contributors.
 
@@ -504,7 +504,7 @@ The initial goal is to attract:
 - early testers;
 - AI automation developers;
 - self-hosted developers;
-- CAPI builders;
+- Capsule Service builders;
 - people managing many small internal tools.
 
 ### 13.2 Community channels

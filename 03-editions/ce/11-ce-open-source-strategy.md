@@ -17,7 +17,7 @@ CE should be a real, useful, self-hosted open-source product. It should establis
 
 The goal of the CE open-source strategy is:
 
-> Use CE to establish `xtrape-capsule` as a credible lightweight governance model for small services, AI tools, CAPI services, and automation workers.
+> Use CE to establish `xtrape-capsule` as a credible lightweight governance model for small services, AI tools, integration services, and automation workers.
 
 CE should help users understand and adopt the core idea:
 
@@ -46,7 +46,7 @@ It is intended for:
 - small teams;
 - self-hosted users;
 - AI automation builders;
-- CAPI service developers;
+- Integration service developers;
 - internal tooling teams;
 - open-source contributors.
 
@@ -488,7 +488,7 @@ The initial goal is to attract:
 - early testers;
 - AI automation developers;
 - self-hosted developers;
-- CAPI builders;
+- Capsule Service builders;
 - people managing many small internal tools.
 
 ### 13.2 Community channels

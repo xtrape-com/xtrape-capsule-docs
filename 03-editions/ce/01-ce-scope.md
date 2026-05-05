@@ -577,7 +577,7 @@ Agent SDK is not in scope for:
 
 Demo is in scope for proving the full CE loop.
 
-Demo is not in scope for representing a production-grade CAPI implementation.
+Demo is not in scope for representing a production-grade integration stack implementation.
 
 ---
 

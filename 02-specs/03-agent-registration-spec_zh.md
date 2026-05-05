@@ -251,7 +251,7 @@ Examples:
 ```text
 local-dev-agent
 home-server-agent-01
-capi-node-agent
+integration-node-agent
 ```
 
 ### 6.2 `name`

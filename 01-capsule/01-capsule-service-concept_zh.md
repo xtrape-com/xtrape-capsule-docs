@@ -52,7 +52,7 @@ The shortest definition is:
 
 AI-era systems tend to generate many small capability services:
 
-- a CAPI wrapper for a third-party web platform;
+- a integration adapter for a third-party web platform;
 - a Playwright-based browser automation worker;
 - an account pool service;
 - an OTP reader;
@@ -96,7 +96,7 @@ It should not be an unbounded collection of unrelated functions.
 
 Good examples:
 
-- `capi-chatgpt`;
+- `integration-worker`;
 - `account-pool`;
 - `browser-session-worker`;
 - `otp-mail-reader`;
@@ -242,16 +242,16 @@ A static UI or frontend-only app is usually not a Capsule Service（胶囊服务
 
 Capsule Services can be grouped by function.
 
-### 5.1 CAPI Service
+### 5.1 集成服务（integration service）
 
-A CAPI service wraps the capability of an external platform or website.
+集成服务封装外部平台或网站的能力边界。
 
 Examples:
 
-- `capi-chatgpt`;
-- `capi-gemini`;
-- `capi-gmail`;
-- `capi-telegram`.
+- `integration-worker`;
+- `integration-gemini`;
+- `integration-gmail`;
+- `integration-telegram`.
 
 Typical resources:
 
@@ -344,8 +344,8 @@ Recommended identity fields:
 
 ```json
 {
-  "code": "capi-chatgpt",
-  "name": "ChatGPT CAPI Service",
+  "code": "integration-worker",
+  "name": "Example integration service",
   "version": "0.1.0",
   "runtime": "nodejs",
   "edition": "ce",
@@ -367,7 +367,7 @@ Rules:
 Examples:
 
 ```text
-capi-chatgpt
+integration-worker
 account-pool
 browser-session-worker
 otp-mail-reader

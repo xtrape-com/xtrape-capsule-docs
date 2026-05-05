@@ -35,7 +35,7 @@ Opstage（运维舞台） CE（社区版） is the open-source community edition
 
 Its purpose is to help developers and small teams manage growing numbers of lightweight services such as:
 
-- CAPI services;
+- integration services;
 - account pool services;
 - browser automation workers;
 - OTP readers;

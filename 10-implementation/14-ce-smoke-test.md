@@ -24,7 +24,7 @@ The smoke test verifies:
 9. Result list / row action UX can be inspected when the service supports it.
 10. Audit events and command history are visible.
 
-This runbook is intentionally service-agnostic. Use the demo service, Capi-Chatgpt, or any embedded Agent service that exposes at least one safe action.
+This runbook is intentionally service-agnostic. Use the bundled demo service or any embedded Agent service that exposes at least one safe action.
 
 ---
 

@@ -934,7 +934,7 @@ Action Catalog 只上报稳定列表和展示元数据，例如 `name`、`label`
       {
         "id": "apk_xxx",
         "name": "default-client",
-        "keyPreview": "capi_a…9zQ",
+        "keyPreview": "demo_a…9zQ",
         "status": "ACTIVE"
       }
     ]

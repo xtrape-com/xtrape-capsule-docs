@@ -24,7 +24,7 @@ Smoke test 验证：
 9. 如果 service 支持 result list / row action，可以检查其 UI 体验。
 10. Audit events 和 command history 可见。
 
-本文不绑定具体 service。可以使用 demo service、Capi-Chatgpt，或任意至少暴露一个安全 action 的 embedded Agent service。
+本文不绑定具体 service。可使用仓库自带的 demo service，或任意至少暴露一个安全 action 的 embedded Agent service。
 
 ---
 

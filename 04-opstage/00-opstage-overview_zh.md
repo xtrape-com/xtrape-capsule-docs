@@ -94,7 +94,7 @@ Opstage（运维舞台） may integrate with some of these areas later, but its 
 
 ## 4. Core Problem
 
-AI-era development will create more lightweight services, agents, automation workers, CAPI adapters, account/session managers, and connector services.
+AI-era development will create more lightweight services, agents, automation workers, integration adapters, account/session managers, and connector services.
 
 These services are usually easy to create but hard to govern over time.
 

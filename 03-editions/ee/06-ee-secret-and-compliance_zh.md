@@ -190,7 +190,7 @@ Examples:
 
 ```text
 agent-local://agent-001/secrets/chatgpt/account-001
-vault://secret/data/capi/chatgpt/account-001
+vault://secret/data/integration/chatgpt/account-001
 aws-secretsmanager://eu-west-1/account/secret-name
 azure-keyvault://vault-name/secret-name
 k8s-secret://namespace/name/key
@@ -239,10 +239,10 @@ A secretRef should be:
 
 ```text
 agent-local://agent-001/secrets/chatgpt/account-001
-vault://kv/capi/chatgpt/account-001
+vault://kv/integration/chatgpt/account-001
 aws-secretsmanager://eu-west-1/123456789012/chatgpt-account-001
 azure-keyvault://corp-vault/chatgpt-account-001
-k8s-secret://prod/capi-chatgpt/account-001
+k8s-secret://prod/integration-worker/account-001
 ```
 
 ### 7.3 UI display
@@ -252,7 +252,7 @@ UI should display secretRef safely.
 Possible displays:
 
 ```text
-secretRef: vault://kv/capi/chatgpt/account-001
+secretRef: vault://kv/integration/chatgpt/account-001
 ```
 
 or:
@@ -473,7 +473,7 @@ Good example:
 ```json
 {
   "key": "account.secret",
-  "value": "vault://kv/capi/chatgpt/account-001",
+  "value": "vault://kv/integration/chatgpt/account-001",
   "type": "secretRef",
   "sensitive": true
 }
@@ -506,7 +506,7 @@ Good example:
 
 ```json
 {
-  "accountSecretRef": "vault://kv/capi/chatgpt/account-001"
+  "accountSecretRef": "vault://kv/integration/chatgpt/account-001"
 }
 ```
 

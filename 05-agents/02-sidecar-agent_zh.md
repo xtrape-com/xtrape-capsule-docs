@@ -334,7 +334,7 @@ Example response:
     "key": "account.secret",
     "label": "Account Secret",
     "type": "secretRef",
-    "currentValue": "vault://kv/capi/account-001",
+    "currentValue": "vault://kv/integration/account-001",
     "editable": false,
     "sensitive": true,
     "source": "vault"
@@ -614,7 +614,7 @@ Raw secret remains outside Opstage Backend.
 Possible secretRef examples:
 
 ```text
-vault://kv/capi/account-001
+vault://kv/integration/account-001
 agent-local://sidecar-agent/secrets/account-001
 k8s-secret://namespace/name/key
 ```

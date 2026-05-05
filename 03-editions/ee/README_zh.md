@@ -114,7 +114,7 @@ Opstage（运维舞台） EE（企业版） is intended for:
 - platform engineering teams;
 - internal developer platform teams;
 - AI automation teams operating many private services;
-- CAPI operators with sensitive accounts and sessions;
+- Operators managing sensitive accounts with sensitive accounts and sessions;
 - customers needing vendor support and upgrade guarantees.
 
 ---

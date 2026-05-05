@@ -74,7 +74,7 @@ Its core value is Capsule Service（胶囊服务） governance.
 
 The product goal of Opstage（运维舞台） Cloud（云版） is:
 
-> Provide a managed, team-oriented, multi-tenant control plane for lightweight services, AI automation services, CAPI services, and operational workers.
+> Provide a managed, team-oriented, multi-tenant control plane for lightweight services, AI automation services, integration services, and operational workers.
 
 Cloud（云版） should reduce the cost of operating Opstage（运维舞台） itself while improving:
 
@@ -126,7 +126,7 @@ Opstage（运维舞台） Cloud（云版） is designed for:
 
 - small teams that do not want to self-host;
 - AI automation teams;
-- CAPI service operators;
+- integration service operators;
 - agencies managing multiple customer environments;
 - startups with many internal lightweight services;
 - teams that need basic governance but lack dedicated platform engineers;
@@ -136,9 +136,9 @@ Opstage（运维舞台） Cloud（云版） is designed for:
 
 ## 6. Target Use Cases
 
-### 6.1 Managed CAPI governance
+### 6.1 Managed integration governance
 
-A team runs several CAPI services across different environments and wants a single hosted console for status, health, actions, commands, and audit.
+A team runs several integration services across different environments and wants a single hosted console for status, health, actions, commands, and audit.
 
 ### 6.2 AI automation operations
 
@@ -285,7 +285,7 @@ Examples:
 
 ```text
 agent-local://agent-001/secrets/chatgpt/account-001
-customer-vault://prod/capi-chatgpt/account-001
+customer-vault://prod/integration-worker/account-001
 cloud-secret://org/workspace/secret-key
 ```
 

@@ -919,7 +919,7 @@ Minimum shape:
       {
         "id": "apk_xxx",
         "name": "default-client",
-        "keyPreview": "capi_a…9zQ",
+        "keyPreview": "demo_a…9zQ",
         "status": "ACTIVE"
       }
     ]

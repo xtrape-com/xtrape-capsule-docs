@@ -41,7 +41,7 @@ Capsule Services exist because many AI-era services are smaller and more operati
 
 Examples:
 
-- CAPI wrappers;
+- integration adapters;
 - browser automation workers;
 - account pool managers;
 - OTP readers;
@@ -60,7 +60,7 @@ These services need visibility, health, configuration, action execution, and aud
 |---|---|---|
 | Primary purpose | Business-domain decomposition | Lightweight capability governance |
 | Main unit | Business service | Capability / worker / connector / runtime unit |
-| Typical scope | Domain capability such as order, payment, user | Specific operational capability such as CAPI, account pool, browser worker |
+| Typical scope | Domain capability such as order, payment, user | Specific operational capability such as integration services, account pools, browser workers |
 | Typical size | Medium to large | Small to medium |
 | Lifecycle | Usually long-running and stable | Long-running, short-running, worker-like, or task-oriented |
 | Technology stack | Often standardized by organization | Multi-language and multi-runtime by design |
@@ -107,7 +107,7 @@ A Capsule Service is usually designed around a small operational capability.
 
 Examples:
 
-- `capi-chatgpt`;
+- `integration-worker`;
 - `account-pool`;
 - `browser-session-worker`;
 - `otp-mail-reader`;
@@ -330,13 +330,13 @@ Use a Capsule Service when the target is:
 - not worth a full microservice framework;
 - requiring health/status/config/action/audit visibility;
 - useful to manage through an Agent;
-- part of an AI automation, CAPI, connector, or worker ecosystem.
+- part of an AI automation, integration adapters, connector, or worker ecosystem.
 
 Good candidates:
 
 ```text
-capi-chatgpt
-capi-gemini
+integration-worker
+integration-gemini
 account-pool
 browser-session-worker
 otp-mail-reader
@@ -385,7 +385,7 @@ Business System
 ├── order-service                # Microservice
 ├── user-service                 # Microservice
 │
-├── capi-chatgpt                 # Capsule Service
+├── integration-worker                 # Capsule Service
 ├── account-pool                 # Capsule Service
 ├── browser-session-worker       # Capsule Service
 ├── otp-mail-reader              # Capsule Service

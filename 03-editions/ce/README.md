@@ -19,7 +19,7 @@ Opstage CE is the open-source community edition of the Capsule Service runtime g
 
 Its purpose is to help developers and small teams manage growing numbers of lightweight services such as:
 
-- CAPI services;
+- integration services;
 - account pool services;
 - browser automation workers;
 - OTP readers;

@@ -220,7 +220,7 @@ Strengths:
 - easiest first implementation;
 - direct access to service health and actions;
 - no extra process required;
-- easy for CAPI and automation services built with Node.js;
+- easy for integration services and automation services built with Node.js;
 - good fit for CE（社区版） prototype.
 
 Limitations:

@@ -593,7 +593,7 @@ Agent（代理） SDK is not in scope for:
 
 Demo is in scope for proving the full CE（社区版） loop.
 
-Demo is not in scope for representing a production-grade CAPI implementation.
+Demo 不用于代表生产级的完整集成实现。
 
 ---
 

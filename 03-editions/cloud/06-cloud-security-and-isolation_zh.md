@@ -554,7 +554,7 @@ Examples:
 
 ```text
 agent-local://agent-001/secrets/chatgpt/account-001
-customer-vault://prod/capi-chatgpt/account-001
+customer-vault://prod/integration-worker/account-001
 aws-secretsmanager://region/account/secret-name
 cloud-secret://org/workspace/secret-key
 ```
