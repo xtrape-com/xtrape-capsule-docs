@@ -31,6 +31,7 @@ Read this directory after:
 10-implementation/10-user-and-ops-manual.md
 10-implementation/11-api-and-security-implementation.md
 10-implementation/12-development-and-release-implementation.md
+10-implementation/13-service-action-design-guide.md
 ```
 
 ## 2. Implementation Rule
