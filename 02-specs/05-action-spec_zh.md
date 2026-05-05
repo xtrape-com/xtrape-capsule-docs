@@ -418,6 +418,8 @@ Service report 中的 `actions` 应视为 **Action Catalog**。Catalog 应保持
 
 `initialPayload` 应由 Agent prepare handler 结合当前状态和 `inputSchema` 默认值生成。动态枚举值、账号选择和上下文提示都应放在 prepare 响应中。
 
+如果 prepare 失败或超时，Backend SHOULD 返回标准错误 envelope，并在 `error.details` 中包含非敏感诊断信息，便于控制台定位问题。推荐字段包括 `commandId`、`commandStatus`、`actionName`、`agentId` 和 `serviceId`。UI MAY 基于这些信息保持 action 面板打开，并提供重试按钮。
+
 ### 7.2 执行 Action
 
 UI 使用 `POST` 向 Backend 请求执行 Action。`POST` 创建一条可被 Agent 轮询和执行的 `ACTION_EXECUTE` Command。
