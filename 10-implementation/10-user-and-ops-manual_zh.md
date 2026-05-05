@@ -109,10 +109,19 @@ OPSTAGE_MAINTENANCE_INTERVAL_SECONDS=60
 
 1. 打开 Capsule Service。
 2. 选择一个 action。
-3. 通过 schema-driven form 或 JSON override 提供 payload。
-4. 如果 action 需要 confirmation 或 danger 较高，勾选确认。
-5. 提交后创建 Command。
-6. Agent poll command、执行 handler、回报 result。
+3. UI 打开 action panel，并向 Agent 请求动态 prepare metadata。
+4. 通过 schema-driven form 或 JSON override 提供 payload。
+5. 如果 action 需要 confirmation 或 danger 较高，点击确认。
+6. 提交后创建 Command。
+7. Agent poll command、执行 handler、回报 result。
+
+操作员需要了解的 action panel 行为：
+
+- 打开 action 会创建一条 `ACTION_PREPARE` Command。这是正常行为，用于加载动态字段、默认值和当前状态。
+- 如果 prepare 超时或失败，面板会保持打开，并展示 `commandId`、`commandStatus`、`agentId`、`serviceId` 等诊断信息。可以用这些信息到 Commands 页面和 Agent 日志中排查。
+- 长任务 action 会在后台继续执行。Action panel 会自动轮询 Command，并在进入终态后刷新 service/account 状态。
+- List action 可以在原始 JSON result 上方展示表格；原始 JSON 仍保留用于排障。
+- List 表格中的行级 action 会创建普通 Command。操作运行时对应行会显示 loading，完成后列表会自动刷新。
 
 已实现的 demo service 暴露：
 
@@ -167,5 +176,7 @@ Audit Events 页面/API 支持 CSV 或 JSON 导出。
 | Registration token 不可用 | token 已使用/撤销/过期 | 创建新的 registration token。 |
 | Agent 显示 offline | heartbeat 停止或 stale threshold 太低 | 检查 Agent 日志、网络和 `OPSTAGE_AGENT_OFFLINE_THRESHOLD_SECONDS`。 |
 | Action 一直 pending | Agent 未 polling 或 token 被 revoke | 检查 Agent 状态和 token 文件。 |
+| Action prepare 超时 | Agent 离线、繁忙或没有 polling prepare command | 使用 prepare diagnostics 中的 `commandId` 和 Commands 页面排查；检查 Agent 日志和 polling interval。 |
+| Row action 成功但列表看起来未更新 | list refresh 失败或 service 状态尚未更新 | 点击 Refresh 或重新执行 list action；检查 row action Command。 |
 | POST 返回 `CSRF_INVALID` | 缺少 `X-CSRF-Token` 或 cookie 问题 | 确保代理保留 cookie 和请求头。 |
 | Backup endpoint forbidden | 当前用户不是 owner | 使用 owner 角色登录。 |

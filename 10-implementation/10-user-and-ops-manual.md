@@ -109,10 +109,19 @@ OPSTAGE_MAINTENANCE_INTERVAL_SECONDS=60
 
 1. Open a Capsule Service.
 2. Select an action.
-3. Provide payload through the schema-driven form or JSON override.
-4. Confirm if the action requires confirmation or has high danger.
-5. Submit. A Command is created.
-6. Agent polls, executes the handler, and reports result.
+3. The UI opens an action panel and requests dynamic prepare metadata from the Agent.
+4. Provide payload through the schema-driven form or JSON override.
+5. Confirm if the action requires confirmation or has high danger.
+6. Submit. A Command is created.
+7. Agent polls, executes the handler, and reports result.
+
+Action panel behavior operators should know:
+
+- Opening an action creates an `ACTION_PREPARE` Command. This is expected and is used to load dynamic fields, defaults, and current state.
+- If prepare times out or fails, the panel remains open and shows diagnostics such as `commandId`, `commandStatus`, `agentId`, and `serviceId`. Use these values to inspect the Commands page and Agent logs.
+- Long-running actions continue in the background. The action panel automatically polls the Command and refreshes service/account status when it reaches a terminal state.
+- List actions may render a table above the raw JSON result. Raw JSON remains available for troubleshooting.
+- Row-level actions in list tables create normal Commands. The clicked row shows loading while the operation runs, and the list refreshes after completion.
 
 The implemented demo service exposes:
 
@@ -167,5 +176,7 @@ Do not expose diagnostics publicly without authentication and TLS.
 | Registration token not accepted | Token already used/revoked/expired | Create a new registration token. |
 | Agent appears offline | Heartbeat stopped or stale threshold too low | Check Agent logs, network, and `OPSTAGE_AGENT_OFFLINE_THRESHOLD_SECONDS`. |
 | Action remains pending | Agent is not polling or token revoked | Check Agent status and token file. |
+| Action prepare times out | Agent is offline, busy, or not polling prepare commands | Use prepare diagnostics `commandId` and Commands page; check Agent logs and polling interval. |
+| Row action succeeds but list looks stale | List refresh failed or service state not updated yet | Click Refresh or run the list action again; inspect the row action Command. |
 | `CSRF_INVALID` on POST | Missing `X-CSRF-Token` or cookie issue | Ensure proxy preserves cookies and request headers. |
 | Backup endpoint forbidden | User is not owner | Login with owner role. |

@@ -48,6 +48,8 @@ Read this directory after:
 10-implementation/11-api-and-security-implementation.md
 10-implementation/12-development-and-release-implementation.md
 10-implementation/13-service-action-design-guide_zh.md
+10-implementation/14-ce-smoke-test_zh.md
+10-implementation/15-docs-implementation-consistency-check_zh.md
 ```
 
 ## 2. 实现 Rule
