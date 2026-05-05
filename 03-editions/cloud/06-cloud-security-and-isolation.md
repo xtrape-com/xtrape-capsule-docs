@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: cloud
+phase: future
+---
+
 # Cloud Security and Isolation
 
 - Status: Planning
@@ -7,7 +16,8 @@
 
 This document defines the planned security and isolation model for **Opstage Cloud**.
 
-Opstage Cloud is the future hosted SaaS edition of the `xtrape-capsule` product family. Cloud security and isolation are future planning concerns and are not CE v0.1 implementation requirements.
+Opstage Cloud is the future hosted SaaS edition of the `xtrape-capsule` product family. Cloud security and isolation are
+future planning concerns and are not CE v0.1 implementation requirements.
 
 ---
 

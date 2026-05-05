@@ -1,3 +1,10 @@
+---
+status: accepted
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Audit Event Specification
 
 - Status: Specification
@@ -656,7 +663,8 @@ SUCCESS
 FAILURE
 ```
 
-`DENIED`, `ERROR`, and `PENDING` are reserved for future EE/Cloud editions and are not part of CE v0.1. Map authorization rejections, validation failures, and unexpected runtime errors to `FAILURE` with `metadata.errorCode`.
+`DENIED`, `ERROR`, and `PENDING` are reserved for future EE/Cloud editions and are not part of CE v0.1. Map
+authorization rejections, validation failures, and unexpected runtime errors to `FAILURE` with `metadata.errorCode`.
 
 Examples:
 

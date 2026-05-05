@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # External Agent
 
 - Status: Planning
@@ -859,7 +866,8 @@ A future External Agent implementation is acceptable when:
 
 External Agent is a future Agent mode for governing explicitly configured services or runtimes from outside their processes.
 
-It is valuable for legacy services, account/session managers, browser automation runtimes, and small local service fleets, but it carries broader security and operational risks than Embedded Agent.
+It is valuable for legacy services, account/session managers, browser automation runtimes, and small local service
+fleets, but it carries broader security and operational risks than Embedded Agent.
 
 The most important External Agent rule is:
 

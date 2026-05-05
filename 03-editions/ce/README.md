@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # Opstage CE Overview
 
 - Status: Implementation Target
@@ -307,7 +316,9 @@ packages/shared
 packages/test-utils
 ```
 
-`@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` come from npm (separate repos: `xtrape-capsule-contracts-node` and `xtrape-capsule-agent-node` — see [ADR 0008](../../08-decisions/0008-naming-and-repositories.md)).
+`@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` come from npm (separate repos:
+`xtrape-capsule-contracts-node` and `xtrape-capsule-agent-node` — see [ADR
+0008](../../08-decisions/0008-naming-and-repositories.md)).
 
 The first user experience should feel simple.
 

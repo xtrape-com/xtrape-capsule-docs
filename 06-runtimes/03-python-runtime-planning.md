@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Python Runtime Planning
 
 - Status: Planning
@@ -9,7 +16,9 @@ This document defines the planned **Python Runtime** integration for the `xtrape
 
 Python Runtime is a future extension. It is not a CE v0.1 implementation requirement.
 
-The current CE implementation focus is **Node.js**. Python Runtime planning exists to keep the Capsule governance model compatible with AI automation workers, FastAPI services, data-processing workers, browser automation tasks, LangChain/LangGraph services, and other Python-based runtimes in future EE or later CE versions.
+The current CE implementation focus is **Node.js**. Python Runtime planning exists to keep the Capsule governance model
+compatible with AI automation workers, FastAPI services, data-processing workers, browser automation tasks,
+LangChain/LangGraph services, and other Python-based runtimes in future EE or later CE versions.
 
 ---
 

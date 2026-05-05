@@ -1,3 +1,12 @@
+---
+status: implemented
+audience: ai-coding-agents
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE v0.1 Quickstart
 
 - Status: Implementation Guidance
@@ -35,7 +44,8 @@ cd deploy/compose
 docker compose up -d
 ```
 
-The Compose deployment MUST refuse to start without the three required env vars (per ADR 0004). After the container is ready, `docker compose ps` shows the `opstage` service as healthy when `GET /api/system/health` returns `200`.
+The Compose deployment MUST refuse to start without the three required env vars (per ADR 0004). After the container is
+ready, `docker compose ps` shows the `opstage` service as healthy when `GET /api/system/health` returns `200`.
 
 ## 3. First Login
 
@@ -45,7 +55,8 @@ After login, the dashboard shows zero Agents and zero Capsule Services.
 
 ## 4. Connecting the Demo Capsule Service
 
-Create a registration token in the UI, then run the demo service locally or through a future Compose demo profile. The current CE repository ships the demo service as a Node workspace app.
+Create a registration token in the UI, then run the demo service locally or through a future Compose demo profile. The
+current CE repository ships the demo service as a Node workspace app.
 
 ```bash
 # 1. In the UI, go to Settings → Registration Tokens → Create.
@@ -58,7 +69,8 @@ OPSTAGE_AGENT_TOKEN_FILE=./data/demo-agent-token.json \
 pnpm --filter @xtrape/demo-capsule-service start
 ```
 
-The demo service registers itself on first start. The Agent token is persisted in `OPSTAGE_AGENT_TOKEN_FILE`, so subsequent restarts skip registration while that file remains valid.
+The demo service registers itself on first start. The Agent token is persisted in `OPSTAGE_AGENT_TOKEN_FILE`, so
+subsequent restarts skip registration while that file remains valid.
 
 Within one heartbeat cycle, the demo service appears in the UI under Capsule Services with status `HEALTHY`.
 

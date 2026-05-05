@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # xtrape-capsule Design Principles
 
 - Status: Conceptual Guidance

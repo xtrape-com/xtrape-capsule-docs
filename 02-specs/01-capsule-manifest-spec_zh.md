@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,7 +35,8 @@
 
 This document 定义 the **Capsule Manifest** specification for the `xtrape-capsule` domain.
 
-A Capsule Manifest is the structured metadata document that 描述 a Capsule Service（胶囊服务）'s identity, runtime, capabilities, resources, actions, configuration surface, and governance metadata.
+A Capsule Manifest is the structured metadata document that 描述 a Capsule Service（胶囊服务）'s identity, runtime,
+capabilities, resources, actions, configuration surface, and governance metadata.
 
 The manifest is one of the primary contracts between Capsule Services, Agents, and Opstage（运维舞台）.
 

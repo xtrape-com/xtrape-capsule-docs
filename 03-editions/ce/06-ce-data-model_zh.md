@@ -1,3 +1,15 @@
+---
+status: draft
+audience: founders
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -420,7 +432,9 @@ createdAt           datetime
 updatedAt           datetime
 ```
 
-CE（社区版） v0.1 stores **only the effective `status`**. The "last reported" view is reconstructed from `lastReportedAt`, `lastHealthAt`, and the latest `HealthReport` row — there is no separate `reportedStatus` column. EE（企业版）/Cloud（云版） may add one later.
+CE（社区版） v0.1 stores **only the effective `status`**. The "last reported" view is reconstructed from `lastReportedAt`,
+`lastHealthAt`, and the latest `HealthReport` row — there is no separate `reportedStatus` column. EE（企业版）/Cloud（云版） may
+add one later.
 
 ### 10.2 Unique constraints (matches Prisma `@@unique([workspaceId, code])`)
 
@@ -535,7 +549,8 @@ createdAt           datetime
 updatedAt           datetime
 ```
 
-The Prisma column is `configKey` (avoiding the SQL reserved word `key`); the OpenAPI surface exposes the same field as `key`. Backend serializers map `configKey` ↔ `key` in both directions.
+The Prisma column is `configKey` (avoiding the SQL reserved word `key`); the OpenAPI surface exposes the same field as
+`key`. Backend serializers map `configKey` ↔ `key` in both directions.
 
 ### 12.2 Unique constraints (matches Prisma)
 
@@ -694,7 +709,8 @@ createdAt     datetime
 
 ### 15.2 Mapping
 
-The Agent（代理） reports `success` / `message` / `data` / `error` (matches OpenAPI `ReportCommandResultRequest`). Backend stores them on this row and transitions the Command (`RUNNING -> SUCCEEDED|FAILED`).
+The Agent（代理） reports `success` / `message` / `data` / `error` (matches OpenAPI `ReportCommandResultRequest`). Backend
+stores them on this row and transitions the Command (`RUNNING -> SUCCEEDED|FAILED`).
 
 ### 15.3 Rules
 
@@ -724,7 +740,8 @@ metadataJson  TEXT (JSON) nullable
 createdAt     datetime
 ```
 
-CE（社区版） v0.1 does NOT persist `actorName`, `targetCode`, `requestJson`, `resultJson`, `ip`, or `userAgent`. Sanitized request/result fragments and any contextual data go inside `metadataJson`.
+CE（社区版） v0.1 does NOT persist `actorName`, `targetCode`, `requestJson`, `resultJson`, `ip`, or `userAgent`. Sanitized
+request/result fragments and any contextual data go inside `metadataJson`.
 
 ### 16.2 Actor types (must match OpenAPI `AuditActorType`)
 
@@ -741,7 +758,8 @@ SUCCESS
 FAILURE
 ```
 
-`DENIED`, `ERROR`, and `PENDING` are reserved for future EE（企业版）/Cloud（云版） editions. Map authorization rejections, validation failures, and unexpected errors to `FAILURE` with `metadata.errorCode`.
+`DENIED`, `ERROR`, and `PENDING` are reserved for future EE（企业版）/Cloud（云版） editions. Map authorization rejections,
+validation failures, and unexpected errors to `FAILURE` with `metadata.errorCode`.
 
 ### 16.4 Required CE（社区版） audit events
 

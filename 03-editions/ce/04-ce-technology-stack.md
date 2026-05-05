@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE Technology Stack
 
 - Status: Implementation Target
@@ -45,7 +54,8 @@ This stack prioritizes:
 - open-source friendliness;
 - simple local development.
 
-See [ADR 0008](../../08-decisions/0008-naming-and-repositories.md) for the four-repository decision and [ADR 0009](../../08-decisions/0009-contracts-spec-and-bindings.md) for the contracts spec/bindings model.
+See [ADR 0008](../../08-decisions/0008-naming-and-repositories.md) for the four-repository decision and [ADR
+0009](../../08-decisions/0009-contracts-spec-and-bindings.md) for the contracts spec/bindings model.
 
 ---
 
@@ -244,7 +254,9 @@ React 18 + TypeScript + Ant Design (antd 5.x)
 + Vitest (tests)
 ```
 
-This is normative for CE v0.1 — see [ADR 0007 — UI State and Data Fetching](../../08-decisions/0007-ui-state-and-data-fetching.md) for the full rationale, API client rules, query conventions, and folder layout.
+This is normative for CE v0.1 — see [ADR 0007 — UI State and Data
+Fetching](../../08-decisions/0007-ui-state-and-data-fetching.md) for the full rationale, API client rules, query
+conventions, and folder layout.
 
 ### 6.2 Rationale
 
@@ -344,7 +356,9 @@ The SDK should not provide:
 
 ### 8.1 `@xtrape/capsule-contracts-node` (separate repo)
 
-The canonical TypeScript binding of the wire contracts is **NOT** a workspace package inside `xtrape-capsule-ce`. It lives in the dedicated repository `xtrape-capsule-contracts-node` and is published to npm as `@xtrape/capsule-contracts-node`.
+The canonical TypeScript binding of the wire contracts is **NOT** a workspace package inside `xtrape-capsule-ce`. It
+lives in the dedicated repository `xtrape-capsule-contracts-node` and is published to npm as
+`@xtrape/capsule-contracts-node`.
 
 Backend, UI, and demo Capsule Service all install it from npm:
 
@@ -403,7 +417,8 @@ pnpm is recommended because:
 
 ### 9.3 Workspace structure (CE monorepo only)
 
-CE v0.1 uses pnpm workspace **only inside the `xtrape-capsule-ce` repository**. The other three repositories (`xtrape-capsule-docs`, `xtrape-capsule-contracts-node`, `xtrape-capsule-agent-node`) are independent npm projects.
+CE v0.1 uses pnpm workspace **only inside the `xtrape-capsule-ce` repository**. The other three repositories
+(`xtrape-capsule-docs`, `xtrape-capsule-contracts-node`, `xtrape-capsule-agent-node`) are independent npm projects.
 
 CE monorepo layout (must match [`10-implementation/00-repository-structure.md`](../../10-implementation/00-repository-structure.md)):
 
@@ -425,7 +440,9 @@ xtrape-capsule-ce/
 └── README.md
 ```
 
-There is **no** `packages/contracts/` and **no** `packages/agent-node/` in this monorepo — both come from npm (`@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` respectively). See [ADR 0008](../../08-decisions/0008-naming-and-repositories.md) for why.
+There is **no** `packages/contracts/` and **no** `packages/agent-node/` in this monorepo — both come from npm
+(`@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` respectively). See [ADR
+0008](../../08-decisions/0008-naming-and-repositories.md) for why.
 
 ---
 

@@ -1,3 +1,13 @@
+---
+status: draft
+audience: ai-coding-agents
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -15,6 +25,41 @@
 -->
 
 # ADR 0004: CE（社区版） v0.1 安全 Defaults
+
+## Status
+
+Draft
+
+## Date
+
+2026-05-05
+
+## Context
+
+本 ADR 记录当前 Xtrape Capsule CE 设计基线中的一项架构或实现决策。详细背景见下方原始决策内容。
+
+## Decision
+
+采用下方“Decision/决策”内容作为当前基线。
+
+## Consequences
+
+该决策会影响 CE 当前实现、相关规范和后续文档维护。具体取舍见下方原始内容。
+
+## Alternatives Considered
+
+未在本模板区单独展开；如原始内容中记录了备选方案，以原始内容为准。
+
+## Implementation Notes
+
+实现和文档引用应优先遵循本 ADR 的 accepted/proposed 状态，并与 `02-specs/`、`10-implementation/` 中的当前 CE 文档保持一致。
+
+## Supersedes / Superseded By
+
+None.
+
+## Original Decision Notes
+
 
 - Status: Accepted
 - Edition: CE（社区版）
@@ -42,7 +87,8 @@ argon2id preferred
 bcrypt acceptable fallback
 ```
 
-No default credential is allowed. There is no built-in `admin/admin` or `change-me` value. Backend MUST refuse to start when `OPSTAGE_ADMIN_PASSWORD` is missing or empty (see "Admin Bootstrap").
+No default credential is allowed. There is no built-in `admin/admin` or `change-me` value. Backend MUST refuse to start
+when `OPSTAGE_ADMIN_PASSWORD` is missing or empty (see "Admin Bootstrap").
 
 ## Session Cookie Rules
 
@@ -65,11 +111,13 @@ The cookie value is opaque to the client (signed/encrypted server-side; CE（社
 - there is no cross-origin GET that mutates state;
 - all state-changing requests use POST/PUT/PATCH/DELETE.
 
-CE（社区版） v0.1 does NOT issue CORS headers for cross-origin browsers. If a future deployment needs to host the UI on a different origin, the operator must front the deployment with a reverse proxy that re-attaches the cookie.
+CE（社区版） v0.1 does NOT issue CORS headers for cross-origin browsers. If a future deployment needs to host the UI on a
+different origin, the operator must front the deployment with a reverse proxy that re-attaches the cookie.
 
 ## CSRF Protection
 
-CE（社区版） v0.1 uses a header-based double-submit token. The Backend keeps the canonical CSRF value bound to the session record server-side; the UI receives a copy in the JSON body and echoes it in a header on every state-changing call.
+CE（社区版） v0.1 uses a header-based double-submit token. The Backend keeps the canonical CSRF value bound to the session
+record server-side; the UI receives a copy in the JSON body and echoes it in a header on every state-changing call.
 
 ```text
 1. The CSRF token is generated as crypto.randomBytes(32).toString("hex").

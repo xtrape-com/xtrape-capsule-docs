@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,9 +33,13 @@
 
 This document 定义 the runtime integration overview for the `xtrape-capsule` product family.
 
-A runtime is a language or execution environment in which Capsule Services and Agents are implemented. Runtime documents explain how different ecosystems should connect to the Capsule governance model and Opstage（运维舞台） Agent（代理） capabilities.
+A runtime is a language or execution environment in which Capsule Services and Agents are implemented. Runtime documents
+explain how different ecosystems should connect to the Capsule governance model and Opstage（运维舞台） Agent（代理）
+capabilities.
 
-The current implementation focus is **CE（社区版）**. CE（社区版） v0.1 prioritizes **Node.js**. Java, Python, Go, Sidecar runtime integration, External Agent（代理） runtime integration, and Kubernetes runtime integration are future EE（企业版）/Cloud（云版） extension tracks and must not expand the CE（社区版） v0.1 implementation scope.
+The current implementation focus is **CE（社区版）**. CE（社区版） v0.1 prioritizes **Node.js**. Java, Python, Go, Sidecar runtime
+integration, External Agent（代理） runtime integration, and Kubernetes runtime integration are future EE（企业版）/Cloud（云版）
+extension tracks and must not expand the CE（社区版） v0.1 implementation scope.
 
 ---
 

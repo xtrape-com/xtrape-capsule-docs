@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Node Agent SDK
 
 - Status: Implementation Target
@@ -9,9 +16,13 @@
 
 This document defines the **Node.js Agent SDK** for Opstage CE.
 
-The Node.js Agent SDK is the first and reference implementation of the Embedded Agent model. It allows a Node.js Capsule Service to register with Opstage Backend, report its runtime metadata, expose health/config/action metadata, poll Commands, execute predefined actions, and report CommandResults.
+The Node.js Agent SDK is the first and reference implementation of the Embedded Agent model. It allows a Node.js Capsule
+Service to register with Opstage Backend, report its runtime metadata, expose health/config/action metadata, poll
+Commands, execute predefined actions, and report CommandResults.
 
-The current implementation focus is **CE v0.1**. Sidecar Agent, External Agent, Java SDK, Python SDK, Go SDK, Agent Gateway, WebSocket delivery, and enterprise secret integrations are future EE/Cloud capabilities and must not be implemented as part of this SDK v0.1.
+The current implementation focus is **CE v0.1**. Sidecar Agent, External Agent, Java SDK, Python SDK, Go SDK, Agent
+Gateway, WebSocket delivery, and enterprise secret integrations are future EE/Cloud capabilities and must not be
+implemented as part of this SDK v0.1.
 
 ---
 

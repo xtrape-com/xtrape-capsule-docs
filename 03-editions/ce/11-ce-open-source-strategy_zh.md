@@ -1,3 +1,15 @@
+---
+status: draft
+audience: founders
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,7 +37,9 @@
 
 This document 定义 the open-source strategy for **Opstage（运维舞台） CE（社区版） / Community 版本**.
 
-CE（社区版） should be a real, useful, self-hosted open-source product. It should establish trust, validate the Capsule Service（胶囊服务） model, and create an adoption path for future EE（企业版） and Cloud（云版） editions without making CE（社区版） feel like an intentionally crippled product.
+CE（社区版） should be a real, useful, self-hosted open-source product. It should establish trust, validate the Capsule
+Service（胶囊服务） model, and create an adoption path for future EE（企业版） and Cloud（云版） editions without making CE（社区版） feel
+like an intentionally crippled product.
 
 ---
 
@@ -138,7 +152,9 @@ CE（社区版） should follow these product principles:
 
 ## 6. Repository Strategy
 
-CE（社区版） v0.1 ships across **four repositories** under the `xtrape` GitHub organization. The decision and full rationale live in [ADR 0008 — Naming and Repositories](../../08-decisions/0008-naming-and-repositories.md). This section is a public-facing summary.
+CE（社区版） v0.1 ships across **four repositories** under the `xtrape` GitHub organization. The decision and full rationale
+live in [ADR 0008 — Naming and Repositories](../../08-decisions/0008-naming-and-repositories.md). This section is a
+public-facing summary.
 
 ### 6.1 The four repositories
 
@@ -153,8 +169,11 @@ CE（社区版） v0.1 ships across **four repositories** under the `xtrape` Git
 
 Two principles drove the four-repo decision:
 
-1. **版本-agnostic vs edition-bound separation.** The wire contracts and the Agent（代理） SDK MUST work against future EE（企业版） and Cloud（云版） backends without recompilation, so they live outside any edition's release cycle.
-2. **One language per binding repo.** Future Java / Python / Go agents will get their own `xtrape-capsule-contracts-{lang}` and `xtrape-capsule-agent-{lang}` repos, each with its own native toolchain. Path C in [ADR 0009](../../08-decisions/0009-contracts-spec-and-bindings.md).
+1. **版本-agnostic vs edition-bound separation.** The wire contracts and the Agent（代理） SDK MUST work against future
+EE（企业版） and Cloud（云版） backends without recompilation, so they live outside any edition's release cycle.
+2. **One language per binding repo.** Future Java / Python / Go agents will get their own
+`xtrape-capsule-contracts-{lang}` and `xtrape-capsule-agent-{lang}` repos, each with its own native toolchain. Path C in
+[ADR 0009](../../08-decisions/0009-contracts-spec-and-bindings.md).
 
 ### 6.3 Repository descriptions (used in GitHub "About" field)
 
@@ -189,7 +208,9 @@ xtrape-capsule-ce/
 └── ROADMAP.md
 ```
 
-`@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` come from npm; they are NOT workspace packages here. See [`10-implementation/00-repository-structure.md`](../../10-implementation/00-repository-structure.md) for the full details.
+`@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` come from npm; they are NOT workspace packages here.
+See [`10-implementation/00-repository-structure.md`](../../10-implementation/00-repository-structure.md) for the full
+details.
 
 ### 6.5 Public documentation
 
@@ -200,7 +221,8 @@ Each of the four repositories should include clear public documentation:
 - `xtrape-capsule-agent-node` README: SDK overview, install snippet, minimal example, pointer to docs repo.
 - `xtrape-capsule-ce` README: project overview, quick start (`docker compose up`), demo guide, Agent（代理） SDK guide, API overview, architecture overview, security model, CE（社区版）/EE（企业版）/Cloud（云版） edition explanation, roadmap, contribution guide.
 
-Per ADR 0008, repository names, npm scope (`@xtrape`), GHCR namespace (`ghcr.io/xtrape`), and image names (`opstage-ce`, `demo-capsule-service`) are normative — implementation MUST follow them.
+Per ADR 0008, repository names, npm scope (`@xtrape`), GHCR namespace (`ghcr.io/xtrape`), and image names (`opstage-ce`,
+`demo-capsule-service`) are normative — implementation MUST follow them.
 
 ---
 

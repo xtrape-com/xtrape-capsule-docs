@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Node Runtime
 
 - Status: Implementation Target
@@ -9,9 +16,11 @@
 
 This document defines the **Node.js Runtime** integration for Opstage CE.
 
-Node.js is the first and reference runtime for `xtrape-capsule`. CE v0.1 uses Node.js to prove the complete Capsule governance loop through a Node.js Capsule Service and the Node.js Embedded Agent SDK.
+Node.js is the first and reference runtime for `xtrape-capsule`. CE v0.1 uses Node.js to prove the complete Capsule
+governance loop through a Node.js Capsule Service and the Node.js Embedded Agent SDK.
 
-Java, Python, Go, Sidecar runtime integration, External Agent runtime integration, and Kubernetes runtime integration are future EE/Cloud extension tracks and must not expand the CE v0.1 implementation scope.
+Java, Python, Go, Sidecar runtime integration, External Agent runtime integration, and Kubernetes runtime integration
+are future EE/Cloud extension tracks and must not expand the CE v0.1 implementation scope.
 
 ---
 

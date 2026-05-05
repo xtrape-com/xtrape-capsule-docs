@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -27,7 +37,9 @@ This document 定义 the **Embedded Agent（代理）** model for the `xtrape-ca
 
 An Embedded Agent（代理） runs inside the same process as a Capsule Service（胶囊服务）. It is the first Agent（代理） mode implemented by CE（社区版）.
 
-The current implementation focus is **CE（社区版）**. CE（社区版） v0.1 implements only the **Node.js Embedded Agent（代理） SDK**. Java, Python, Go, Sidecar Agent（代理）, External Agent（代理）, Host Agent（代理）, and Kubernetes Agent（代理） are future EE（企业版）/Cloud（云版） extension tracks and must not expand the CE（社区版） v0.1 implementation scope.
+The current implementation focus is **CE（社区版）**. CE（社区版） v0.1 implements only the **Node.js Embedded Agent（代理） SDK**.
+Java, Python, Go, Sidecar Agent（代理）, External Agent（代理）, Host Agent（代理）, and Kubernetes Agent（代理） are future
+EE（企业版）/Cloud（云版） extension tracks and must not expand the CE（社区版） v0.1 implementation scope.
 
 ---
 
@@ -1025,7 +1037,8 @@ The CE（社区版） Embedded Agent（代理） is acceptable when:
 
 The Embedded Agent（代理） is the first and simplest Agent（代理） mode for Opstage（运维舞台） CE（社区版）.
 
-It should provide a lightweight in-process SDK that makes a Node.js Capsule Service（胶囊服务） visible, healthy, configurable by metadata, operable through predefined actions, and auditable through Commands and CommandResults.
+It should provide a lightweight in-process SDK that makes a Node.js Capsule Service（胶囊服务） visible, healthy, configurable
+by metadata, operable through predefined actions, and auditable through Commands and CommandResults.
 
 The most important Embedded Agent（代理） rule is:
 

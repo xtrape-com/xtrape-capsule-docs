@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,7 +33,9 @@
 
 This document compares **Capsule Service（胶囊服务）** with traditional **Microservice** architecture.
 
-The purpose is not to claim that Capsule Services replace microservices. Instead, this document clarifies when a service should be modeled as a Capsule Service（胶囊服务）, when it should remain a traditional microservice, and how both models can coexist in the Xtrape ecosystem.
+The purpose is not to claim that Capsule Services replace microservices. Instead, this document clarifies when a service
+should be modeled as a Capsule Service（胶囊服务）, when it should remain a traditional microservice, and how both models can
+coexist in the Xtrape ecosystem.
 
 ---
 
@@ -385,7 +397,8 @@ billing-service
 inventory-service
 ```
 
-A microservice may still be connected to Opstage（运维舞台） as a Capsule Service（胶囊服务） if it exposes a governance boundary. In that case, it is both a microservice and a governed Capsule target.
+A microservice may still be connected to Opstage（运维舞台） as a Capsule Service（胶囊服务） if it exposes a governance boundary.
+In that case, it is both a microservice and a governed Capsule target.
 
 ---
 
@@ -408,7 +421,8 @@ Business System
 └── proxy-health-checker         # Capsule Service
 ```
 
-Opstage（运维舞台） does not replace the business service platform. It 提供 runtime governance for Capsule Services and optionally for microservices that choose to expose Capsule governance metadata.
+Opstage（运维舞台） does not replace the business service platform. It 提供 runtime governance for Capsule Services and
+optionally for microservices that choose to expose Capsule governance metadata.
 
 ---
 

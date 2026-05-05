@@ -1,3 +1,15 @@
+---
+status: draft
+audience: founders
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -24,7 +36,9 @@
 
 This document 定义 the extension points that **Opstage（运维舞台） CE（社区版） v0.1** should preserve for future **EE（企业版）** and **Cloud（云版）** editions.
 
-CE（社区版） should be lightweight and focused, but it must not be designed as a dead end. The first implementation should leave clean expansion paths for enterprise private deployment and hosted SaaS without forcing their complexity into CE（社区版） v0.1.
+CE（社区版） should be lightweight and focused, but it must not be designed as a dead end. The first implementation should
+leave clean expansion paths for enterprise private deployment and hosted SaaS without forcing their complexity into
+CE（社区版） v0.1.
 
 ---
 

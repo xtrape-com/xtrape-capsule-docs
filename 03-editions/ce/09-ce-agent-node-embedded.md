@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE Node Embedded Agent
 
 - Status: Implementation Target
@@ -15,7 +24,8 @@ The Node.js Embedded Agent is the first Agent implementation of `xtrape-capsule`
 
 ## 1. Purpose
 
-The purpose of the Node.js Embedded Agent is to make a Node.js Capsule Service governable by Opstage without forcing the service to become dependent on Opstage for its core startup and business logic.
+The purpose of the Node.js Embedded Agent is to make a Node.js Capsule Service governable by Opstage without forcing the
+service to become dependent on Opstage for its core startup and business logic.
 
 The Agent SDK should provide:
 

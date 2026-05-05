@@ -1,3 +1,15 @@
+---
+status: draft
+audience: ai-coding-agents
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,7 +37,9 @@
 
 ## 1. 概述
 
-Opstage（运维舞台） CE（社区版） v0.1 is delivered as **four repositories** under the `xtrape` GitHub organization. The split exists because two of the four are **edition-agnostic** (the wire contracts and the Node Agent（代理） SDK) and must not be tied to any specific edition's release cycle.
+Opstage（运维舞台） CE（社区版） v0.1 is delivered as **four repositories** under the `xtrape` GitHub organization. The split
+exists because two of the four are **edition-agnostic** (the wire contracts and the Node Agent（代理） SDK) and must not be
+tied to any specific edition's release cycle.
 
 ```text
 xtrape-capsule-docs              ← design docs, ADRs, Layer 1 contract SSOT (you are here)
@@ -34,7 +48,8 @@ xtrape-capsule-agent-node        ← Node Agent SDK
 xtrape-capsule-ce                ← CE backend, UI, demo, deploy (the only edition-bound code repo)
 ```
 
-Future Java/Python/Go agents follow the same shape: each gets its own `xtrape-capsule-contracts-<lang>` and `xtrape-capsule-agent-<lang>` repo. EE（企业版） / Cloud（云版） editions get their own `xtrape-capsule-opstage-<edition>` repos.
+Future Java/Python/Go agents follow the same shape: each gets its own `xtrape-capsule-contracts-<lang>` and
+`xtrape-capsule-agent-<lang>` repo. EE（企业版） / Cloud（云版） editions get their own `xtrape-capsule-opstage-<edition>` repos.
 
 ## 2. Dependency Graph
 
@@ -56,7 +71,8 @@ xtrape-capsule-agent-node            xtrape-capsule-ce
                               ghcr.io/xtrape/demo-capsule-service:vX.Y.Z
 ```
 
-**Strict rule (enforced by CI in each repo)**: nothing depends on `xtrape-capsule-ce`. 版本-agnostic repos MUST NOT import from edition-bound repos. See ADR 0008 §"Reverse-dependency prohibition".
+**Strict rule (enforced by CI in each repo)**: nothing depends on `xtrape-capsule-ce`. 版本-agnostic repos MUST NOT import
+from edition-bound repos. See ADR 0008 §"Reverse-dependency prohibition".
 
 ## 3. `xtrape-capsule-ce` — CE（社区版） Monorepo
 
@@ -157,7 +173,8 @@ demo.message
 
 #### `packages/db`
 
-Prisma schema, client, migrations, and DB bootstrap logic. The schema is the **authoritative** copy of `xtrape-capsule-docs/09-contracts/prisma/schema.prisma`; CI MUST verify they remain identical.
+Prisma schema, client, migrations, and DB bootstrap logic. The schema is the **authoritative** copy of
+`xtrape-capsule-docs/09-contracts/prisma/schema.prisma`; CI MUST verify they remain identical.
 
 Responsibilities:
 
@@ -182,7 +199,8 @@ This package MUST NOT contain large business modules; if a module is touched by 
 
 #### `packages/test-utils`
 
-共享 integration test helpers used by `apps/opstage-backend` and `apps/demo-capsule-service`. NOT published; consumed via workspace protocol (`"@xtrape/capsule-test-utils": "workspace:*"`).
+共享 integration test helpers used by `apps/opstage-backend` and `apps/demo-capsule-service`. NOT published; consumed via
+workspace protocol (`"@xtrape/capsule-test-utils": "workspace:*"`).
 
 Module layout:
 

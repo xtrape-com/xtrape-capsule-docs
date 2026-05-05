@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Java Runtime Planning
 
 - Status: Planning
@@ -9,7 +16,8 @@ This document defines the planned **Java Runtime** integration for the `xtrape-c
 
 Java Runtime is a future extension. It is not a CE v0.1 implementation requirement.
 
-The current CE implementation focus is **Node.js**. Java Runtime planning exists to keep the Capsule governance model compatible with enterprise Java and Spring-based services in future EE or later CE versions.
+The current CE implementation focus is **Node.js**. Java Runtime planning exists to keep the Capsule governance model
+compatible with enterprise Java and Spring-based services in future EE or later CE versions.
 
 ---
 

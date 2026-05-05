@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE API Design
 
 - Status: Implementation Target
@@ -240,7 +249,10 @@ CE may keep status usage simple, but it should not return `200` for clear authen
 
 ## 7. Pagination, Sorting, and Filtering
 
-All list endpoints share a single convention. Backend MUST validate every query param with the Zod schema exported from `@xtrape/capsule-contracts-node` (the published npm package; see [ADR 0008](../../08-decisions/0008-naming-and-repositories.md)) before reaching the data layer; unknown params return `422 VALIDATION_FAILED`.
+All list endpoints share a single convention. Backend MUST validate every query param with the Zod schema exported from
+`@xtrape/capsule-contracts-node` (the published npm package; see [ADR
+0008](../../08-decisions/0008-naming-and-repositories.md)) before reaching the data layer; unknown params return `422
+VALIDATION_FAILED`.
 
 ### 7.1 Pagination
 
@@ -291,7 +303,8 @@ Filters are individual query params named after the field they filter:
 | `GET /api/admin/audit-events`          | `actorType`, `targetType`, `targetId`, `result`, `from`, `to` (`from`/`to` apply to `createdAt`) |
 | `GET /api/admin/registration-tokens`   | `status` (`TokenStatus`)                                         |
 
-Multiple values for the same key (e.g. `status=PENDING&status=RUNNING`) are OR'ed; multiple keys are AND'ed. `from`/`to` are ISO-8601 timestamps and apply to the endpoint's natural time field (`occurredAt` for audit, `createdAt` otherwise).
+Multiple values for the same key (e.g. `status=PENDING&status=RUNNING`) are OR'ed; multiple keys are AND'ed. `from`/`to`
+are ISO-8601 timestamps and apply to the endpoint's natural time field (`occurredAt` for audit, `createdAt` otherwise).
 
 CE v0.1 does NOT implement free-text search (`q=`); that is reserved for EE.
 
@@ -752,7 +765,9 @@ Response:
 }
 ```
 
-Service report stores only the stable Action Catalog. `GET` records an `ACTION_PREPARE` Command, dispatches it to the Agent prepare handler, waits for dynamic form/current-state data, and returns it. It must not execute the action execution handler.
+Service report stores only the stable Action Catalog. `GET` records an `ACTION_PREPARE` Command, dispatches it to the
+Agent prepare handler, waits for dynamic form/current-state data, and returns it. It must not execute the action
+execution handler.
 
 ### 14.2 Request action execution
 

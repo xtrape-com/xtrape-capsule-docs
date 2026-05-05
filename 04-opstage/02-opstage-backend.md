@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Opstage Backend
 
 - Status: Implementation Guidance
@@ -540,7 +547,9 @@ createdAt
 updatedAt
 ```
 
-Reported vs. effective status (CE v0.1 decision): the database persists only the **effective** `status`. The "last reported" view is derived from `lastReportedAt`, `lastHealthAt`, and the latest `HealthReport` row — there is no separate `reportedStatus` column. EE/Cloud may add one later.
+Reported vs. effective status (CE v0.1 decision): the database persists only the **effective** `status`. The "last
+reported" view is derived from `lastReportedAt`, `lastHealthAt`, and the latest `HealthReport` row — there is no
+separate `reportedStatus` column. EE/Cloud may add one later.
 
 Required uniqueness (CE v0.1 decision, matches Prisma `@@unique([workspaceId, code])`):
 
@@ -758,7 +767,8 @@ SUCCESS
 FAILURE
 ```
 
-`DENIED`, `ERROR`, and `PENDING` are reserved for future EE/Cloud editions. Map authorization rejections, validation failures, and runtime errors to `FAILURE` with `metadata.errorCode`.
+`DENIED`, `ERROR`, and `PENDING` are reserved for future EE/Cloud editions. Map authorization rejections, validation
+failures, and runtime errors to `FAILURE` with `metadata.errorCode`.
 
 AuditEvents should be sanitized and should not contain raw secrets.
 
@@ -938,19 +948,23 @@ async function runAgentOfflineSweep({ prisma, clock, cfg }: Deps) {
 }
 ```
 
-The other two sweeps follow the same shape, swapping table and audit action. `command-ttl-sweep` MUST also insert a synthetic `CommandResult` with `success=false`, `error: { code: "COMMAND_EXPIRED", message: "TTL elapsed before completion." }` so the UI sees a uniform terminal state.
+The other two sweeps follow the same shape, swapping table and audit action. `command-ttl-sweep` MUST also insert a
+synthetic `CommandResult` with `success=false`, `error: { code: "COMMAND_EXPIRED", message: "TTL elapsed before
+completion." }` so the UI sees a uniform terminal state.
 
 CE v0.1 does NOT broadcast SSE/WebSocket from sweeps; UI polls. Push delivery is reserved for EE.
 
 ### 27.2 Effective Status Derivation
 
-Read paths (`GET /api/admin/agents`, `GET /api/admin/capsule-services`) MUST return the persisted `effectiveStatus`/`status` column, not recompute on every request. This guarantees:
+Read paths (`GET /api/admin/agents`, `GET /api/admin/capsule-services`) MUST return the persisted
+`effectiveStatus`/`status` column, not recompute on every request. This guarantees:
 
 - consistent values across UI tabs and API consumers;
 - a single audit trail for status transitions (sweeper-driven only);
 - monotonic transitions (no flicker between requests).
 
-If the persisted column is older than `2 × BACKGROUND_SWEEP_INTERVAL_SECONDS` (i.e. the sweeper hasn't run), Backend logs a warning at WARN level — this is the signal that the sweeper has crashed or fallen behind.
+If the persisted column is older than `2 × BACKGROUND_SWEEP_INTERVAL_SECONDS` (i.e. the sweeper hasn't run), Backend
+logs a warning at WARN level — this is the signal that the sweeper has crashed or fallen behind.
 
 ---
 

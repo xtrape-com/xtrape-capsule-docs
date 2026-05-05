@@ -1,3 +1,15 @@
+---
+status: draft
+audience: founders
+stability: unstable
+last_reviewed: 2026-05-05
+edition: cloud
+phase: future
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,7 +35,8 @@
 
 This document 定义 the product positioning of **Opstage（运维舞台） Cloud（云版）**.
 
-Opstage（运维舞台） Cloud（云版） is the future hosted SaaS edition of the `xtrape-capsule` product family. It should extend the same Agent（代理）-based Capsule governance model used by CE（社区版） and EE（企业版）, but provide it as a managed cloud service.
+Opstage（运维舞台） Cloud（云版） is the future hosted SaaS edition of the `xtrape-capsule` product family. It should extend the
+same Agent（代理）-based Capsule governance model used by CE（社区版） and EE（企业版）, but provide it as a managed cloud service.
 
 Cloud（云版） is not a CE（社区版） v0.1 implementation requirement.
 

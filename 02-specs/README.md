@@ -1,3 +1,10 @@
+---
+status: accepted
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Shared Specifications
 
 - Status: Specification
@@ -9,7 +16,9 @@
 
 This directory contains the shared specifications for the `xtrape-capsule` domain.
 
-These specifications define the long-term contracts shared by CE, EE, and Cloud editions. CE v0.1 may implement only a subset of each specification, but it should not introduce incompatible names, status values, data structures, or protocol concepts.
+These specifications define the long-term contracts shared by CE, EE, and Cloud editions. CE v0.1 may implement only a
+subset of each specification, but it should not introduce incompatible names, status values, data structures, or
+protocol concepts.
 
 ---
 
@@ -473,3 +482,13 @@ CE v0.1 should implement only the smallest useful subset, but it should follow t
 The key rule is:
 
 > CE may be small, but it should not be incompatible.
+
+## Spec Status Policy
+
+This repository currently keeps specs in place to avoid breaking references. Use the frontmatter `status` field to distinguish accepted specs from draft specs.
+
+- `status: accepted` means the document is a current implementation target or stable design baseline.
+- `status: draft` or `status: proposed` means the document is exploratory or future-looking.
+- Implementation docs should reference accepted specs first.
+
+A future cleanup may move files into `accepted/` and `draft/` folders once references are updated safely.

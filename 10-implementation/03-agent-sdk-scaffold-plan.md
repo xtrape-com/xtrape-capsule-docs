@@ -1,3 +1,12 @@
+---
+status: implemented
+audience: ai-coding-agents
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE v0.1 Node Agent SDK Scaffold Plan
 
 - Status: Implementation Guidance
@@ -15,7 +24,9 @@ The SDK should make it easy for a Node.js Capsule Service to register with Opsta
 
 ## 2. Repository
 
-The Node Agent SDK lives in a **dedicated edition-agnostic repository**: `xtrape-capsule-agent-node` (see [ADR 0008 — Naming and Repositories](../08-decisions/0008-naming-and-repositories.md)). It is NOT a workspace package inside the CE monorepo.
+The Node Agent SDK lives in a **dedicated edition-agnostic repository**: `xtrape-capsule-agent-node` (see [ADR 0008 —
+Naming and Repositories](../08-decisions/0008-naming-and-repositories.md)). It is NOT a workspace package inside the CE
+monorepo.
 
 Published npm package:
 

@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,7 +35,8 @@
 
 This document 定义 the **Command** specification for the `xtrape-capsule` domain.
 
-A Command is an instruction created by Opstage（运维舞台） Backend and executed by an authorized Agent（代理）. Commands are the delivery mechanism for operational requests such as predefined Capsule Service（胶囊服务） actions.
+A Command is an instruction created by Opstage（运维舞台） Backend and executed by an authorized Agent（代理）. Commands are the
+delivery mechanism for operational requests such as predefined Capsule Service（胶囊服务） actions.
 
 In CE（社区版） v0.1, Commands are primarily used to execute predefined actions through the Node.js embedded Agent（代理） SDK.
 
@@ -238,7 +249,8 @@ Target Capsule Service（胶囊服务）. Required. Prefix: `svc_`.
 
 ### 6.4 `type`
 
-Type of Command. Required. CE（社区版） v0.1 支持 only `ACTION`. Other types (`CONFIG_UPDATE`, `CONFIG_RELOAD`, `SERVICE_REFRESH`, `AGENT_CONTROL`, `CUSTOM`) are reserved for future EE（企业版）/Cloud（云版）.
+Type of Command. Required. CE（社区版） v0.1 支持 only `ACTION`. Other types (`CONFIG_UPDATE`, `CONFIG_RELOAD`,
+`SERVICE_REFRESH`, `AGENT_CONTROL`, `CUSTOM`) are reserved for future EE（企业版）/Cloud（云版）.
 
 ### 6.5 `actionName`
 
@@ -467,7 +479,8 @@ Unknown action result example (CommandResult report body, see §13):
 
 ## 12. CommandResult Object
 
-CE（社区版） v0.1 CommandResult uses the OpenAPI shape. The Agent（代理） reports `success` (boolean) plus optional `message`, `data`, and `error`. Backend persists these along with timing metadata.
+CE（社区版） v0.1 CommandResult uses the OpenAPI shape. The Agent（代理） reports `success` (boolean) plus optional `message`,
+`data`, and `error`. Backend persists these along with timing metadata.
 
 ### 12.1 CommandResult report body (Agent（代理） → Backend)
 
@@ -527,7 +540,8 @@ The Command row separately tracks `startedAt` (set during polling) and `complete
 
 ### 12.5 Optional timing fields
 
-The Agent（代理） MAY include `startedAt` and `finishedAt` (ISO-8601). Backend uses them only to refine `Command.startedAt` / `Command.completedAt` if the Agent（代理）'s clock is trustworthy; Backend's own clock is authoritative.
+The Agent（代理） MAY include `startedAt` and `finishedAt` (ISO-8601). Backend uses them only to refine `Command.startedAt`
+/ `Command.completedAt` if the Agent（代理）'s clock is trustworthy; Backend's own clock is authoritative.
 
 ---
 
@@ -554,7 +568,9 @@ Request body (matches OpenAPI `ReportCommandResultRequest`):
 ```
 
 
-Backend SHOULD 限制序列化后的 CommandResult payload 大小。CE（社区版） v0.1 使用 `OPSTAGE_COMMAND_RESULT_MAX_BYTES`（默认 `1000000`）。如果序列化后的 `message` + `data` + `error` payload 超过限制，Backend 会以 `413 COMMAND_RESULT_TOO_LARGE` 拒绝本次上报。CommandResult 应保持简洁；大型日志或产物应由未来的日志/产物采集能力承载。
+Backend SHOULD 限制序列化后的 CommandResult payload 大小。CE（社区版） v0.1 使用 `OPSTAGE_COMMAND_RESULT_MAX_BYTES`（默认 `1000000`）。如果序列化后的
+`message` + `data` + `error` payload 超过限制，Backend 会以 `413 COMMAND_RESULT_TOO_LARGE` 拒绝本次上报。CommandResult
+应保持简洁；大型日志或产物应由未来的日志/产物采集能力承载。
 
 Backend responsibilities:
 

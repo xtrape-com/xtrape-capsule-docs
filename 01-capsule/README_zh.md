@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,7 +33,8 @@
 
 This directory 定义 the core `xtrape-capsule` domain concepts.
 
-Read these documents before implementing Opstage（运维舞台）, Agents, runtime SDKs, or edition-specific features. They define the shared vocabulary used by the rest of the documentation set.
+Read these documents before implementing Opstage（运维舞台）, Agents, runtime SDKs, or edition-specific features. They define
+the shared vocabulary used by the rest of the documentation set.
 
 ---
 
@@ -68,7 +79,8 @@ Defines Capsule Service（胶囊服务） as the core governable service unit.
 
 ### 3.3 `02-capsule-vs-microservice.md`
 
-Compares Capsule Service（胶囊服务） with traditional microservices and clarifies why Capsule Services are better suited for lightweight capability units, automation workers, account/session services, and AI-era integration services.
+Compares Capsule Service（胶囊服务） with traditional microservices and clarifies why Capsule Services are better suited for
+lightweight capability units, automation workers, account/session services, and AI-era integration services.
 
 ### 3.4 `03-domain-model.md`
 

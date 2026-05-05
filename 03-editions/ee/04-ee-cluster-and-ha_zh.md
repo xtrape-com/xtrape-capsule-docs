@@ -1,3 +1,15 @@
+---
+status: draft
+audience: founders
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ee
+phase: future
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,7 +35,8 @@
 
 This document 定义 the planned cluster and high availability model for **Opstage（运维舞台） EE（企业版） / Enterprise 版本**.
 
-Opstage（运维舞台） EE（企业版） is the future private commercial edition of the `xtrape-capsule` product family. Cluster and high availability capabilities are not CE（社区版） v0.1 implementation requirements.
+Opstage（运维舞台） EE（企业版） is the future private commercial edition of the `xtrape-capsule` product family. Cluster and high
+availability capabilities are not CE（社区版） v0.1 implementation requirements.
 
 ---
 

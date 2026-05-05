@@ -1,3 +1,15 @@
+---
+status: draft
+audience: founders
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,7 +37,8 @@
 
 This document 定义 the architecture of **Opstage（运维舞台） CE（社区版） v0.1**.
 
-CE（社区版） architecture should be lightweight, modular, self-hosted, and simple enough for the first open-source implementation, while preserving extension points for EE（企业版） and Cloud（云版）.
+CE（社区版） architecture should be lightweight, modular, self-hosted, and simple enough for the first open-source
+implementation, while preserving extension points for EE（企业版） and Cloud（云版）.
 
 ---
 
@@ -328,7 +341,9 @@ Modules may be physically combined in CE（社区版） v0.1 if implementation s
 
 ## 7. Repository 架构
 
-CE（社区版） v0.1 ships across **four repositories** (see [ADR 0008](../../08-decisions/0008-naming-and-repositories.md) and [`10-implementation/00-repository-structure.md`](../../10-implementation/00-repository-structure.md) for the authoritative details):
+CE（社区版） v0.1 ships across **four repositories** (see [ADR 0008](../../08-decisions/0008-naming-and-repositories.md) and
+[`10-implementation/00-repository-structure.md`](../../10-implementation/00-repository-structure.md) for the
+authoritative details):
 
 ```text
 xtrape-capsule-docs              ← design docs + Layer 1 contract SSOT
@@ -362,11 +377,15 @@ There is **no** `packages/contracts/` and **no** `packages/agent-node/` inside `
 
 ### 7.1 `apps/opstage-backend`
 
-Fastify backend application. Contains HTTP server, Admin APIs, Agent（代理） APIs, database access via `@xtrape/capsule-db`, auth, status calculation, command handling, audit writing. Imports types and Zod schemas from `@xtrape/capsule-contracts-node`.
+Fastify backend application. Contains HTTP server, Admin APIs, Agent（代理） APIs, database access via `@xtrape/capsule-db`,
+auth, status calculation, command handling, audit writing. Imports types and Zod schemas from
+`@xtrape/capsule-contracts-node`.
 
 ### 7.2 `apps/opstage-ui`
 
-React 18 + Ant Design (antd) web UI application. Contains login page, dashboard, Agent（代理） pages, Capsule Service（胶囊服务） pages, Command pages, Audit pages. See [ADR 0007](../../08-decisions/0007-ui-state-and-data-fetching.md) for the full state-and-data-fetching stack.
+React 18 + Ant Design (antd) web UI application. Contains login page, dashboard, Agent（代理） pages, Capsule Service（胶囊服务）
+pages, Command pages, Audit pages. See [ADR 0007](../../08-decisions/0007-ui-state-and-data-fetching.md) for the full
+state-and-data-fetching stack.
 
 ### 7.3 `apps/demo-capsule-service`
 

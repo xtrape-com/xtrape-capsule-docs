@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: cloud
+phase: future
+---
+
 # Cloud Data Boundary
 
 - Status: Planning
@@ -7,7 +16,8 @@
 
 This document defines the planned data boundary for **Opstage Cloud**.
 
-Opstage Cloud is the future hosted SaaS edition of the `xtrape-capsule` product family. Cloud data boundary design is a future capability and is not a CE v0.1 implementation requirement.
+Opstage Cloud is the future hosted SaaS edition of the `xtrape-capsule` product family. Cloud data boundary design is a
+future capability and is not a CE v0.1 implementation requirement.
 
 ---
 

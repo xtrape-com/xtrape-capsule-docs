@@ -1,3 +1,13 @@
+---
+status: draft
+audience: backend-developers
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -21,7 +31,8 @@
 - Priority: Current
 - Audience: architects, backend developers, frontend developers, agent SDK developers, test engineers, AI coding agents
 
-This directory is **Layer 1** of the contracts model: the language-agnostic single source of truth (SSOT) for the CE（社区版） v0.1 wire format, error codes, status enumerations, audit actions, ID prefixes, and persistence schema.
+This directory is **Layer 1** of the contracts model: the language-agnostic single source of truth (SSOT) for the
+CE（社区版） v0.1 wire format, error codes, status enumerations, audit actions, ID prefixes, and persistence schema.
 
 > **Read first**: [ADR 0009 — Contracts Spec and Bindings](../08-decisions/0009-contracts-spec-and-bindings.md). It 定义 the two-layer model (Spec + Bindings), the per-language repository strategy (Path C), and the synchronization rules.
 
@@ -57,7 +68,8 @@ Layer 1 is the SSOT. Layer 2 mirrors Layer 1 and regenerates from it; PRs to a b
 
 Files marked ★ are the four JSON SSOT files. They are the inputs that every binding repo reads.
 
-`prisma/schema.prisma` is included here for review and contract-driven development. The **authoritative** copy lives in `xtrape-capsule-ce/packages/db/schema.prisma` (CE（社区版）-bound).
+`prisma/schema.prisma` is included here for review and contract-driven development. The **authoritative** copy lives in
+`xtrape-capsule-ce/packages/db/schema.prisma` (CE（社区版）-bound).
 
 ## 3. Layer 2 Bindings (per-language repositories)
 
@@ -70,7 +82,8 @@ Files marked ★ are the four JSON SSOT files. They are the inputs that every bi
 
 Repository naming is normative — see [ADR 0008 — Naming and Repositories](../08-decisions/0008-naming-and-repositories.md).
 
-CE（社区版） v0.1 only ships the Node binding. The remaining three are listed for forward-compatibility; their codegen path is identical (read `09-contracts/`, emit language-native types).
+CE（社区版） v0.1 only ships the Node binding. The remaining three are listed for forward-compatibility; their codegen path
+is identical (read `09-contracts/`, emit language-native types).
 
 ## 4. Contract 优先级
 
@@ -168,7 +181,9 @@ Expected lint output:
 - Without the config, `redocly lint` produces ~11 warnings (all acceptable) but exits 0.
 - `prisma validate` prints `The schema at … is valid 🚀`.
 
-The included `prisma.config.ts` follows the Prisma ORM v7 convention where datasource URLs live in config instead of the schema file. It should be copied to the implementation package root (`xtrape-capsule-ce/packages/db/`) or invoked with Prisma's `--config` option after Prisma is installed locally.
+The included `prisma.config.ts` follows the Prisma ORM v7 convention where datasource URLs live in config instead of the
+schema file. It should be copied to the implementation package root (`xtrape-capsule-ce/packages/db/`) or invoked with
+Prisma's `--config` option after Prisma is installed locally.
 
 ## 9. Editing the SSOT
 

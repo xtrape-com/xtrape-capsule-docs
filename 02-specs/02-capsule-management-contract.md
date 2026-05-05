@@ -1,3 +1,10 @@
+---
+status: accepted
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Capsule Management Contract
 
 - Status: Specification
@@ -9,7 +16,9 @@
 
 This document defines the **Capsule Management Contract** for the `xtrape-capsule` domain.
 
-The Capsule Management Contract is the service-side governance interface that describes how a Capsule Service can expose or provide its manifest, health, configuration metadata, actions, resources, events, and metrics to an Agent or to Opstage.
+The Capsule Management Contract is the service-side governance interface that describes how a Capsule Service can expose
+or provide its manifest, health, configuration metadata, actions, resources, events, and metrics to an Agent or to
+Opstage.
 
 This contract is shared by CE, EE, and Cloud. CE v0.1 may implement only a subset through the Node.js embedded Agent SDK.
 

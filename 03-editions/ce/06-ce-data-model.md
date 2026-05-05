@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE Data Model
 
 - Status: Implementation Target
@@ -404,7 +413,9 @@ createdAt           datetime
 updatedAt           datetime
 ```
 
-CE v0.1 stores **only the effective `status`**. The "last reported" view is reconstructed from `lastReportedAt`, `lastHealthAt`, and the latest `HealthReport` row — there is no separate `reportedStatus` column. EE/Cloud may add one later.
+CE v0.1 stores **only the effective `status`**. The "last reported" view is reconstructed from `lastReportedAt`,
+`lastHealthAt`, and the latest `HealthReport` row — there is no separate `reportedStatus` column. EE/Cloud may add one
+later.
 
 ### 10.2 Unique constraints (matches Prisma `@@unique([workspaceId, code])`)
 
@@ -519,7 +530,8 @@ createdAt           datetime
 updatedAt           datetime
 ```
 
-The Prisma column is `configKey` (avoiding the SQL reserved word `key`); the OpenAPI surface exposes the same field as `key`. Backend serializers map `configKey` ↔ `key` in both directions.
+The Prisma column is `configKey` (avoiding the SQL reserved word `key`); the OpenAPI surface exposes the same field as
+`key`. Backend serializers map `configKey` ↔ `key` in both directions.
 
 ### 12.2 Unique constraints (matches Prisma)
 
@@ -678,7 +690,8 @@ createdAt     datetime
 
 ### 15.2 Mapping
 
-The Agent reports `success` / `message` / `data` / `error` (matches OpenAPI `ReportCommandResultRequest`). Backend stores them on this row and transitions the Command (`RUNNING -> SUCCEEDED|FAILED`).
+The Agent reports `success` / `message` / `data` / `error` (matches OpenAPI `ReportCommandResultRequest`). Backend
+stores them on this row and transitions the Command (`RUNNING -> SUCCEEDED|FAILED`).
 
 ### 15.3 Rules
 
@@ -708,7 +721,8 @@ metadataJson  TEXT (JSON) nullable
 createdAt     datetime
 ```
 
-CE v0.1 does NOT persist `actorName`, `targetCode`, `requestJson`, `resultJson`, `ip`, or `userAgent`. Sanitized request/result fragments and any contextual data go inside `metadataJson`.
+CE v0.1 does NOT persist `actorName`, `targetCode`, `requestJson`, `resultJson`, `ip`, or `userAgent`. Sanitized
+request/result fragments and any contextual data go inside `metadataJson`.
 
 ### 16.2 Actor types (must match OpenAPI `AuditActorType`)
 
@@ -725,7 +739,8 @@ SUCCESS
 FAILURE
 ```
 
-`DENIED`, `ERROR`, and `PENDING` are reserved for future EE/Cloud editions. Map authorization rejections, validation failures, and unexpected errors to `FAILURE` with `metadata.errorCode`.
+`DENIED`, `ERROR`, and `PENDING` are reserved for future EE/Cloud editions. Map authorization rejections, validation
+failures, and unexpected errors to `FAILURE` with `metadata.errorCode`.
 
 ### 16.4 Required CE audit events
 
@@ -1105,7 +1120,8 @@ The most important data model rule is:
 
 ## 22. CE v0.1 SQL Note: Command Payload Redaction Boundary
 
-`commands.payloadJson` must store the raw execution payload so Agent polling APIs can receive required secrets such as passwords, tokens, and API keys. Admin display APIs and UI must redact before returning payloads.
+`commands.payloadJson` must store the raw execution payload so Agent polling APIs can receive required secrets such as
+passwords, tokens, and API keys. Admin display APIs and UI must redact before returning payloads.
 
 Command creation SQL should use the raw payload:
 

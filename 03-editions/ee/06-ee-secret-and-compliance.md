@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ee
+phase: future
+---
+
 # EE Secret and Compliance
 
 - Status: Planning
@@ -7,7 +16,8 @@
 
 This document defines the planned secret management and compliance direction for **Opstage EE / Enterprise Edition**.
 
-Opstage EE is the future private commercial edition of the `xtrape-capsule` product family. Secret management and compliance capabilities are not CE v0.1 implementation requirements.
+Opstage EE is the future private commercial edition of the `xtrape-capsule` product family. Secret management and
+compliance capabilities are not CE v0.1 implementation requirements.
 
 ---
 
@@ -950,7 +960,8 @@ EE secret and compliance planning is acceptable when:
 
 ## 35. Summary
 
-Opstage EE should provide enterprise secret and compliance capabilities by governing references, access, audit, retention, and export rather than becoming a raw secret vault by default.
+Opstage EE should provide enterprise secret and compliance capabilities by governing references, access, audit,
+retention, and export rather than becoming a raw secret vault by default.
 
 The most important secret and compliance rule is:
 

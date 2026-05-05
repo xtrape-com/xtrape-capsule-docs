@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Capsule Domain Documents
 
 - Status: Implementation Guidance
@@ -52,7 +59,8 @@ Defines Capsule Service as the core governable service unit.
 
 ### 3.3 `02-capsule-vs-microservice.md`
 
-Compares Capsule Service with traditional microservices and clarifies why Capsule Services are better suited for lightweight capability units, automation workers, account/session services, and AI-era integration services.
+Compares Capsule Service with traditional microservices and clarifies why Capsule Services are better suited for
+lightweight capability units, automation workers, account/session services, and AI-era integration services.
 
 ### 3.4 `03-domain-model.md`
 

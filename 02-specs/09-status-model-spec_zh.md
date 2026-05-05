@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,7 +35,8 @@
 
 This document 定义 the shared **状态 Model** for the `xtrape-capsule` domain.
 
-状态 values are used by Opstage（运维舞台） Backend, Opstage（运维舞台） UI, Agents, and Capsule Services to describe current state, reported state, effective state, health state, command state, token state, and freshness.
+状态 values are used by Opstage（运维舞台） Backend, Opstage（运维舞台） UI, Agents, and Capsule Services to describe current state,
+reported state, effective state, health state, command state, token state, and freshness.
 
 A consistent status model is required so that CE（社区版）, EE（企业版）, and Cloud（云版） can share the same mental model and avoid ambiguous UI behavior.
 
@@ -60,11 +71,14 @@ This document should be used by:
 
 ### 2.1 Reported State
 
-**Reported state** is what an Agent（代理） last sent: `HealthStatus` from the latest `HealthReport`, plus `lastReportedAt` and `lastHealthAt` timestamps. CE（社区版） v0.1 does not persist a separate `reportedStatus` column; reported state is derived from the latest stored `HealthReport` row.
+**Reported state** is what an Agent（代理） last sent: `HealthStatus` from the latest `HealthReport`, plus `lastReportedAt`
+and `lastHealthAt` timestamps. CE（社区版） v0.1 does not persist a separate `reportedStatus` column; reported state is
+derived from the latest stored `HealthReport` row.
 
 ### 2.2 Effective 状态
 
-**Effective status** is the status calculated by Opstage（运维舞台） Backend based on Agent（代理） heartbeat freshness, Agent（代理） disabled/revoked state, and the latest health report. CE（社区版） v0.1 stores this on `CapsuleService.status`.
+**Effective status** is the status calculated by Opstage（运维舞台） Backend based on Agent（代理） heartbeat freshness, Agent（代理）
+disabled/revoked state, and the latest health report. CE（社区版） v0.1 stores this on `CapsuleService.status`.
 
 Example response (matches OpenAPI `CapsuleService` + `HealthReport`):
 
@@ -372,7 +386,9 @@ SUCCESS
 FAILURE
 ```
 
-`DENIED`, `ERROR`, and `PENDING` are reserved for future EE（企业版）/Cloud（云版） editions and are not part of CE（社区版） v0.1. CE（社区版） implementations should map authorization rejections and unexpected errors to `FAILURE` with a descriptive `message`.
+`DENIED`, `ERROR`, and `PENDING` are reserved for future EE（企业版）/Cloud（云版） editions and are not part of CE（社区版） v0.1.
+CE（社区版） implementations should map authorization rejections and unexpected errors to `FAILURE` with a descriptive
+`message`.
 
 ### 9.1 `SUCCESS`
 
@@ -380,7 +396,8 @@ Operation completed successfully.
 
 ### 9.2 `FAILURE`
 
-Operation failed for any reason (validation rejection, business error, authorization denial, runtime exception). The `message` field and `metadata.errorCode` carry the specific reason.
+Operation failed for any reason (validation rejection, business error, authorization denial, runtime exception). The
+`message` field and `metadata.errorCode` carry the specific reason.
 
 ---
 
@@ -480,7 +497,8 @@ STALE  — last report exceeds healthStaleThresholdSeconds
 
 UI should avoid showing stale data as current truth.
 
-CE（社区版） v0.1 persists only the **effective** status on `CapsuleService.status`. The "last reported" view is derived from `lastReportedAt` + `lastHealthAt` + the latest `HealthReport` row, not stored in a separate column.
+CE（社区版） v0.1 persists only the **effective** status on `CapsuleService.status`. The "last reported" view is derived from
+`lastReportedAt` + `lastHealthAt` + the latest `HealthReport` row, not stored in a separate column.
 
 Recommended UI display:
 

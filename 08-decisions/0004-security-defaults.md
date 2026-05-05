@@ -1,4 +1,46 @@
+---
+status: accepted
+audience: ai-coding-agents
+stability: stable
+last_reviewed: 2026-05-05
+---
+
 # ADR 0004: CE v0.1 Security Defaults
+
+## Status
+
+Accepted
+
+## Date
+
+2026-05-05
+
+## Context
+
+This ADR records an architecture or implementation decision for the current Xtrape Capsule CE design baseline. See the original decision notes below for the detailed background.
+
+## Decision
+
+Use the decision content below as the current baseline for this topic.
+
+## Consequences
+
+This decision constrains CE implementation work, related specifications, and future documentation maintenance. Detailed trade-offs are captured in the original decision notes below where available.
+
+## Alternatives Considered
+
+Not separately captured in this standardized template section. If alternatives are described in the original decision notes below, those notes remain authoritative.
+
+## Implementation Notes
+
+Implementation and documentation updates should follow this ADR status first, then align related `02-specs/` and current CE `10-implementation/` documents.
+
+## Supersedes / Superseded By
+
+None.
+
+## Original Decision Notes
+
 
 - Status: Accepted
 - Edition: CE
@@ -26,7 +68,8 @@ argon2id preferred
 bcrypt acceptable fallback
 ```
 
-No default credential is allowed. There is no built-in `admin/admin` or `change-me` value. Backend MUST refuse to start when `OPSTAGE_ADMIN_PASSWORD` is missing or empty (see "Admin Bootstrap").
+No default credential is allowed. There is no built-in `admin/admin` or `change-me` value. Backend MUST refuse to start
+when `OPSTAGE_ADMIN_PASSWORD` is missing or empty (see "Admin Bootstrap").
 
 ## Session Cookie Rules
 
@@ -49,11 +92,13 @@ The cookie value is opaque to the client (signed/encrypted server-side; CE v0.1 
 - there is no cross-origin GET that mutates state;
 - all state-changing requests use POST/PUT/PATCH/DELETE.
 
-CE v0.1 does NOT issue CORS headers for cross-origin browsers. If a future deployment needs to host the UI on a different origin, the operator must front the deployment with a reverse proxy that re-attaches the cookie.
+CE v0.1 does NOT issue CORS headers for cross-origin browsers. If a future deployment needs to host the UI on a
+different origin, the operator must front the deployment with a reverse proxy that re-attaches the cookie.
 
 ## CSRF Protection
 
-CE v0.1 uses a header-based double-submit token. The Backend keeps the canonical CSRF value bound to the session record server-side; the UI receives a copy in the JSON body and echoes it in a header on every state-changing call.
+CE v0.1 uses a header-based double-submit token. The Backend keeps the canonical CSRF value bound to the session record
+server-side; the UI receives a copy in the JSON body and echoes it in a header on every state-changing call.
 
 ```text
 1. The CSRF token is generated as crypto.randomBytes(32).toString("hex").

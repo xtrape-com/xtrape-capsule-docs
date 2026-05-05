@@ -1,3 +1,10 @@
+---
+status: accepted
+audience: backend-developers
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Error Codes
 
 All error responses use the OpenAPI `ErrorEnvelope` shape:

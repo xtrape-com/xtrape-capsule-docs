@@ -1,3 +1,13 @@
+---
+status: draft
+audience: maintainers
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,7 +33,9 @@
 
 This repository 包含 the documentation set for the `xtrape-capsule` product family.
 
-`xtrape-capsule` 定义 the lightweight Capsule Service（胶囊服务） architecture domain in the Xtrape ecosystem. It 涵盖 the Capsule Service（胶囊服务） concept, shared specifications, edition boundaries, Opstage（运维舞台） runtime governance, Agent（代理） integration, runtime support, and the CE（社区版）/EE（企业版）/Cloud（云版） roadmap.
+`xtrape-capsule` 定义 the lightweight Capsule Service（胶囊服务） architecture domain in the Xtrape ecosystem. It 涵盖 the Capsule
+Service（胶囊服务） concept, shared specifications, edition boundaries, Opstage（运维舞台） runtime governance, Agent（代理）
+integration, runtime support, and the CE（社区版）/EE（企业版）/Cloud（云版） roadmap.
 
 This documentation is for the whole `xtrape-capsule` domain, not only for `xtrape-capsule-opstage`. Opstage（运维舞台） is the first major runtime governance subsystem under this domain.
 
@@ -122,7 +134,8 @@ Defines shared cross-edition specifications:
 - AuditEvent;
 - 状态 Model.
 
-These specifications should remain stable across CE（社区版）, EE（企业版）, and Cloud（云版）. CE（社区版） v0.1 may implement only the required subset, but it should not introduce concepts that conflict with the long-term specs.
+These specifications should remain stable across CE（社区版）, EE（企业版）, and Cloud（云版）. CE（社区版） v0.1 may implement only the
+required subset, but it should not introduce concepts that conflict with the long-term specs.
 
 ### 3.3 `03-editions/`
 

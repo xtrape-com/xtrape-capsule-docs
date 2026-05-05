@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Agent Permission Model
 
 - Status: Implementation Guidance
@@ -9,7 +16,9 @@ This document defines the **Agent Permission Model** for the `xtrape-capsule` pr
 
 Agent permission is the security boundary that decides what an authenticated Agent is allowed to report, poll, execute, and update in Opstage.
 
-The current implementation focus is **CE**. CE v0.1 implements a simple but strict Agent permission model for the Node.js Embedded Agent. EE and Cloud may later add workspace-scoped policies, Agent groups, capability scopes, token rotation, and richer permission controls.
+The current implementation focus is **CE**. CE v0.1 implements a simple but strict Agent permission model for the
+Node.js Embedded Agent. EE and Cloud may later add workspace-scoped policies, Agent groups, capability scopes, token
+rotation, and richer permission controls.
 
 ---
 

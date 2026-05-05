@@ -1,3 +1,13 @@
+---
+status: draft
+audience: backend-developers
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 # 错误码
 
 所有错误响应都使用 OpenAPI `ErrorEnvelope` 结构：

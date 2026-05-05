@@ -1,3 +1,13 @@
+---
+status: draft
+audience: maintainers
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 # [原文标题的中文翻译]
 
 - 状态：[翻译状态字段]

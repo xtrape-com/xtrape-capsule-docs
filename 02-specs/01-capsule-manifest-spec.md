@@ -1,3 +1,10 @@
+---
+status: accepted
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Capsule Manifest Specification
 
 - Status: Specification
@@ -9,7 +16,8 @@
 
 This document defines the **Capsule Manifest** specification for the `xtrape-capsule` domain.
 
-A Capsule Manifest is the structured metadata document that describes a Capsule Service's identity, runtime, capabilities, resources, actions, configuration surface, and governance metadata.
+A Capsule Manifest is the structured metadata document that describes a Capsule Service's identity, runtime,
+capabilities, resources, actions, configuration surface, and governance metadata.
 
 The manifest is one of the primary contracts between Capsule Services, Agents, and Opstage.
 

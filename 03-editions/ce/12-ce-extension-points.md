@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 
 # CE Extension Points for EE and Cloud
 
@@ -8,7 +17,8 @@
 
 This document defines the extension points that **Opstage CE v0.1** should preserve for future **EE** and **Cloud** editions.
 
-CE should be lightweight and focused, but it must not be designed as a dead end. The first implementation should leave clean expansion paths for enterprise private deployment and hosted SaaS without forcing their complexity into CE v0.1.
+CE should be lightweight and focused, but it must not be designed as a dead end. The first implementation should leave
+clean expansion paths for enterprise private deployment and hosted SaaS without forcing their complexity into CE v0.1.
 
 ---
 

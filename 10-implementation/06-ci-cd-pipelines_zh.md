@@ -1,3 +1,15 @@
+---
+status: draft
+audience: ai-coding-agents
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -181,7 +193,8 @@ jobs:
           labels: spec-bump,automated
 ```
 
-If conformance fails, this job exits non-zero **without** opening a PR; instead a separate workflow opens an **issue** with the failure log so a human can decide whether the spec or the binding needs to change.
+If conformance fails, this job exits non-zero **without** opening a PR; instead a separate workflow opens an **issue**
+with the failure log so a human can decide whether the spec or the binding needs to change.
 
 #### `release.yml`
 
@@ -220,7 +233,8 @@ jobs:
 
 ### 3.3 `xtrape-capsule-agent-node/.github/workflows/`
 
-Same shape as `xtrape-capsule-contracts-node` minus the `upstream-bump.yml`. Instead of mirroring `09-contracts/`, it relies on Renovate to bump `@xtrape/capsule-contracts-node` automatically.
+Same shape as `xtrape-capsule-contracts-node` minus the `upstream-bump.yml`. Instead of mirroring `09-contracts/`, it
+relies on Renovate to bump `@xtrape/capsule-contracts-node` automatically.
 
 #### `ci.yml`
 

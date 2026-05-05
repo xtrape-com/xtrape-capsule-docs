@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -672,7 +682,8 @@ SUCCESS
 FAILURE
 ```
 
-`DENIED`, `ERROR`, and `PENDING` are reserved for future EE（企业版）/Cloud（云版） editions and are not part of CE（社区版） v0.1. Map authorization rejections, validation failures, and unexpected runtime errors to `FAILURE` with `metadata.errorCode`.
+`DENIED`, `ERROR`, and `PENDING` are reserved for future EE（企业版）/Cloud（云版） editions and are not part of CE（社区版） v0.1.
+Map authorization rejections, validation failures, and unexpected runtime errors to `FAILURE` with `metadata.errorCode`.
 
 Examples:
 

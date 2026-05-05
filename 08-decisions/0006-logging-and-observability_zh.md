@@ -1,3 +1,13 @@
+---
+status: draft
+audience: ai-coding-agents
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -16,6 +26,41 @@
 
 # ADR 0006: CE（社区版） v0.1 日志 and Observability
 
+## Status
+
+Draft
+
+## Date
+
+2026-05-05
+
+## Context
+
+本 ADR 记录当前 Xtrape Capsule CE 设计基线中的一项架构或实现决策。详细背景见下方原始决策内容。
+
+## Decision
+
+采用下方“Decision/决策”内容作为当前基线。
+
+## Consequences
+
+该决策会影响 CE 当前实现、相关规范和后续文档维护。具体取舍见下方原始内容。
+
+## Alternatives Considered
+
+未在本模板区单独展开；如原始内容中记录了备选方案，以原始内容为准。
+
+## Implementation Notes
+
+实现和文档引用应优先遵循本 ADR 的 accepted/proposed 状态，并与 `02-specs/`、`10-implementation/` 中的当前 CE 文档保持一致。
+
+## Supersedes / Superseded By
+
+None.
+
+## Original Decision Notes
+
+
 - Status: Accepted
 - Edition: CE（社区版）
 - Priority: Current
@@ -23,7 +68,9 @@
 
 ## Decision
 
-CE（社区版） v0.1 emits structured JSON logs from every process (Backend, UI server in production, Agent（代理） SDK). Operators consume them via stdout/stderr; no log shipper is bundled. EE（企业版） adds OpenTelemetry; this ADR scopes only what CE（社区版） v0.1 MUST do.
+CE（社区版） v0.1 emits structured JSON logs from every process (Backend, UI server in production, Agent（代理） SDK). Operators
+consume them via stdout/stderr; no log shipper is bundled. EE（企业版） adds OpenTelemetry; this ADR scopes only what CE（社区版）
+v0.1 MUST do.
 
 ## Logger
 
@@ -34,7 +81,9 @@ Stream:     stdout for level <= info, stderr for level >= warn
 Pretty:     pino-pretty in development only (NODE_ENV !== "production")
 ```
 
-The Backend instantiates one logger in `plugins/logger.ts` and re-uses it everywhere. Every other module obtains the logger from Fastify's `req.log` or via DI; modules MUST NOT call `console.log` / `console.error` (lint rule should enforce this).
+The Backend instantiates one logger in `plugins/logger.ts` and re-uses it everywhere. Every other module obtains the
+logger from Fastify's `req.log` or via DI; modules MUST NOT call `console.log` / `console.error` (lint rule should
+enforce this).
 
 ## Log Levels
 
@@ -85,7 +134,8 @@ Domain-specific fields (e.g. `commandId`, `serviceId`, `agentId`) SHOULD be adde
 
 ## Redaction Rules
 
-The pino logger MUST be constructed with redaction paths. Any field listed below is replaced with `"[REDACTED]"` BEFORE serialization. The Backend MUST also strip these fields from `details` before they reach `ErrorEnvelope`.
+The pino logger MUST be constructed with redaction paths. Any field listed below is replaced with `"[REDACTED]"` BEFORE
+serialization. The Backend MUST also strip these fields from `details` before they reach `ErrorEnvelope`.
 
 ```text
 *.password

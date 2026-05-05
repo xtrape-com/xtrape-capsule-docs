@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,7 +35,9 @@ This document 定义 the planned **Python Runtime** integration for the `xtrape-
 
 Python Runtime is a future extension. It is not a CE（社区版） v0.1 implementation requirement.
 
-The current CE（社区版） implementation focus is **Node.js**. Python Runtime planning exists to keep the Capsule governance model compatible with AI automation workers, FastAPI services, data-processing workers, browser automation tasks, LangChain/LangGraph services, and other Python-based runtimes in future EE（企业版） or later CE（社区版） versions.
+The current CE（社区版） implementation focus is **Node.js**. Python Runtime planning exists to keep the Capsule governance
+model compatible with AI automation workers, FastAPI services, data-processing workers, browser automation tasks,
+LangChain/LangGraph services, and other Python-based runtimes in future EE（企业版） or later CE（社区版） versions.
 
 ---
 

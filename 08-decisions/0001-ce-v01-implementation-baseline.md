@@ -1,4 +1,46 @@
+---
+status: accepted
+audience: ai-coding-agents
+stability: stable
+last_reviewed: 2026-05-05
+---
+
 # ADR 0001: CE v0.1 Implementation Baseline
+
+## Status
+
+Accepted
+
+## Date
+
+2026-05-05
+
+## Context
+
+This ADR records an architecture or implementation decision for the current Xtrape Capsule CE design baseline. See the original decision notes below for the detailed background.
+
+## Decision
+
+Use the decision content below as the current baseline for this topic.
+
+## Consequences
+
+This decision constrains CE implementation work, related specifications, and future documentation maintenance. Detailed trade-offs are captured in the original decision notes below where available.
+
+## Alternatives Considered
+
+Not separately captured in this standardized template section. If alternatives are described in the original decision notes below, those notes remain authoritative.
+
+## Implementation Notes
+
+Implementation and documentation updates should follow this ADR status first, then align related `02-specs/` and current CE `10-implementation/` documents.
+
+## Supersedes / Superseded By
+
+None.
+
+## Original Decision Notes
+
 
 - Status: Accepted
 - Edition: CE
@@ -45,7 +87,8 @@ CE v0.1 should allow a developer to:
 8. see Command and CommandResult state;
 9. inspect AuditEvents for important operations.
 
-The primary user is a developer or small team operating lightweight internal services, workers, automation services, or AI-related service capsules without adopting Kubernetes, service mesh, or SaaS-only tooling.
+The primary user is a developer or small team operating lightweight internal services, workers, automation services, or
+AI-related service capsules without adopting Kubernetes, service mesh, or SaaS-only tooling.
 
 ## 3. Architecture Baseline
 
@@ -103,7 +146,9 @@ Build:           Vite for UI, tsup or tsdown for packages
 Deployment:      single container first (ghcr.io/xtrape/opstage-ce), Docker Compose optional
 ```
 
-NestJS remains a future or alternative option, but it is not the CE v0.1 baseline. The UI stack and the multi-repo split are pinned by [ADR 0007](./0007-ui-state-and-data-fetching.md) and [ADR 0008](./0008-naming-and-repositories.md) respectively, which supersede earlier drafts of this baseline.
+NestJS remains a future or alternative option, but it is not the CE v0.1 baseline. The UI stack and the multi-repo split
+are pinned by [ADR 0007](./0007-ui-state-and-data-fetching.md) and [ADR 0008](./0008-naming-and-repositories.md)
+respectively, which supersede earlier drafts of this baseline.
 
 ## 6. Command and Action Baseline
 
@@ -215,7 +260,9 @@ CE v0.1 must not include:
 
 ## 10. Defaults and Thresholds
 
-CE v0.1 timing defaults are normative. Backend MUST honor these unless explicitly overridden via environment variables. Agent SDK MUST treat the values returned in `RegisterAgentResponse` / `AgentHeartbeatResponse` as the authoritative cadence.
+CE v0.1 timing defaults are normative. Backend MUST honor these unless explicitly overridden via environment variables.
+Agent SDK MUST treat the values returned in `RegisterAgentResponse` / `AgentHeartbeatResponse` as the authoritative
+cadence.
 
 ```text
 heartbeatIntervalSeconds         30      OPSTAGE_AGENT_HEARTBEAT_INTERVAL_SECONDS
@@ -240,4 +287,5 @@ Constraints:
 
 ## 11. Implementation Rule
 
-When documents disagree, CE v0.1 implementation should follow this ADR first, then the contracts in `09-contracts/`, then the CE implementation target documents, then shared specifications.
+When documents disagree, CE v0.1 implementation should follow this ADR first, then the contracts in `09-contracts/`,
+then the CE implementation target documents, then shared specifications.

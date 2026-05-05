@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Embedded Agent
 
 - Status: Implementation Guidance
@@ -11,7 +18,9 @@ This document defines the **Embedded Agent** model for the `xtrape-capsule` prod
 
 An Embedded Agent runs inside the same process as a Capsule Service. It is the first Agent mode implemented by CE.
 
-The current implementation focus is **CE**. CE v0.1 implements only the **Node.js Embedded Agent SDK**. Java, Python, Go, Sidecar Agent, External Agent, Host Agent, and Kubernetes Agent are future EE/Cloud extension tracks and must not expand the CE v0.1 implementation scope.
+The current implementation focus is **CE**. CE v0.1 implements only the **Node.js Embedded Agent SDK**. Java, Python,
+Go, Sidecar Agent, External Agent, Host Agent, and Kubernetes Agent are future EE/Cloud extension tracks and must not
+expand the CE v0.1 implementation scope.
 
 ---
 
@@ -1009,7 +1018,8 @@ The CE Embedded Agent is acceptable when:
 
 The Embedded Agent is the first and simplest Agent mode for Opstage CE.
 
-It should provide a lightweight in-process SDK that makes a Node.js Capsule Service visible, healthy, configurable by metadata, operable through predefined actions, and auditable through Commands and CommandResults.
+It should provide a lightweight in-process SDK that makes a Node.js Capsule Service visible, healthy, configurable by
+metadata, operable through predefined actions, and auditable through Commands and CommandResults.
 
 The most important Embedded Agent rule is:
 

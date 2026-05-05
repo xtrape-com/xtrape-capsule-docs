@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE Architecture
 
 - Status: Implementation Target
@@ -312,7 +321,9 @@ Modules may be physically combined in CE v0.1 if implementation stays simple, bu
 
 ## 7. Repository Architecture
 
-CE v0.1 ships across **four repositories** (see [ADR 0008](../../08-decisions/0008-naming-and-repositories.md) and [`10-implementation/00-repository-structure.md`](../../10-implementation/00-repository-structure.md) for the authoritative details):
+CE v0.1 ships across **four repositories** (see [ADR 0008](../../08-decisions/0008-naming-and-repositories.md) and
+[`10-implementation/00-repository-structure.md`](../../10-implementation/00-repository-structure.md) for the
+authoritative details):
 
 ```text
 xtrape-capsule-docs              ← design docs + Layer 1 contract SSOT
@@ -346,11 +357,15 @@ There is **no** `packages/contracts/` and **no** `packages/agent-node/` inside `
 
 ### 7.1 `apps/opstage-backend`
 
-Fastify backend application. Contains HTTP server, Admin APIs, Agent APIs, database access via `@xtrape/capsule-db`, auth, status calculation, command handling, audit writing. Imports types and Zod schemas from `@xtrape/capsule-contracts-node`.
+Fastify backend application. Contains HTTP server, Admin APIs, Agent APIs, database access via `@xtrape/capsule-db`,
+auth, status calculation, command handling, audit writing. Imports types and Zod schemas from
+`@xtrape/capsule-contracts-node`.
 
 ### 7.2 `apps/opstage-ui`
 
-React 18 + Ant Design (antd) web UI application. Contains login page, dashboard, Agent pages, Capsule Service pages, Command pages, Audit pages. See [ADR 0007](../../08-decisions/0007-ui-state-and-data-fetching.md) for the full state-and-data-fetching stack.
+React 18 + Ant Design (antd) web UI application. Contains login page, dashboard, Agent pages, Capsule Service pages,
+Command pages, Audit pages. See [ADR 0007](../../08-decisions/0007-ui-state-and-data-fetching.md) for the full
+state-and-data-fetching stack.
 
 ### 7.3 `apps/demo-capsule-service`
 

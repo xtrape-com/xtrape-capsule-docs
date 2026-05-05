@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ee
+phase: future
+---
+
 # EE Positioning
 
 - Status: Planning
@@ -7,7 +16,9 @@
 
 This document defines the product positioning of **Opstage EE / Enterprise Edition**.
 
-Opstage EE is the future private commercial edition of the `xtrape-capsule` product family. It should extend the CE governance kernel for enterprise customers that require private deployment, stronger identity, larger scale, compliance-oriented audit, observability integration, secret integration, and commercial support.
+Opstage EE is the future private commercial edition of the `xtrape-capsule` product family. It should extend the CE
+governance kernel for enterprise customers that require private deployment, stronger identity, larger scale,
+compliance-oriented audit, observability integration, secret integration, and commercial support.
 
 EE is not a CE v0.1 implementation requirement.
 
@@ -19,7 +30,8 @@ Opstage EE is:
 
 > An enterprise-grade private deployment edition of Opstage for governing Capsule Services inside customer-controlled environments.
 
-It helps organizations make lightweight services, AI automation services, integration services, and operational workers visible, manageable, auditable, and secure without moving the control plane to a hosted SaaS provider.
+It helps organizations make lightweight services, AI automation services, integration services, and operational workers
+visible, manageable, auditable, and secure without moving the control plane to a hosted SaaS provider.
 
 ---
 
@@ -136,7 +148,8 @@ A company builds integration services for platforms such as LLM providers, brows
 
 ### 6.3 Sensitive account and session operations
 
-A service manages accounts, sessions, cookies, OAuth states, or browser contexts. EE provides visibility and safe predefined operations while keeping raw secrets inside the customer environment.
+A service manages accounts, sessions, cookies, OAuth states, or browser contexts. EE provides visibility and safe
+predefined operations while keeping raw secrets inside the customer environment.
 
 ### 6.4 Larger Agent fleets
 
@@ -545,7 +558,8 @@ EE positioning is successful when customers understand that:
 
 Opstage EE should be positioned as the enterprise private deployment edition of the Capsule governance model.
 
-It should serve organizations that want the Opstage control plane inside their own environment with enterprise-grade identity, audit, deployment, observability, secret integration, and support.
+It should serve organizations that want the Opstage control plane inside their own environment with enterprise-grade
+identity, audit, deployment, observability, secret integration, and support.
 
 The most important EE positioning rule is:
 

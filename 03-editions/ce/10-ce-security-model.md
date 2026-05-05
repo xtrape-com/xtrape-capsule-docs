@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE Security Model
 
 - Status: Implementation Target
@@ -9,7 +18,8 @@
 
 This document defines the security model for **Opstage CE v0.1**.
 
-CE security should be practical, lightweight, and safe by default. It should protect the core governance loop without introducing enterprise security complexity that belongs to EE or Cloud.
+CE security should be practical, lightweight, and safe by default. It should protect the core governance loop without
+introducing enterprise security complexity that belongs to EE or Cloud.
 
 ---
 

@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,7 +35,9 @@
 
 This directory 包含 the shared specifications for the `xtrape-capsule` domain.
 
-These specifications define the long-term contracts shared by CE（社区版）, EE（企业版）, and Cloud（云版） editions. CE（社区版） v0.1 may implement only a subset of each specification, but it should not introduce incompatible names, status values, data structures, or protocol concepts.
+These specifications define the long-term contracts shared by CE（社区版）, EE（企业版）, and Cloud（云版） editions. CE（社区版） v0.1 may
+implement only a subset of each specification, but it should not introduce incompatible names, status values, data
+structures, or protocol concepts.
 
 ---
 
@@ -127,7 +139,8 @@ through the Node.js embedded Agent（代理） SDK.
 
 ### `03-agent-registration-spec.md`
 
-Defines Agent（代理） enrollment, registration tokens, Agent（代理） tokens, heartbeat, service reporting, command polling, result reporting, Agent（代理） status, revocation, and authorization.
+Defines Agent（代理） enrollment, registration tokens, Agent（代理） tokens, heartbeat, service reporting, command polling,
+result reporting, Agent（代理） status, revocation, and authorization.
 
 CE（社区版） v0.1 must implement the basic registration and heartbeat loop.
 

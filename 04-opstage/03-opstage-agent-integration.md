@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Opstage Agent Integration
 
 - Status: Implementation Guidance
@@ -9,7 +16,8 @@
 
 This document defines the Agent integration subsystem of **Opstage**.
 
-Agent integration is the bridge between Opstage Backend and Capsule Services. It allows lightweight services to become visible, manageable, and auditable without becoming dependent on Opstage for their core business runtime.
+Agent integration is the bridge between Opstage Backend and Capsule Services. It allows lightweight services to become
+visible, manageable, and auditable without becoming dependent on Opstage for their core business runtime.
 
 The current implementation focus is **Opstage CE**. EE and Cloud Agent capabilities are future planning tracks and must not expand the CE v0.1 implementation scope.
 

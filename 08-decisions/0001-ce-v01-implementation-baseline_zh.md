@@ -1,3 +1,13 @@
+---
+status: draft
+audience: ai-coding-agents
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -15,6 +25,41 @@
 -->
 
 # ADR 0001: CE（社区版） v0.1 实现 Baseline
+
+## Status
+
+Draft
+
+## Date
+
+2026-05-05
+
+## Context
+
+本 ADR 记录当前 Xtrape Capsule CE 设计基线中的一项架构或实现决策。详细背景见下方原始决策内容。
+
+## Decision
+
+采用下方“Decision/决策”内容作为当前基线。
+
+## Consequences
+
+该决策会影响 CE 当前实现、相关规范和后续文档维护。具体取舍见下方原始内容。
+
+## Alternatives Considered
+
+未在本模板区单独展开；如原始内容中记录了备选方案，以原始内容为准。
+
+## Implementation Notes
+
+实现和文档引用应优先遵循本 ADR 的 accepted/proposed 状态，并与 `02-specs/`、`10-implementation/` 中的当前 CE 文档保持一致。
+
+## Supersedes / Superseded By
+
+None.
+
+## Original Decision Notes
+
 
 - Status: Accepted
 - Edition: CE（社区版）
@@ -61,7 +106,8 @@ CE（社区版） v0.1 should allow a developer to:
 8. see Command and CommandResult state;
 9. inspect AuditEvents for important operations.
 
-The primary user is a developer or small team operating lightweight internal services, workers, automation services, or AI-related service capsules without adopting Kubernetes, service mesh, or SaaS-only tooling.
+The primary user is a developer or small team operating lightweight internal services, workers, automation services, or
+AI-related service capsules without adopting Kubernetes, service mesh, or SaaS-only tooling.
 
 ## 3. 架构 Baseline
 
@@ -119,7 +165,9 @@ Build:           Vite for UI, tsup or tsdown for packages
 Deployment:      single container first (ghcr.io/xtrape/opstage-ce), Docker Compose optional
 ```
 
-NestJS remains a future or alternative option, but it is not the CE（社区版） v0.1 baseline. The UI stack and the multi-repo split are pinned by [ADR 0007](./0007-ui-state-and-data-fetching.md) and [ADR 0008](./0008-naming-and-repositories.md) respectively, which supersede earlier drafts of this baseline.
+NestJS remains a future or alternative option, but it is not the CE（社区版） v0.1 baseline. The UI stack and the multi-repo
+split are pinned by [ADR 0007](./0007-ui-state-and-data-fetching.md) and [ADR 0008](./0008-naming-and-repositories.md)
+respectively, which supersede earlier drafts of this baseline.
 
 ## 6. Command and Action Baseline
 
@@ -231,7 +279,9 @@ CE（社区版） v0.1 must not include:
 
 ## 10. Defaults and Thresholds
 
-CE（社区版） v0.1 timing defaults are normative. Backend MUST honor these unless explicitly overridden via environment variables. Agent（代理） SDK MUST treat the values returned in `RegisterAgentResponse` / `AgentHeartbeatResponse` as the authoritative cadence.
+CE（社区版） v0.1 timing defaults are normative. Backend MUST honor these unless explicitly overridden via environment
+variables. Agent（代理） SDK MUST treat the values returned in `RegisterAgentResponse` / `AgentHeartbeatResponse` as the
+authoritative cadence.
 
 ```text
 heartbeatIntervalSeconds         30      OPSTAGE_AGENT_HEARTBEAT_INTERVAL_SECONDS
@@ -256,4 +306,5 @@ Constraints:
 
 ## 11. 实现 Rule
 
-When documents disagree, CE（社区版） v0.1 implementation should follow this ADR first, then the contracts in `09-contracts/`, then the CE（社区版） implementation target documents, then shared specifications.
+When documents disagree, CE（社区版） v0.1 implementation should follow this ADR first, then the contracts in
+`09-contracts/`, then the CE（社区版） implementation target documents, then shared specifications.

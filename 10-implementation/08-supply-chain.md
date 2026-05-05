@@ -1,3 +1,12 @@
+---
+status: implemented
+audience: ai-coding-agents
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE v0.1 Supply Chain (SBOM and License Scanning)
 
 - Status: Implementation Guidance
@@ -15,7 +24,8 @@ This document describes the supply-chain hygiene requirements for Opstage CE v0.
 
 ## 1. License Policy
 
-CE v0.1 is published under a permissive open-source license (see top-level `LICENSE`). All transitive dependencies MUST carry an SPDX-recognised license that is compatible with that policy.
+CE v0.1 is published under a permissive open-source license (see top-level `LICENSE`). All transitive dependencies MUST
+carry an SPDX-recognised license that is compatible with that policy.
 
 Allowed licenses (from `pnpm dlx license-checker --onlyAllow`):
 
@@ -73,7 +83,8 @@ The Docker image MUST embed `/app/sbom.json` and expose it via:
 GET /api/system/sbom        (System API; unauthenticated; returns CycloneDX JSON)
 ```
 
-Adding this endpoint is OPTIONAL for CE v0.1; the GitHub Release attachment is the primary distribution channel. If implemented, the endpoint MUST be served from the System API namespace per ADR 0002.
+Adding this endpoint is OPTIONAL for CE v0.1; the GitHub Release attachment is the primary distribution channel. If
+implemented, the endpoint MUST be served from the System API namespace per ADR 0002.
 
 ## 3. Vulnerability Scanning
 
@@ -127,7 +138,9 @@ provenance: true
 sbom:       true
 ```
 
-This ensures GitHub Container Registry stores SLSA build provenance and an in-registry SBOM for `ghcr.io/xtrape/opstage-ce:<tag>` and `ghcr.io/xtrape/demo-capsule-service:<tag>` per [ADR 0008](../08-decisions/0008-naming-and-repositories.md).
+This ensures GitHub Container Registry stores SLSA build provenance and an in-registry SBOM for
+`ghcr.io/xtrape/opstage-ce:<tag>` and `ghcr.io/xtrape/demo-capsule-service:<tag>` per [ADR
+0008](../08-decisions/0008-naming-and-repositories.md).
 
 ## 6. Acceptance Criteria
 

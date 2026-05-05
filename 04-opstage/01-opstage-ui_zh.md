@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -27,7 +37,8 @@ This document 定义 the UI subsystem of **Opstage（运维舞台）**.
 
 Opstage（运维舞台） UI is the human-facing console for operating Capsule Services through Opstage（运维舞台） Backend and Agent（代理）-based governance.
 
-The current implementation focus is **Opstage（运维舞台） CE（社区版）**. EE（企业版） and Cloud（云版） UI capabilities are future planning tracks and must not expand the CE（社区版） v0.1 implementation scope.
+The current implementation focus is **Opstage（运维舞台） CE（社区版）**. EE（企业版） and Cloud（云版） UI capabilities are future planning
+tracks and must not expand the CE（社区版） v0.1 implementation scope.
 
 ---
 

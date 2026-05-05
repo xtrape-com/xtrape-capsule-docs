@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,9 +33,12 @@
 
 This document 定义 the **Observability Roadmap** for Opstage（运维舞台）.
 
-Observability helps operators understand Agent（代理） status, Capsule Service（胶囊服务） health, freshness, Command outcomes, and operational signals. In CE（社区版）, observability should remain lightweight. EE（企业版） and Cloud（云版） may extend observability into history, alerting, dashboards, and integrations.
+Observability helps operators understand Agent（代理） status, Capsule Service（胶囊服务） health, freshness, Command outcomes,
+and operational signals. In CE（社区版）, observability should remain lightweight. EE（企业版） and Cloud（云版） may extend
+observability into history, alerting, dashboards, and integrations.
 
-The current implementation focus is **Opstage（运维舞台） CE（社区版）**. EE（企业版） and Cloud（云版） observability capabilities are future planning tracks and must not expand the CE（社区版） v0.1 implementation scope.
+The current implementation focus is **Opstage（运维舞台） CE（社区版）**. EE（企业版） and Cloud（云版） observability capabilities are
+future planning tracks and must not expand the CE（社区版） v0.1 implementation scope.
 
 ---
 

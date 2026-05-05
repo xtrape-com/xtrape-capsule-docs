@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # xtrape-capsule Overview
 
 - Status: Conceptual Guidance
@@ -5,11 +12,14 @@
 - Priority: High
 - Audience: architects, developers, AI coding agents
 
-`xtrape-capsule` is the lightweight service architecture domain of Xtrape. It defines the concept, specifications, runtime governance model, agent integration model, and edition strategy for Capsule Services.
+`xtrape-capsule` is the lightweight service architecture domain of Xtrape. It defines the concept, specifications,
+runtime governance model, agent integration model, and edition strategy for Capsule Services.
 
 `xtrape-capsule-opstage` is one core subsystem under this domain. It provides the runtime governance platform for Capsule Services, but it is not the whole `xtrape-capsule` domain.
 
-The current implementation focus is **CE / Community Edition**. EE / Enterprise Edition and Cloud / SaaS Edition are future planning targets. CE should reserve extension points for them, but it should not implement their full capabilities in early versions.
+The current implementation focus is **CE / Community Edition**. EE / Enterprise Edition and Cloud / SaaS Edition are
+future planning targets. CE should reserve extension points for them, but it should not implement their full
+capabilities in early versions.
 
 ---
 
@@ -28,7 +38,8 @@ AI-era applications are producing more and more small service units:
 - session managers;
 - lightweight internal tools.
 
-These services are usually not complex by themselves. They may be a Node.js service, a Playwright worker, a Python script, a small Java service, or an adapter that wraps a third-party platform capability.
+These services are usually not complex by themselves. They may be a Node.js service, a Playwright worker, a Python
+script, a small Java service, or an adapter that wraps a third-party platform capability.
 
 The real problem is not how to implement these services. The real problem is:
 

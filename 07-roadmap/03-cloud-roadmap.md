@@ -1,3 +1,10 @@
+---
+status: draft
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Cloud Roadmap
 
 - Status: Planning
@@ -7,7 +14,9 @@
 
 This document defines the roadmap for **Opstage Cloud / SaaS Cloud Edition**.
 
-Cloud is the future hosted SaaS edition of the `xtrape-capsule` product family. It should provide managed Opstage hosting, multi-tenant organizations and workspaces, Cloud Agent connectivity, billing, usage metering, managed audit retention, managed alerting, and SaaS support workflows.
+Cloud is the future hosted SaaS edition of the `xtrape-capsule` product family. It should provide managed Opstage
+hosting, multi-tenant organizations and workspaces, Cloud Agent connectivity, billing, usage metering, managed audit
+retention, managed alerting, and SaaS support workflows.
 
 Cloud is not a CE v0.1 implementation requirement.
 
@@ -850,7 +859,8 @@ This Cloud roadmap is acceptable when:
 
 Cloud should become the hosted SaaS edition after the CE governance kernel is proven and managed-hosting demand is clear.
 
-It should provide hosted Opstage, organizations, workspaces, managed Agent connectivity, billing, audit retention, alerting, support, and operational reliability while preserving the same Capsule governance model.
+It should provide hosted Opstage, organizations, workspaces, managed Agent connectivity, billing, audit retention,
+alerting, support, and operational reliability while preserving the same Capsule governance model.
 
 The most important Cloud roadmap rule is:
 

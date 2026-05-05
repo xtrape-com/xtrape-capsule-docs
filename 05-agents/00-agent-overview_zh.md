@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -27,7 +37,9 @@ This document 定义 the overall Agent（代理） concept for the `xtrape-capsu
 
 An Agent（代理） is the authorized governance bridge that allows a Capsule Service（胶囊服务） to join the Opstage（运维舞台） runtime governance system.
 
-The current implementation focus is **CE（社区版）**. CE（社区版） v0.1 implements only the **Node.js Embedded Agent（代理）**. Sidecar Agent（代理）, External Agent（代理）, Host Agent（代理）, Kubernetes Agent（代理）, and multi-language Agent（代理） SDKs are future EE（企业版）/Cloud（云版） extension tracks and must not expand the CE（社区版） v0.1 implementation scope.
+The current implementation focus is **CE（社区版）**. CE（社区版） v0.1 implements only the **Node.js Embedded Agent（代理）**.
+Sidecar Agent（代理）, External Agent（代理）, Host Agent（代理）, Kubernetes Agent（代理）, and multi-language Agent（代理） SDKs are
+future EE（企业版）/Cloud（云版） extension tracks and must not expand the CE（社区版） v0.1 implementation scope.
 
 ---
 
@@ -792,7 +804,8 @@ CE（社区版） Agent（代理） implementation is acceptable when:
 
 Agent（代理） is the runtime-side governance bridge for Capsule Services.
 
-CE（社区版） should implement a small, safe, Node.js Embedded Agent（代理） first. EE（企业版） and Cloud（云版） can later expand Agent（代理） modes, runtimes, protocols, diagnostics, and deployment patterns.
+CE（社区版） should implement a small, safe, Node.js Embedded Agent（代理） first. EE（企业版） and Cloud（云版） can later expand
+Agent（代理） modes, runtimes, protocols, diagnostics, and deployment patterns.
 
 The most important Agent（代理） rule is:
 

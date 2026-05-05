@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE Deployment Model
 
 - Status: Implementation Target
@@ -9,7 +18,8 @@
 
 This document defines the deployment model for **Opstage CE v0.1**.
 
-CE deployment should be lightweight, self-hosted, easy to start, and suitable for open-source community users. It should not require Kubernetes, external databases, message queues, or cloud services for the first version.
+CE deployment should be lightweight, self-hosted, easy to start, and suitable for open-source community users. It should
+not require Kubernetes, external databases, message queues, or cloud services for the first version.
 
 ---
 

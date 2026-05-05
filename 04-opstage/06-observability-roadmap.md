@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Observability Roadmap
 
 - Status: Implementation Guidance
@@ -7,7 +14,9 @@
 
 This document defines the **Observability Roadmap** for Opstage.
 
-Observability helps operators understand Agent status, Capsule Service health, freshness, Command outcomes, and operational signals. In CE, observability should remain lightweight. EE and Cloud may extend observability into history, alerting, dashboards, and integrations.
+Observability helps operators understand Agent status, Capsule Service health, freshness, Command outcomes, and
+operational signals. In CE, observability should remain lightweight. EE and Cloud may extend observability into history,
+alerting, dashboards, and integrations.
 
 The current implementation focus is **Opstage CE**. EE and Cloud observability capabilities are future planning tracks and must not expand the CE v0.1 implementation scope.
 

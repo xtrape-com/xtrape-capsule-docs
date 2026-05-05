@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: cloud
+phase: future
+---
+
 # Cloud Planned Capabilities
 
 - Status: Planning

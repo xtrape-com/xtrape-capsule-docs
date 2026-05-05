@@ -1,8 +1,16 @@
+---
+status: accepted
+audience: backend-developers
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # 09-contracts/tools
 
 Markdown renderers that turn the JSON SSOT files in `09-contracts/` into human-readable markdown. These scripts run in CI in `--check` mode; PRs fail if any rendered file is stale.
 
-The scripts intentionally have **no runtime dependencies** beyond Node.js (use `node --experimental-strip-types` on Node 22+, or `tsx`). Do not pull in template engines or markdown libs — just string concatenation.
+The scripts intentionally have **no runtime dependencies** beyond Node.js (use `node --experimental-strip-types` on Node
+22+, or `tsx`). Do not pull in template engines or markdown libs — just string concatenation.
 
 ## Scripts
 

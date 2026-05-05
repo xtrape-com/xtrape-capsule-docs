@@ -1,3 +1,15 @@
+---
+status: draft
+audience: ai-coding-agents
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,7 +35,8 @@
 
 > **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/openapi/opstage-ce-v0.1.yaml` disagree, the ADRs and OpenAPI contract win for CE（社区版） v0.1.
 
-This document is the canonical "first 10 minutes" experience for Opstage（运维舞台） CE（社区版）. The implementation MUST keep the published `README.md` of the repo in sync with the steps below.
+This document is the canonical "first 10 minutes" experience for Opstage（运维舞台） CE（社区版）. The implementation MUST keep the
+published `README.md` of the repo in sync with the steps below.
 
 ## 1. Prerequisites
 

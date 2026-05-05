@@ -1,4 +1,46 @@
+---
+status: accepted
+audience: ai-coding-agents
+stability: stable
+last_reviewed: 2026-05-05
+---
+
 # ADR 0002: API Namespace Convention
+
+## Status
+
+Accepted
+
+## Date
+
+2026-05-05
+
+## Context
+
+This ADR records an architecture or implementation decision for the current Xtrape Capsule CE design baseline. See the original decision notes below for the detailed background.
+
+## Decision
+
+Use the decision content below as the current baseline for this topic.
+
+## Consequences
+
+This decision constrains CE implementation work, related specifications, and future documentation maintenance. Detailed trade-offs are captured in the original decision notes below where available.
+
+## Alternatives Considered
+
+Not separately captured in this standardized template section. If alternatives are described in the original decision notes below, those notes remain authoritative.
+
+## Implementation Notes
+
+Implementation and documentation updates should follow this ADR status first, then align related `02-specs/` and current CE `10-implementation/` documents.
+
+## Supersedes / Superseded By
+
+None.
+
+## Original Decision Notes
+
 
 - Status: Accepted
 - Edition: CE

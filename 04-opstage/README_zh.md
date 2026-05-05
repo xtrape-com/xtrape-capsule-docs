@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,7 +33,8 @@
 
 This directory 包含 the Opstage（运维舞台） subsystem documents for the `xtrape-capsule` product family.
 
-Opstage（运维舞台） is the runtime governance platform for Capsule Services. It 提供 the UI, Backend, and Agent（代理） integration model that makes lightweight services visible, operable, and auditable.
+Opstage（运维舞台） is the runtime governance platform for Capsule Services. It 提供 the UI, Backend, and Agent（代理） integration
+model that makes lightweight services visible, operable, and auditable.
 
 The current implementation focus is **Opstage（运维舞台） CE（社区版）**.
 

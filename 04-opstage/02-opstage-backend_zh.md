@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -27,7 +37,8 @@ This document 定义 the Backend subsystem of **Opstage（运维舞台）**.
 
 Opstage（运维舞台） Backend is the control-plane service that coordinates UI users, Agents, Capsule Services, Commands, CommandResults, AuditEvents, and persistence.
 
-The current implementation focus is **Opstage（运维舞台） CE（社区版）**. EE（企业版） and Cloud（云版） Backend capabilities are future planning tracks and must not expand the CE（社区版） v0.1 implementation scope.
+The current implementation focus is **Opstage（运维舞台） CE（社区版）**. EE（企业版） and Cloud（云版） Backend capabilities are future
+planning tracks and must not expand the CE（社区版） v0.1 implementation scope.
 
 ---
 
@@ -556,7 +567,9 @@ createdAt
 updatedAt
 ```
 
-Reported vs. effective status (CE（社区版） v0.1 decision): the database persists only the **effective** `status`. The "last reported" view is derived from `lastReportedAt`, `lastHealthAt`, and the latest `HealthReport` row — there is no separate `reportedStatus` column. EE（企业版）/Cloud（云版） may add one later.
+Reported vs. effective status (CE（社区版） v0.1 decision): the database persists only the **effective** `status`. The "last
+reported" view is derived from `lastReportedAt`, `lastHealthAt`, and the latest `HealthReport` row — there is no
+separate `reportedStatus` column. EE（企业版）/Cloud（云版） may add one later.
 
 Required uniqueness (CE（社区版） v0.1 decision, matches Prisma `@@unique([workspaceId, code])`):
 
@@ -774,7 +787,8 @@ SUCCESS
 FAILURE
 ```
 
-`DENIED`, `ERROR`, and `PENDING` are reserved for future EE（企业版）/Cloud（云版） editions. Map authorization rejections, validation failures, and runtime errors to `FAILURE` with `metadata.errorCode`.
+`DENIED`, `ERROR`, and `PENDING` are reserved for future EE（企业版）/Cloud（云版） editions. Map authorization rejections,
+validation failures, and runtime errors to `FAILURE` with `metadata.errorCode`.
 
 AuditEvents should be sanitized and should not contain raw secrets.
 
@@ -954,19 +968,23 @@ async function runAgentOfflineSweep({ prisma, clock, cfg }: Deps) {
 }
 ```
 
-The other two sweeps follow the same shape, swapping table and audit action. `command-ttl-sweep` MUST also insert a synthetic `CommandResult` with `success=false`, `error: { code: "COMMAND_EXPIRED", message: "TTL elapsed before completion." }` so the UI sees a uniform terminal state.
+The other two sweeps follow the same shape, swapping table and audit action. `command-ttl-sweep` MUST also insert a
+synthetic `CommandResult` with `success=false`, `error: { code: "COMMAND_EXPIRED", message: "TTL elapsed before
+completion." }` so the UI sees a uniform terminal state.
 
 CE（社区版） v0.1 does NOT broadcast SSE/WebSocket from sweeps; UI polls. Push delivery is reserved for EE（企业版）.
 
 ### 27.2 Effective 状态 Derivation
 
-Read paths (`GET /api/admin/agents`, `GET /api/admin/capsule-services`) MUST return the persisted `effectiveStatus`/`status` column, not recompute on every request. This guarantees:
+Read paths (`GET /api/admin/agents`, `GET /api/admin/capsule-services`) MUST return the persisted
+`effectiveStatus`/`status` column, not recompute on every request. This guarantees:
 
 - consistent values across UI tabs and API consumers;
 - a single audit trail for status transitions (sweeper-driven only);
 - monotonic transitions (no flicker between requests).
 
-If the persisted column is older than `2 × BACKGROUND_SWEEP_INTERVAL_SECONDS` (i.e. the sweeper hasn't run), Backend logs a warning at WARN level — this is the signal that the sweeper has crashed or fallen behind.
+If the persisted column is older than `2 × BACKGROUND_SWEEP_INTERVAL_SECONDS` (i.e. the sweeper hasn't run), Backend
+logs a warning at WARN level — this is the signal that the sweeper has crashed or fallen behind.
 
 ---
 

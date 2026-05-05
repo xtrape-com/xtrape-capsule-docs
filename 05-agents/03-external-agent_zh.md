@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -875,7 +885,8 @@ A future External Agent（代理） implementation is acceptable when:
 
 External Agent（代理） is a future Agent（代理） mode for governing explicitly configured services or runtimes from outside their processes.
 
-It is valuable for legacy services, account/session managers, browser automation runtimes, and small local service fleets, but it carries broader security and operational risks than Embedded Agent（代理）.
+It is valuable for legacy services, account/session managers, browser automation runtimes, and small local service
+fleets, but it carries broader security and operational risks than Embedded Agent（代理）.
 
 The most important External Agent（代理） rule is:
 

@@ -1,3 +1,12 @@
+---
+status: implemented
+audience: ai-coding-agents
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE Smoke Test Runbook
 
 - Status: Implementation Guidance
@@ -50,7 +59,9 @@ No TypeScript errors.
 
 ### Automated local smoke script
 
-The CE repository also provides an in-process smoke script that starts the backend with a temporary SQLite database, registers an embedded demo Agent, verifies action prepare, action execute, list results, row action metadata, and sensitive config redaction:
+The CE repository also provides an in-process smoke script that starts the backend with a temporary SQLite database,
+registers an embedded demo Agent, verifies action prepare, action execute, list results, row action metadata, and
+sensitive config redaction:
 
 ```bash
 cd xtrape-capsule-ce

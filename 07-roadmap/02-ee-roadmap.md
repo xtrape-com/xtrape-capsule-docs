@@ -1,3 +1,10 @@
+---
+status: draft
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # EE Roadmap
 
 - Status: Planning
@@ -7,7 +14,9 @@
 
 This document defines the roadmap for **Opstage EE / Enterprise Edition**.
 
-EE is the future private commercial edition of the `xtrape-capsule` product family. It should provide enterprise-grade deployment, identity, security, audit, observability, Agent expansion, and commercial support for customers who need private deployment.
+EE is the future private commercial edition of the `xtrape-capsule` product family. It should provide enterprise-grade
+deployment, identity, security, audit, observability, Agent expansion, and commercial support for customers who need
+private deployment.
 
 EE is not a CE v0.1 implementation requirement.
 

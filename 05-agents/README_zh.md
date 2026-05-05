@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,7 +35,9 @@ This directory 包含 the Agent（代理）-related documents for the `xtrape-ca
 
 An Agent（代理） is the authorized runtime bridge that connects Capsule Services to Opstage（运维舞台） governance.
 
-The current implementation focus is **CE（社区版）**. CE（社区版） v0.1 implements only the **Node.js Embedded Agent（代理） SDK**. Sidecar Agent（代理）, External Agent（代理）, multi-language SDKs, Agent（代理） Gateway, and advanced Agent（代理） policy capabilities are future EE（企业版）/Cloud（云版） extension tracks and must not expand the CE（社区版） v0.1 implementation scope.
+The current implementation focus is **CE（社区版）**. CE（社区版） v0.1 implements only the **Node.js Embedded Agent（代理） SDK**.
+Sidecar Agent（代理）, External Agent（代理）, multi-language SDKs, Agent（代理） Gateway, and advanced Agent（代理） policy
+capabilities are future EE（企业版）/Cloud（云版） extension tracks and must not expand the CE（社区版） v0.1 implementation scope.
 
 ---
 

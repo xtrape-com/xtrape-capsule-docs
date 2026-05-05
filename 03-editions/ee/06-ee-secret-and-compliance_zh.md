@@ -1,3 +1,15 @@
+---
+status: draft
+audience: founders
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ee
+phase: future
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,7 +35,8 @@
 
 This document 定义 the planned secret management and compliance direction for **Opstage（运维舞台） EE（企业版） / Enterprise 版本**.
 
-Opstage（运维舞台） EE（企业版） is the future private commercial edition of the `xtrape-capsule` product family. Secret management and compliance capabilities are not CE（社区版） v0.1 implementation requirements.
+Opstage（运维舞台） EE（企业版） is the future private commercial edition of the `xtrape-capsule` product family. Secret management
+and compliance capabilities are not CE（社区版） v0.1 implementation requirements.
 
 ---
 
@@ -966,7 +979,8 @@ EE（企业版） secret and compliance planning is acceptable when:
 
 ## 35. Summary
 
-Opstage（运维舞台） EE（企业版） should provide enterprise secret and compliance capabilities by governing references, access, audit, retention, and export rather than becoming a raw secret vault by default.
+Opstage（运维舞台） EE（企业版） should provide enterprise secret and compliance capabilities by governing references, access,
+audit, retention, and export rather than becoming a raw secret vault by default.
 
 The most important secret and compliance rule is:
 

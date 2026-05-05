@@ -1,3 +1,12 @@
+---
+status: implemented
+audience: ai-coding-agents
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE v0.1 Database Implementation
 
 - Status: Implementation Record
@@ -19,11 +28,13 @@ OPSTAGE_DATA_DIR=./data
 OPSTAGE_BACKUP_DIR=./data/backups
 ```
 
-Docker deployments mount `/app/data` as the persistent volume. Losing this volume loses all persisted state, including admin users, Agent tokens, service inventory, commands, audit history, and backup files.
+Docker deployments mount `/app/data` as the persistent volume. Losing this volume loses all persisted state, including
+admin users, Agent tokens, service inventory, commands, audit history, and backup files.
 
 ## 2. Workspace model
 
-CE v0.1 is single-workspace in product behavior. The database still stores a `Workspace` row so the schema can evolve toward multi-workspace or EE features without breaking core tables.
+CE v0.1 is single-workspace in product behavior. The database still stores a `Workspace` row so the schema can evolve
+toward multi-workspace or EE features without breaking core tables.
 
 Implemented default workspace:
 
@@ -113,7 +124,9 @@ PENDING/RUNNING -> CANCELLED
 PENDING/RUNNING -> EXPIRED
 ```
 
-`commands.expiresAt` is set when a command is created. Maintenance expires pending/running commands after that time. A successful Agent result creates one `command_results` row and moves the command to `SUCCEEDED`; a failed Agent result moves it to `FAILED`.
+`commands.expiresAt` is set when a command is created. Maintenance expires pending/running commands after that time. A
+successful Agent result creates one `command_results` row and moves the command to `SUCCEEDED`; a failed Agent result
+moves it to `FAILED`.
 
 ## 8. Audit retention
 

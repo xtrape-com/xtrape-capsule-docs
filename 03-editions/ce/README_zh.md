@@ -1,3 +1,15 @@
+---
+status: draft
+audience: founders
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,7 +37,8 @@ This document 定义 the implementation overview of **Opstage（运维舞台） 
 
 Opstage（运维舞台） CE（社区版） is the current implementation target of the `xtrape-capsule` project.
 
-CE（社区版） should be lightweight, open-source, self-hosted, and practical enough to prove the core Capsule Service（胶囊服务） governance model without introducing unnecessary EE（企业版） or Cloud（云版） complexity.
+CE（社区版） should be lightweight, open-source, self-hosted, and practical enough to prove the core Capsule Service（胶囊服务）
+governance model without introducing unnecessary EE（企业版） or Cloud（云版） complexity.
 
 ---
 
@@ -324,7 +337,9 @@ packages/shared
 packages/test-utils
 ```
 
-`@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` come from npm (separate repos: `xtrape-capsule-contracts-node` and `xtrape-capsule-agent-node` — see [ADR 0008](../../08-decisions/0008-naming-and-repositories.md)).
+`@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` come from npm (separate repos:
+`xtrape-capsule-contracts-node` and `xtrape-capsule-agent-node` — see [ADR
+0008](../../08-decisions/0008-naming-and-repositories.md)).
 
 The first user experience should feel simple.
 

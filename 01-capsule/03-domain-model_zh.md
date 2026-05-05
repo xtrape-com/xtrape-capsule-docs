@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,7 +33,8 @@
 
 This document 定义 the core domain objects of `xtrape-capsule`.
 
-The domain model is shared by CE（社区版）, EE（企业版）, and Cloud（云版）, but CE（社区版） v0.1 should implement only the minimum subset required to prove the Capsule Service（胶囊服务） governance loop.
+The domain model is shared by CE（社区版）, EE（企业版）, and Cloud（云版）, but CE（社区版） v0.1 should implement only the minimum subset
+required to prove the Capsule Service（胶囊服务） governance loop.
 
 ---
 

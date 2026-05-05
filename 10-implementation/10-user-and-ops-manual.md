@@ -1,3 +1,12 @@
+---
+status: implemented
+audience: ai-coding-agents
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE v0.1 User and Operations Manual
 
 - Status: Implementation Record
@@ -29,7 +38,8 @@ DATABASE_URL                 # default: file:./data/opstage.db
 OPSTAGE_STATIC_DIR           # default: apps/opstage-ui/dist
 ```
 
-On first boot, the backend creates the default workspace and the initial admin user. Later changes to `OPSTAGE_ADMIN_USERNAME` and `OPSTAGE_ADMIN_PASSWORD` do not overwrite existing users.
+On first boot, the backend creates the default workspace and the initial admin user. Later changes to
+`OPSTAGE_ADMIN_USERNAME` and `OPSTAGE_ADMIN_PASSWORD` do not overwrite existing users.
 
 ## 3. Login and session behavior
 
@@ -73,7 +83,8 @@ OPSTAGE_REGISTRATION_TOKEN=opstage_reg_...
 OPSTAGE_AGENT_TOKEN_FILE=./data/agent-token.json
 ```
 
-The Agent registers once, stores its Agent token file, and then uses that file on later restarts. If the token file is deleted, the Agent needs a new registration token unless another valid Agent token is provided.
+The Agent registers once, stores its Agent token file, and then uses that file on later restarts. If the token file is
+deleted, the Agent needs a new registration token unless another valid Agent token is provided.
 
 ## 6. Monitoring Agents and Services
 
@@ -150,7 +161,10 @@ Owners can create SQLite backups from Settings. The backend writes backup files 
 OPSTAGE_BACKUP_DIR=./data/backups
 ```
 
-Audit events can be exported as CSV or JSON from the Audit Events page or the export API. The Audit Events page exposes action, actor, result, target type, and explicit ISO `from` / `to` time range filters; CSV export uses the same active filters. Audit list and export filters are validated; invalid `actorType`, `result`, or date ranges return `422 VALIDATION_FAILED`. Date range filters use inclusive `from` / `to` bounds on `createdAt`.
+Audit events can be exported as CSV or JSON from the Audit Events page or the export API. The Audit Events page exposes
+action, actor, result, target type, and explicit ISO `from` / `to` time range filters; CSV export uses the same active
+filters. Audit list and export filters are validated; invalid `actorType`, `result`, or date ranges return `422
+VALIDATION_FAILED`. Date range filters use inclusive `from` / `to` bounds on `createdAt`.
 
 Operational recommendations:
 
@@ -168,7 +182,10 @@ The console exposes runtime diagnostics and metrics for operators:
 
 Do not expose diagnostics publicly without authentication and TLS.
 
-The Settings page renders operational metrics as summary cards plus a stable table, with raw JSON available in a collapsed diagnostics block. Runtime diagnostics are also rendered as a categorized table (`runtime`, `memory`, `config`, `maintenance`) with raw JSON collapsed by default. Operational metrics include command/action counters useful during incident response:
+The Settings page renders operational metrics as summary cards plus a stable table, with raw JSON available in a
+collapsed diagnostics block. Runtime diagnostics are also rendered as a categorized table (`runtime`, `memory`,
+`config`, `maintenance`) with raw JSON collapsed by default. Operational metrics include command/action counters useful
+during incident response:
 
 - `operational.agentCommandPolls`: in-memory count of Agent command poll requests since backend start.
 - `operational.commandsDispatched`: number of Commands dispatched to Agents.

@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Capsule Service vs Microservice
 
 - Status: Conceptual Guidance
@@ -7,7 +14,9 @@
 
 This document compares **Capsule Service** with traditional **Microservice** architecture.
 
-The purpose is not to claim that Capsule Services replace microservices. Instead, this document clarifies when a service should be modeled as a Capsule Service, when it should remain a traditional microservice, and how both models can coexist in the Xtrape ecosystem.
+The purpose is not to claim that Capsule Services replace microservices. Instead, this document clarifies when a service
+should be modeled as a Capsule Service, when it should remain a traditional microservice, and how both models can
+coexist in the Xtrape ecosystem.
 
 ---
 
@@ -392,7 +401,8 @@ Business System
 └── proxy-health-checker         # Capsule Service
 ```
 
-Opstage does not replace the business service platform. It provides runtime governance for Capsule Services and optionally for microservices that choose to expose Capsule governance metadata.
+Opstage does not replace the business service platform. It provides runtime governance for Capsule Services and
+optionally for microservices that choose to expose Capsule governance metadata.
 
 ---
 

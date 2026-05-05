@@ -1,3 +1,13 @@
+---
+status: draft
+audience: founders
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,7 +33,9 @@
 
 This document 定义 the roadmap for **Opstage（运维舞台） Cloud（云版） / SaaS Cloud（云版） 版本**.
 
-Cloud（云版） is the future hosted SaaS edition of the `xtrape-capsule` product family. It should provide managed Opstage（运维舞台） hosting, multi-tenant organizations and workspaces, Cloud（云版） Agent（代理） connectivity, billing, usage metering, managed audit retention, managed alerting, and SaaS support workflows.
+Cloud（云版） is the future hosted SaaS edition of the `xtrape-capsule` product family. It should provide managed
+Opstage（运维舞台） hosting, multi-tenant organizations and workspaces, Cloud（云版） Agent（代理） connectivity, billing, usage
+metering, managed audit retention, managed alerting, and SaaS support workflows.
 
 Cloud（云版） is not a CE（社区版） v0.1 implementation requirement.
 
@@ -866,7 +878,8 @@ This Cloud（云版） roadmap is acceptable when:
 
 Cloud（云版） should become the hosted SaaS edition after the CE（社区版） governance kernel is proven and managed-hosting demand is clear.
 
-It should provide hosted Opstage（运维舞台）, organizations, workspaces, managed Agent（代理） connectivity, billing, audit retention, alerting, support, and operational reliability while preserving the same Capsule governance model.
+It should provide hosted Opstage（运维舞台）, organizations, workspaces, managed Agent（代理） connectivity, billing, audit
+retention, alerting, support, and operational reliability while preserving the same Capsule governance model.
 
 The most important Cloud（云版） roadmap rule is:
 

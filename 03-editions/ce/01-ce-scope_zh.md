@@ -1,3 +1,15 @@
+---
+status: draft
+audience: founders
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,7 +37,8 @@
 
 This document 定义 the implementation scope of **Opstage（运维舞台） CE（社区版） / Community 版本**.
 
-CE（社区版） v0.1 should deliver the smallest useful version of Opstage（运维舞台） that proves the Capsule Service（胶囊服务） governance model through a Node.js embedded Agent（代理）, a Backend control plane, and a Web UI.
+CE（社区版） v0.1 should deliver the smallest useful version of Opstage（运维舞台） that proves the Capsule Service（胶囊服务）
+governance model through a Node.js embedded Agent（代理）, a Backend control plane, and a Web UI.
 
 ---
 

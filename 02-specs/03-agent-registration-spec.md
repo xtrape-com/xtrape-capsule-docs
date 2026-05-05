@@ -1,3 +1,10 @@
+---
+status: accepted
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Agent Registration Specification
 
 - Status: Specification
@@ -216,7 +223,8 @@ createdAt       datetime
 updatedAt       datetime
 ```
 
-EE/Cloud may extend Agent with `version`, `hostname`, `os`, `arch`, `registeredAt`, and `metadataJson` later. CE v0.1 does NOT persist these; if an Agent reports them at registration, Backend may log them but should not require them.
+EE/Cloud may extend Agent with `version`, `hostname`, `os`, `arch`, `registeredAt`, and `metadataJson` later. CE v0.1
+does NOT persist these; if an Agent reports them at registration, Backend may log them but should not require them.
 
 ### 6.1 `code`
 
@@ -392,9 +400,12 @@ Authorization: Bearer <agentToken>
 
 Both `serviceId` and `health` are optional. A heartbeat with an empty body `{}` is valid and only updates `Agent.lastHeartbeatAt`.
 
-CE v0.1 also treats successful command polling (`GET /api/agents/{agentId}/commands`) as a lightweight heartbeat: it updates `Agent.lastHeartbeatAt` and moves the Agent to `ONLINE`. Agents that poll commands frequently do not need a separate heartbeat loop unless they need to report per-service health through this endpoint.
+CE v0.1 also treats successful command polling (`GET /api/agents/{agentId}/commands`) as a lightweight heartbeat: it
+updates `Agent.lastHeartbeatAt` and moves the Agent to `ONLINE`. Agents that poll commands frequently do not need a
+separate heartbeat loop unless they need to report per-service health through this endpoint.
 
-A heartbeat reports health for at most one service per call. Multi-service Agents should send one heartbeat per service or rely on the dedicated `POST /api/agents/{agentId}/services/report` endpoint.
+A heartbeat reports health for at most one service per call. Multi-service Agents should send one heartbeat per service
+or rely on the dedicated `POST /api/agents/{agentId}/services/report` endpoint.
 
 ### 9.3 Response (envelope omitted; matches OpenAPI `AgentHeartbeatResponse`)
 
@@ -481,7 +492,9 @@ Authorization: Bearer <agentToken>
 
 `code` and `name` are sibling fields of `manifest` (not nested inside it). `health`, `configs`, and `actions` are optional but recommended.
 
-For CE-scale deployments, Agents SHOULD avoid repeatedly uploading unchanged manifest/actions/configs. A recommended pattern is: send a full service report at startup and whenever manifest/actions/config definitions change; during steady state, report service health through `POST /api/agents/{agentId}/heartbeat` with `serviceId` and `health`.
+For CE-scale deployments, Agents SHOULD avoid repeatedly uploading unchanged manifest/actions/configs. A recommended
+pattern is: send a full service report at startup and whenever manifest/actions/config definitions change; during steady
+state, report service health through `POST /api/agents/{agentId}/heartbeat` with `serviceId` and `health`.
 
 ### 10.3 Backend Responsibilities
 

@@ -1,3 +1,10 @@
+---
+status: accepted
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Config Specification
 
 - Status: Specification
@@ -11,7 +18,8 @@ This document defines the **Config** specification for the `xtrape-capsule` doma
 
 Config describes the manageable configuration metadata of a Capsule Service.
 
-In CE v0.1, Config should focus on **visibility** and **safe metadata reporting**. Full configuration publishing, approval, versioning, rollback, and environment promotion are future capabilities.
+In CE v0.1, Config should focus on **visibility** and **safe metadata reporting**. Full configuration publishing,
+approval, versioning, rollback, and environment promotion are future capabilities.
 
 ---
 

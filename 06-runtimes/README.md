@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Runtime Documents
 
 - Status: Implementation Guidance
@@ -9,7 +16,9 @@ This directory contains the runtime integration documents for the `xtrape-capsul
 
 A runtime is a concrete language or execution environment that can host Capsule Services and Agent integrations.
 
-The current implementation focus is **CE**. CE v0.1 prioritizes **Node.js**. Java, Python, Go, Sidecar runtime integration, External Agent runtime integration, and Kubernetes runtime integration are future EE/Cloud extension tracks and must not expand the CE v0.1 implementation scope.
+The current implementation focus is **CE**. CE v0.1 prioritizes **Node.js**. Java, Python, Go, Sidecar runtime
+integration, External Agent runtime integration, and Kubernetes runtime integration are future EE/Cloud extension tracks
+and must not expand the CE v0.1 implementation scope.
 
 ---
 

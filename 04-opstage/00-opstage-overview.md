@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Opstage Subsystem Overview
 
 - Status: Implementation Guidance
@@ -9,7 +16,8 @@
 
 This document defines the subsystem overview for **Opstage**.
 
-Opstage is the runtime governance platform under the `xtrape-capsule` domain. It is responsible for making Capsule Services visible, manageable, and auditable through a Backend, UI, and Agent-based integration model.
+Opstage is the runtime governance platform under the `xtrape-capsule` domain. It is responsible for making Capsule
+Services visible, manageable, and auditable through a Backend, UI, and Agent-based integration model.
 
 The current implementation focus is **Opstage CE**.
 

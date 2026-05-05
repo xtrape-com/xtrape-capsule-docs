@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE Open Source Strategy
 
 - Status: Implementation Target
@@ -9,7 +18,9 @@
 
 This document defines the open-source strategy for **Opstage CE / Community Edition**.
 
-CE should be a real, useful, self-hosted open-source product. It should establish trust, validate the Capsule Service model, and create an adoption path for future EE and Cloud editions without making CE feel like an intentionally crippled product.
+CE should be a real, useful, self-hosted open-source product. It should establish trust, validate the Capsule Service
+model, and create an adoption path for future EE and Cloud editions without making CE feel like an intentionally
+crippled product.
 
 ---
 
@@ -122,7 +133,9 @@ CE should follow these product principles:
 
 ## 6. Repository Strategy
 
-CE v0.1 ships across **four repositories** under the `xtrape` GitHub organization. The decision and full rationale live in [ADR 0008 — Naming and Repositories](../../08-decisions/0008-naming-and-repositories.md). This section is a public-facing summary.
+CE v0.1 ships across **four repositories** under the `xtrape` GitHub organization. The decision and full rationale live
+in [ADR 0008 — Naming and Repositories](../../08-decisions/0008-naming-and-repositories.md). This section is a
+public-facing summary.
 
 ### 6.1 The four repositories
 
@@ -137,8 +150,11 @@ CE v0.1 ships across **four repositories** under the `xtrape` GitHub organizatio
 
 Two principles drove the four-repo decision:
 
-1. **Edition-agnostic vs edition-bound separation.** The wire contracts and the Agent SDK MUST work against future EE and Cloud backends without recompilation, so they live outside any edition's release cycle.
-2. **One language per binding repo.** Future Java / Python / Go agents will get their own `xtrape-capsule-contracts-{lang}` and `xtrape-capsule-agent-{lang}` repos, each with its own native toolchain. Path C in [ADR 0009](../../08-decisions/0009-contracts-spec-and-bindings.md).
+1. **Edition-agnostic vs edition-bound separation.** The wire contracts and the Agent SDK MUST work against future EE
+and Cloud backends without recompilation, so they live outside any edition's release cycle.
+2. **One language per binding repo.** Future Java / Python / Go agents will get their own
+`xtrape-capsule-contracts-{lang}` and `xtrape-capsule-agent-{lang}` repos, each with its own native toolchain. Path C in
+[ADR 0009](../../08-decisions/0009-contracts-spec-and-bindings.md).
 
 ### 6.3 Repository descriptions (used in GitHub "About" field)
 
@@ -173,7 +189,9 @@ xtrape-capsule-ce/
 └── ROADMAP.md
 ```
 
-`@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` come from npm; they are NOT workspace packages here. See [`10-implementation/00-repository-structure.md`](../../10-implementation/00-repository-structure.md) for the full details.
+`@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` come from npm; they are NOT workspace packages here.
+See [`10-implementation/00-repository-structure.md`](../../10-implementation/00-repository-structure.md) for the full
+details.
 
 ### 6.5 Public documentation
 
@@ -184,7 +202,8 @@ Each of the four repositories should include clear public documentation:
 - `xtrape-capsule-agent-node` README: SDK overview, install snippet, minimal example, pointer to docs repo.
 - `xtrape-capsule-ce` README: project overview, quick start (`docker compose up`), demo guide, Agent SDK guide, API overview, architecture overview, security model, CE/EE/Cloud edition explanation, roadmap, contribution guide.
 
-Per ADR 0008, repository names, npm scope (`@xtrape`), GHCR namespace (`ghcr.io/xtrape`), and image names (`opstage-ce`, `demo-capsule-service`) are normative — implementation MUST follow them.
+Per ADR 0008, repository names, npm scope (`@xtrape`), GHCR namespace (`ghcr.io/xtrape`), and image names (`opstage-ce`,
+`demo-capsule-service`) are normative — implementation MUST follow them.
 
 ---
 

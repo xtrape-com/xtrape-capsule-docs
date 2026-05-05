@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,7 +35,9 @@
 
 This document 定义 the **Capsule Management Contract** for the `xtrape-capsule` domain.
 
-The Capsule Management Contract is the service-side governance interface that 描述 how a Capsule Service（胶囊服务） can expose or provide its manifest, health, configuration metadata, actions, resources, events, and metrics to an Agent（代理） or to Opstage（运维舞台）.
+The Capsule Management Contract is the service-side governance interface that 描述 how a Capsule Service（胶囊服务） can expose
+or provide its manifest, health, configuration metadata, actions, resources, events, and metrics to an Agent（代理） or to
+Opstage（运维舞台）.
 
 This contract is shared by CE（社区版）, EE（企业版）, and Cloud（云版）. CE（社区版） v0.1 may implement only a subset through the Node.js embedded Agent（代理） SDK.
 

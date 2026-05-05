@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -27,7 +37,8 @@ This document 定义 the **Config** specification for the `xtrape-capsule` domai
 
 Config 描述 the manageable configuration metadata of a Capsule Service（胶囊服务）.
 
-In CE（社区版） v0.1, Config should focus on **visibility** and **safe metadata reporting**. Full configuration publishing, approval, versioning, rollback, and environment promotion are future capabilities.
+In CE（社区版） v0.1, Config should focus on **visibility** and **safe metadata reporting**. Full configuration publishing,
+approval, versioning, rollback, and environment promotion are future capabilities.
 
 ---
 

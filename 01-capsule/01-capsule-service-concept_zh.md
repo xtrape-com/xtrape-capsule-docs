@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -29,7 +39,9 @@ A Capsule Service（胶囊服务） is the main object that Opstage（运维舞�
 
 ## 1. Definition
 
-A **Capsule Service（胶囊服务）** is a lightweight, self-contained, independently runnable, agent-governed service unit that 提供 a clear capability, connector, worker process, automation function, account resource, session resource, or runtime adapter.
+A **Capsule Service（胶囊服务）** is a lightweight, self-contained, independently runnable, agent-governed service unit that
+提供 a clear capability, connector, worker process, automation function, account resource, session resource, or runtime
+adapter.
 
 A Capsule Service（胶囊服务） is not defined by a specific language, framework, protocol, or deployment model. It is defined by its governance shape:
 
@@ -224,7 +236,8 @@ These are infrastructure dependencies. They may be monitored by Opstage（运维
 
 ### 4.2 Large business domain service without lightweight governance boundary
 
-A large payment or order service may be a traditional microservice. It becomes a Capsule Service（胶囊服务） only if it intentionally exposes Capsule governance metadata, health, actions, or management resources.
+A large payment or order service may be a traditional microservice. It becomes a Capsule Service（胶囊服务） only if it
+intentionally exposes Capsule governance metadata, health, actions, or management resources.
 
 ### 4.3 Random script without identity
 

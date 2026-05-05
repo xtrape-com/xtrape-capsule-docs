@@ -1,4 +1,46 @@
+---
+status: accepted
+audience: ai-coding-agents
+stability: stable
+last_reviewed: 2026-05-05
+---
+
 # ADR 0008: Naming and Repositories
+
+## Status
+
+Accepted
+
+## Date
+
+2026-05-05
+
+## Context
+
+This ADR records an architecture or implementation decision for the current Xtrape Capsule CE design baseline. See the original decision notes below for the detailed background.
+
+## Decision
+
+Use the decision content below as the current baseline for this topic.
+
+## Consequences
+
+This decision constrains CE implementation work, related specifications, and future documentation maintenance. Detailed trade-offs are captured in the original decision notes below where available.
+
+## Alternatives Considered
+
+Not separately captured in this standardized template section. If alternatives are described in the original decision notes below, those notes remain authoritative.
+
+## Implementation Notes
+
+Implementation and documentation updates should follow this ADR status first, then align related `02-specs/` and current CE `10-implementation/` documents.
+
+## Supersedes / Superseded By
+
+None.
+
+## Original Decision Notes
+
 
 - Status: Accepted
 - Edition: Shared (CE v0.1 actionable; EE/Cloud aligned)
@@ -7,9 +49,13 @@
 
 ## Decision
 
-Opstage CE v0.1 ships as **four repositories** under a single GitHub organization, with strict separation between edition-bound and edition-agnostic codebases. All names, scopes, and registries below are **normative**: implementation MUST follow them and downstream documentation MUST reference them by these exact strings.
+Opstage CE v0.1 ships as **four repositories** under a single GitHub organization, with strict separation between
+edition-bound and edition-agnostic codebases. All names, scopes, and registries below are **normative**: implementation
+MUST follow them and downstream documentation MUST reference them by these exact strings.
 
-This ADR is the single source of truth for repository names, package names, container image names, GitHub organization, and npm scope. Older documents (including `03-editions/ce/11-ce-open-source-strategy.md` §6 and `10-implementation/00-repository-structure.md`) MUST defer to this ADR when they disagree.
+This ADR is the single source of truth for repository names, package names, container image names, GitHub organization,
+and npm scope. Older documents (including `03-editions/ce/11-ce-open-source-strategy.md` §6 and
+`10-implementation/00-repository-structure.md`) MUST defer to this ADR when they disagree.
 
 ## Identity
 

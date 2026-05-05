@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -21,11 +31,14 @@
 - Priority: 高
 - Audience: architects, developers, AI coding agents
 
-`xtrape-capsule` is the lightweight service architecture domain of Xtrape. It 定义 the concept, specifications, runtime governance model, agent integration model, and edition strategy for Capsule Services.
+`xtrape-capsule` is the lightweight service architecture domain of Xtrape. It 定义 the concept, specifications, runtime
+governance model, agent integration model, and edition strategy for Capsule Services.
 
 `xtrape-capsule-opstage` is one core subsystem under this domain. It 提供 the runtime governance platform for Capsule Services, but it is not the whole `xtrape-capsule` domain.
 
-The current implementation focus is **CE（社区版） / Community 版本**. EE（企业版） / Enterprise 版本 and Cloud（云版） / SaaS 版本 are future planning targets. CE（社区版） should reserve extension points for them, but it should not implement their full capabilities in early versions.
+The current implementation focus is **CE（社区版） / Community 版本**. EE（企业版） / Enterprise 版本 and Cloud（云版） / SaaS 版本 are
+future planning targets. CE（社区版） should reserve extension points for them, but it should not implement their full
+capabilities in early versions.
 
 ---
 
@@ -44,7 +57,8 @@ AI-era applications are producing more and more small service units:
 - session managers;
 - lightweight internal tools.
 
-These services are usually not complex by themselves. They may be a Node.js service, a Playwright worker, a Python script, a small Java service, or an adapter that wraps a third-party platform capability.
+These services are usually not complex by themselves. They may be a Node.js service, a Playwright worker, a Python
+script, a small Java service, or an adapter that wraps a third-party platform capability.
 
 The real problem is not how to implement these services. The real problem is:
 

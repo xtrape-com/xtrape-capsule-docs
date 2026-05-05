@@ -1,3 +1,15 @@
+---
+status: draft
+audience: founders
+stability: unstable
+last_reviewed: 2026-05-05
+edition: cloud
+phase: future
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,7 +35,8 @@
 
 This document 定义 the planned Agent（代理） connectivity model for **Opstage（运维舞台） Cloud（云版）**.
 
-Opstage（运维舞台） Cloud（云版） is the future hosted SaaS edition of the `xtrape-capsule` product family. Cloud（云版） Agent（代理） connectivity is a future capability, not a CE（社区版） v0.1 implementation requirement.
+Opstage（运维舞台） Cloud（云版） is the future hosted SaaS edition of the `xtrape-capsule` product family. Cloud（云版） Agent（代理）
+connectivity is a future capability, not a CE（社区版） v0.1 implementation requirement.
 
 ---
 

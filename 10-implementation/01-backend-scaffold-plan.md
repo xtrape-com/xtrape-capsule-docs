@@ -1,3 +1,12 @@
+---
+status: implemented
+audience: ai-coding-agents
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE v0.1 Backend Scaffold Plan
 
 - Status: Implementation Guidance
@@ -169,7 +178,9 @@ export const csrfPlugin = fp(async (app) => {
 });
 ```
 
-The CSRF token is generated with `crypto.randomBytes(32).toString("hex")`, stored in the session record, returned in the JSON body of `/api/admin/auth/login`, `/api/admin/auth/me`, and `/api/admin/auth/csrf`. Rotated on `/api/admin/auth/csrf` and on logout.
+The CSRF token is generated with `crypto.randomBytes(32).toString("hex")`, stored in the session record, returned in the
+JSON body of `/api/admin/auth/login`, `/api/admin/auth/me`, and `/api/admin/auth/csrf`. Rotated on
+`/api/admin/auth/csrf` and on logout.
 
 ## 5. Backend Modules
 
@@ -329,7 +340,8 @@ Implementation rules:
 
 At startup:
 
-1. load environment via Zod schema in `config/env.ts`; **fail fast** if any required variable is missing or empty (`OPSTAGE_ADMIN_USERNAME`, `OPSTAGE_ADMIN_PASSWORD`, `OPSTAGE_SESSION_SECRET`);
+1. load environment via Zod schema in `config/env.ts`; **fail fast** if any required variable is missing or empty
+(`OPSTAGE_ADMIN_USERNAME`, `OPSTAGE_ADMIN_PASSWORD`, `OPSTAGE_SESSION_SECRET`);
 2. ensure `OPSTAGE_SESSION_SECRET` is at least 32 characters;
 3. initialize DB directory if needed;
 4. run or require migrations according to deployment mode;

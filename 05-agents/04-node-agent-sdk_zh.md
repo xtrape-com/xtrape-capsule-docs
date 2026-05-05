@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,9 +35,13 @@
 
 This document 定义 the **Node.js Agent（代理） SDK** for Opstage（运维舞台） CE（社区版）.
 
-The Node.js Agent（代理） SDK is the first and reference implementation of the Embedded Agent（代理） model. It allows a Node.js Capsule Service（胶囊服务） to register with Opstage（运维舞台） Backend, report its runtime metadata, expose health/config/action metadata, poll Commands, execute predefined actions, and report CommandResults.
+The Node.js Agent（代理） SDK is the first and reference implementation of the Embedded Agent（代理） model. It allows a Node.js
+Capsule Service（胶囊服务） to register with Opstage（运维舞台） Backend, report its runtime metadata, expose health/config/action
+metadata, poll Commands, execute predefined actions, and report CommandResults.
 
-The current implementation focus is **CE（社区版） v0.1**. Sidecar Agent（代理）, External Agent（代理）, Java SDK, Python SDK, Go SDK, Agent（代理） Gateway, WebSocket delivery, and enterprise secret integrations are future EE（企业版）/Cloud（云版） capabilities and must not be implemented as part of this SDK v0.1.
+The current implementation focus is **CE（社区版） v0.1**. Sidecar Agent（代理）, External Agent（代理）, Java SDK, Python SDK, Go
+SDK, Agent（代理） Gateway, WebSocket delivery, and enterprise secret integrations are future EE（企业版）/Cloud（云版） capabilities
+and must not be implemented as part of this SDK v0.1.
 
 ---
 

@@ -1,3 +1,10 @@
+---
+status: accepted
+audience: backend-developers
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # CE v0.1 Implementation Contracts
 
 - Status: Implementation Target
@@ -5,7 +12,8 @@
 - Priority: Current
 - Audience: architects, backend developers, frontend developers, agent SDK developers, test engineers, AI coding agents
 
-This directory is **Layer 1** of the contracts model: the language-agnostic single source of truth (SSOT) for the CE v0.1 wire format, error codes, status enumerations, audit actions, ID prefixes, and persistence schema.
+This directory is **Layer 1** of the contracts model: the language-agnostic single source of truth (SSOT) for the CE
+v0.1 wire format, error codes, status enumerations, audit actions, ID prefixes, and persistence schema.
 
 > **Read first**: [ADR 0009 — Contracts Spec and Bindings](../08-decisions/0009-contracts-spec-and-bindings.md). It defines the two-layer model (Spec + Bindings), the per-language repository strategy (Path C), and the synchronization rules.
 
@@ -152,7 +160,9 @@ Expected lint output:
 - Without the config, `redocly lint` produces ~11 warnings (all acceptable) but exits 0.
 - `prisma validate` prints `The schema at … is valid 🚀`.
 
-The included `prisma.config.ts` follows the Prisma ORM v7 convention where datasource URLs live in config instead of the schema file. It should be copied to the implementation package root (`xtrape-capsule-ce/packages/db/`) or invoked with Prisma's `--config` option after Prisma is installed locally.
+The included `prisma.config.ts` follows the Prisma ORM v7 convention where datasource URLs live in config instead of the
+schema file. It should be copied to the implementation package root (`xtrape-capsule-ce/packages/db/`) or invoked with
+Prisma's `--config` option after Prisma is installed locally.
 
 ## 9. Editing the SSOT
 

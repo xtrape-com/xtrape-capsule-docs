@@ -1,3 +1,15 @@
+---
+status: draft
+audience: founders
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ee
+phase: future
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,7 +35,9 @@
 
 This document 定义 the product positioning of **Opstage（运维舞台） EE（企业版） / Enterprise 版本**.
 
-Opstage（运维舞台） EE（企业版） is the future private commercial edition of the `xtrape-capsule` product family. It should extend the CE（社区版） governance kernel for enterprise customers that require private deployment, stronger identity, larger scale, compliance-oriented audit, observability integration, secret integration, and commercial support.
+Opstage（运维舞台） EE（企业版） is the future private commercial edition of the `xtrape-capsule` product family. It should extend
+the CE（社区版） governance kernel for enterprise customers that require private deployment, stronger identity, larger scale,
+compliance-oriented audit, observability integration, secret integration, and commercial support.
 
 EE（企业版） is not a CE（社区版） v0.1 implementation requirement.
 
@@ -35,7 +49,8 @@ Opstage（运维舞台） EE（企业版） is:
 
 > An enterprise-grade private deployment edition of Opstage（运维舞台） for governing Capsule Services inside customer-controlled environments.
 
-It helps organizations make lightweight services, AI automation services, integration services, and operational workers visible, manageable, auditable, and secure without moving the control plane to a hosted SaaS provider.
+It helps organizations make lightweight services, AI automation services, integration services, and operational workers
+visible, manageable, auditable, and secure without moving the control plane to a hosted SaaS provider.
 
 ---
 
@@ -152,7 +167,8 @@ A company builds integration services for platforms such as LLM providers, brows
 
 ### 6.3 Sensitive account and session operations
 
-A service manages accounts, sessions, cookies, OAuth states, or browser contexts. EE（企业版） 提供 visibility and safe predefined operations while keeping raw secrets inside the customer environment.
+A service manages accounts, sessions, cookies, OAuth states, or browser contexts. EE（企业版） 提供 visibility and safe
+predefined operations while keeping raw secrets inside the customer environment.
 
 ### 6.4 Larger Agent（代理） fleets
 
@@ -561,7 +577,8 @@ EE（企业版） positioning is successful when customers understand that:
 
 Opstage（运维舞台） EE（企业版） should be positioned as the enterprise private deployment edition of the Capsule governance model.
 
-It should serve organizations that want the Opstage（运维舞台） control plane inside their own environment with enterprise-grade identity, audit, deployment, observability, secret integration, and support.
+It should serve organizations that want the Opstage（运维舞台） control plane inside their own environment with
+enterprise-grade identity, audit, deployment, observability, secret integration, and support.
 
 The most important EE（企业版） positioning rule is:
 

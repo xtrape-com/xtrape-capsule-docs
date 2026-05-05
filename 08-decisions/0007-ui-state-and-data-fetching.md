@@ -1,4 +1,46 @@
+---
+status: accepted
+audience: ai-coding-agents
+stability: stable
+last_reviewed: 2026-05-05
+---
+
 # ADR 0007: CE v0.1 UI State and Data Fetching
+
+## Status
+
+Accepted
+
+## Date
+
+2026-05-05
+
+## Context
+
+This ADR records an architecture or implementation decision for the current Xtrape Capsule CE design baseline. See the original decision notes below for the detailed background.
+
+## Decision
+
+Use the decision content below as the current baseline for this topic.
+
+## Consequences
+
+This decision constrains CE implementation work, related specifications, and future documentation maintenance. Detailed trade-offs are captured in the original decision notes below where available.
+
+## Alternatives Considered
+
+Not separately captured in this standardized template section. If alternatives are described in the original decision notes below, those notes remain authoritative.
+
+## Implementation Notes
+
+Implementation and documentation updates should follow this ADR status first, then align related `02-specs/` and current CE `10-implementation/` documents.
+
+## Supersedes / Superseded By
+
+None.
+
+## Original Decision Notes
+
 
 - Status: Accepted (supersedes the Vue 3 draft; React 18 is the implemented stack)
 - Edition: CE
@@ -7,7 +49,9 @@
 
 ## Decision
 
-Opstage CE UI is a **React 18** SPA built with **Ant Design (antd 5.x)** for components, **TanStack React Query** for server state, and **React component state plus module-scoped in-memory CSRF state** for the small slice of client state that does not belong on the server.
+Opstage CE UI is a **React 18** SPA built with **Ant Design (antd 5.x)** for components, **TanStack React Query** for
+server state, and **React component state plus module-scoped in-memory CSRF state** for the small slice of client state
+that does not belong on the server.
 
 Frontend lives in `xtrape-capsule-ce/apps/opstage-ui` (CE monorepo).
 
@@ -35,7 +79,9 @@ URL state       → React Router (search params)    # filters, pagination, sort
 Component state → useState / useReducer           # everything else
 ```
 
-The `csrfToken` is stored only in module-scoped memory and re-hydrated from `POST /api/admin/auth/login`, `GET /api/admin/auth/me`, or `GET /api/admin/auth/csrf` (see ADR 0004). It MUST NOT be persisted to `localStorage` or `sessionStorage`.
+The `csrfToken` is stored only in module-scoped memory and re-hydrated from `POST /api/admin/auth/login`, `GET
+/api/admin/auth/me`, or `GET /api/admin/auth/csrf` (see ADR 0004). It MUST NOT be persisted to `localStorage` or
+`sessionStorage`.
 
 ## Session and CSRF State (CE v0.1)
 
@@ -58,7 +104,8 @@ export async function refreshCsrfToken() {
 }
 ```
 
-The session and CSRF token MUST NOT be persisted to `localStorage` or `sessionStorage`. They come from the server on every page load via `GET /api/admin/auth/me`, and CSRF can be refreshed via `GET /api/admin/auth/csrf`.
+The session and CSRF token MUST NOT be persisted to `localStorage` or `sessionStorage`. They come from the server on
+every page load via `GET /api/admin/auth/me`, and CSRF can be refreshed via `GET /api/admin/auth/csrf`.
 
 ## API Client
 
@@ -71,7 +118,8 @@ A single thin fetch wrapper lives in `apps/opstage-ui/src/api.ts`. Rules:
 - on `4xx` errors: throws an `ApiError` with `httpStatus`, `code`, `message`, `details` (parsed from `ErrorEnvelope`);
 - on network error: throws an `ApiError` with `code: "NETWORK_ERROR"`.
 
-The wrapper is the only allowed `fetch` caller in the UI; ESLint rule `no-restricted-globals: ["fetch"]` enforces this. Pages and components MUST call the wrapper or typed data hooks; they never call `fetch` directly.
+The wrapper is the only allowed `fetch` caller in the UI; ESLint rule `no-restricted-globals: ["fetch"]` enforces this.
+Pages and components MUST call the wrapper or typed data hooks; they never call `fetch` directly.
 
 ```ts
 // apps/opstage-ui/src/api.ts (sketch)
@@ -223,7 +271,9 @@ export function CreateTokenForm({ onSubmit }: { onSubmit: (values: unknown) => v
 
 ## Error Surface
 
-`ApiError` is converted to user-facing copy via a `useApiErrorMessage(err)` hook that maps `error.code` → friendly text (with a fallback to `error.message`). Authentication-related codes (`UNAUTHORIZED`, `CSRF_INVALID`) are handled by the API client and never bubble to components.
+`ApiError` is converted to user-facing copy via a `useApiErrorMessage(err)` hook that maps `error.code` → friendly text
+(with a fallback to `error.message`). Authentication-related codes (`UNAUTHORIZED`, `CSRF_INVALID`) are handled by the
+API client and never bubble to components.
 
 ```ts
 // apps/opstage-ui/src/lib/use-api-error-message.ts
@@ -243,7 +293,8 @@ export function useApiErrorMessage(err: ApiError | null | undefined): string {
 }
 ```
 
-The map MUST stay in sync with `09-contracts/errors.json`; a small script in CI verifies every error code listed there has either a UI mapping or an explicit "internal-only" allow-list entry.
+The map MUST stay in sync with `09-contracts/errors.json`; a small script in CI verifies every error code listed there
+has either a UI mapping or an explicit "internal-only" allow-list entry.
 
 ## Forbidden in CE v0.1
 

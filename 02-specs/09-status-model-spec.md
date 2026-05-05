@@ -1,3 +1,10 @@
+---
+status: accepted
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Status Model Specification
 
 - Status: Specification
@@ -9,7 +16,8 @@
 
 This document defines the shared **Status Model** for the `xtrape-capsule` domain.
 
-Status values are used by Opstage Backend, Opstage UI, Agents, and Capsule Services to describe current state, reported state, effective state, health state, command state, token state, and freshness.
+Status values are used by Opstage Backend, Opstage UI, Agents, and Capsule Services to describe current state, reported
+state, effective state, health state, command state, token state, and freshness.
 
 A consistent status model is required so that CE, EE, and Cloud can share the same mental model and avoid ambiguous UI behavior.
 
@@ -44,11 +52,14 @@ This document should be used by:
 
 ### 2.1 Reported State
 
-**Reported state** is what an Agent last sent: `HealthStatus` from the latest `HealthReport`, plus `lastReportedAt` and `lastHealthAt` timestamps. CE v0.1 does not persist a separate `reportedStatus` column; reported state is derived from the latest stored `HealthReport` row.
+**Reported state** is what an Agent last sent: `HealthStatus` from the latest `HealthReport`, plus `lastReportedAt` and
+`lastHealthAt` timestamps. CE v0.1 does not persist a separate `reportedStatus` column; reported state is derived from
+the latest stored `HealthReport` row.
 
 ### 2.2 Effective Status
 
-**Effective status** is the status calculated by Opstage Backend based on Agent heartbeat freshness, Agent disabled/revoked state, and the latest health report. CE v0.1 stores this on `CapsuleService.status`.
+**Effective status** is the status calculated by Opstage Backend based on Agent heartbeat freshness, Agent
+disabled/revoked state, and the latest health report. CE v0.1 stores this on `CapsuleService.status`.
 
 Example response (matches OpenAPI `CapsuleService` + `HealthReport`):
 
@@ -356,7 +367,8 @@ SUCCESS
 FAILURE
 ```
 
-`DENIED`, `ERROR`, and `PENDING` are reserved for future EE/Cloud editions and are not part of CE v0.1. CE implementations should map authorization rejections and unexpected errors to `FAILURE` with a descriptive `message`.
+`DENIED`, `ERROR`, and `PENDING` are reserved for future EE/Cloud editions and are not part of CE v0.1. CE
+implementations should map authorization rejections and unexpected errors to `FAILURE` with a descriptive `message`.
 
 ### 9.1 `SUCCESS`
 
@@ -364,7 +376,8 @@ Operation completed successfully.
 
 ### 9.2 `FAILURE`
 
-Operation failed for any reason (validation rejection, business error, authorization denial, runtime exception). The `message` field and `metadata.errorCode` carry the specific reason.
+Operation failed for any reason (validation rejection, business error, authorization denial, runtime exception). The
+`message` field and `metadata.errorCode` carry the specific reason.
 
 ---
 
@@ -464,7 +477,8 @@ STALE  — last report exceeds healthStaleThresholdSeconds
 
 UI should avoid showing stale data as current truth.
 
-CE v0.1 persists only the **effective** status on `CapsuleService.status`. The "last reported" view is derived from `lastReportedAt` + `lastHealthAt` + the latest `HealthReport` row, not stored in a separate column.
+CE v0.1 persists only the **effective** status on `CapsuleService.status`. The "last reported" view is derived from
+`lastReportedAt` + `lastHealthAt` + the latest `HealthReport` row, not stored in a separate column.
 
 Recommended UI display:
 

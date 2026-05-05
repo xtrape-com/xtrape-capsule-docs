@@ -1,3 +1,15 @@
+---
+status: draft
+audience: founders
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,13 +37,15 @@
 
 This document 定义 the **Node.js Embedded Agent（代理）** design for **Opstage（运维舞台） CE（社区版） v0.1**.
 
-The Node.js Embedded Agent（代理） is the first Agent（代理） implementation of `xtrape-capsule`. It runs inside a Node.js Capsule Service（胶囊服务） process and connects the service to Opstage（运维舞台） Backend.
+The Node.js Embedded Agent（代理） is the first Agent（代理） implementation of `xtrape-capsule`. It runs inside a Node.js
+Capsule Service（胶囊服务） process and connects the service to Opstage（运维舞台） Backend.
 
 ---
 
 ## 1. Purpose
 
-The purpose of the Node.js Embedded Agent（代理） is to make a Node.js Capsule Service（胶囊服务） governable by Opstage（运维舞台） without forcing the service to become dependent on Opstage（运维舞台） for its core startup and business logic.
+The purpose of the Node.js Embedded Agent（代理） is to make a Node.js Capsule Service（胶囊服务） governable by Opstage（运维舞台）
+without forcing the service to become dependent on Opstage（运维舞台） for its core startup and business logic.
 
 The Agent（代理） SDK should provide:
 

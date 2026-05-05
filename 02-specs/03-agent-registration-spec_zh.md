@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -232,7 +242,9 @@ createdAt       datetime
 updatedAt       datetime
 ```
 
-EE（企业版）/Cloud（云版） may extend Agent（代理） with `version`, `hostname`, `os`, `arch`, `registeredAt`, and `metadataJson` later. CE（社区版） v0.1 does NOT persist these; if an Agent（代理） reports them at registration, Backend may log them but should not require them.
+EE（企业版）/Cloud（云版） may extend Agent（代理） with `version`, `hostname`, `os`, `arch`, `registeredAt`, and `metadataJson`
+later. CE（社区版） v0.1 does NOT persist these; if an Agent（代理） reports them at registration, Backend may log them but
+should not require them.
 
 ### 6.1 `code`
 
@@ -338,7 +350,8 @@ This endpoint is called by the Agent（代理） using a Registration Token.
 
 `service` is optional at registration time but recommended for CE（社区版） v0.1 embedded Agent（代理）. When provided, the `service` object must be a valid `ReportedService` (see §10.2).
 
-The Agent（代理） MAY include additional informational fields such as `version`, `hostname`, `os`, `arch` in the request body; Backend ignores unknown fields in CE（社区版） v0.1 (forward-compat).
+The Agent（代理） MAY include additional informational fields such as `version`, `hostname`, `os`, `arch` in the request
+body; Backend ignores unknown fields in CE（社区版） v0.1 (forward-compat).
 
 ### 7.3 Response (envelope omitted; matches OpenAPI `RegisterAgentResponse`)
 
@@ -408,9 +421,11 @@ Authorization: Bearer <agentToken>
 
 Both `serviceId` and `health` are optional. A heartbeat with an empty body `{}` is valid and only updates `Agent.lastHeartbeatAt`.
 
-CE（社区版） v0.1 也会把成功的 command polling（`GET /api/agents/{agentId}/commands`）视为轻量 heartbeat：它会更新 `Agent.lastHeartbeatAt` 并把 Agent（代理）置为 `ONLINE`。如果 Agent（代理）已经高频轮询 commands，除非需要通过 heartbeat endpoint 上报单个 service health，否则不需要单独 heartbeat loop。
+CE（社区版） v0.1 也会把成功的 command polling（`GET /api/agents/{agentId}/commands`）视为轻量 heartbeat：它会更新 `Agent.lastHeartbeatAt` 并把
+Agent（代理）置为 `ONLINE`。如果 Agent（代理）已经高频轮询 commands，除非需要通过 heartbeat endpoint 上报单个 service health，否则不需要单独 heartbeat loop。
 
-A heartbeat reports health for at most one service per call. Multi-service Agents should send one heartbeat per service or rely on the dedicated `POST /api/agents/{agentId}/services/report` endpoint.
+A heartbeat reports health for at most one service per call. Multi-service Agents should send one heartbeat per service
+or rely on the dedicated `POST /api/agents/{agentId}/services/report` endpoint.
 
 ### 9.3 Response (envelope omitted; matches OpenAPI `AgentHeartbeatResponse`)
 
@@ -497,7 +512,8 @@ Authorization: Bearer <agentToken>
 
 `code` and `name` are sibling fields of `manifest` (not nested inside it). `health`, `configs`, and `actions` are optional but recommended.
 
-对于 CE（社区版）规模部署，Agent（代理） SHOULD 避免反复上传未变化的 manifest/actions/configs。推荐模式是：启动时以及 manifest/actions/config 定义变化时发送完整 service report；稳定运行期间，通过 `POST /api/agents/{agentId}/heartbeat` 携带 `serviceId` 和 `health` 上报 service health。
+对于 CE（社区版）规模部署，Agent（代理） SHOULD 避免反复上传未变化的 manifest/actions/configs。推荐模式是：启动时以及 manifest/actions/config 定义变化时发送完整
+service report；稳定运行期间，通过 `POST /api/agents/{agentId}/heartbeat` 携带 `serviceId` 和 `health` 上报 service health。
 
 ### 10.3 Backend Responsibilities
 

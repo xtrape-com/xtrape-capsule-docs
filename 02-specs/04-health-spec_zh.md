@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -495,7 +505,9 @@ Threshold relationship:
 agentOfflineThresholdSeconds (90s) < healthStaleThresholdSeconds (120s)
 ```
 
-This creates a deliberate 30-second grace window (90–120s): an Agent（代理） that has just gone OFFLINE will have its Agent（代理） status set to OFFLINE first, but its last health report is still considered FRESH until 120s passes. This avoids a race condition where a momentary Agent（代理） dropout causes the health display to show STALE immediately.
+This creates a deliberate 30-second grace window (90–120s): an Agent（代理） that has just gone OFFLINE will have its
+Agent（代理） status set to OFFLINE first, but its last health report is still considered FRESH until 120s passes. This
+avoids a race condition where a momentary Agent（代理） dropout causes the health display to show STALE immediately.
 
 During the 90–120s window, `effectiveStatus` is STALE (driven by Agent（代理） OFFLINE), but `freshness` is still FRESH. After 120s, both are STALE.
 

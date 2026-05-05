@@ -1,3 +1,10 @@
+---
+status: draft
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # CE Roadmap
 
 - Status: Implementation Guidance

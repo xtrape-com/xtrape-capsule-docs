@@ -1,3 +1,10 @@
+---
+status: accepted
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Command Specification
 
 - Status: Specification
@@ -9,7 +16,8 @@
 
 This document defines the **Command** specification for the `xtrape-capsule` domain.
 
-A Command is an instruction created by Opstage Backend and executed by an authorized Agent. Commands are the delivery mechanism for operational requests such as predefined Capsule Service actions.
+A Command is an instruction created by Opstage Backend and executed by an authorized Agent. Commands are the delivery
+mechanism for operational requests such as predefined Capsule Service actions.
 
 In CE v0.1, Commands are primarily used to execute predefined actions through the Node.js embedded Agent SDK.
 
@@ -222,7 +230,8 @@ Target Capsule Service. Required. Prefix: `svc_`.
 
 ### 6.4 `type`
 
-Type of Command. Required. CE v0.1 supports only `ACTION`. Other types (`CONFIG_UPDATE`, `CONFIG_RELOAD`, `SERVICE_REFRESH`, `AGENT_CONTROL`, `CUSTOM`) are reserved for future EE/Cloud.
+Type of Command. Required. CE v0.1 supports only `ACTION`. Other types (`CONFIG_UPDATE`, `CONFIG_RELOAD`,
+`SERVICE_REFRESH`, `AGENT_CONTROL`, `CUSTOM`) are reserved for future EE/Cloud.
 
 ### 6.5 `actionName`
 
@@ -379,9 +388,14 @@ GET /api/agents/{agentId}/commands?limit=1
 Authorization: Bearer <agentToken>
 ```
 
-`limit` is optional. Backend SHOULD clamp it to a safe range, for example `1..10`. Agents SHOULD set it to their remaining local command execution capacity so Backend does not transition more Commands to `RUNNING` than the Agent can execute.
+`limit` is optional. Backend SHOULD clamp it to a safe range, for example `1..10`. Agents SHOULD set it to their
+remaining local command execution capacity so Backend does not transition more Commands to `RUNNING` than the Agent can
+execute.
 
-Agents MAY also apply narrower internal execution locks per action class. For example, an Agent can poll several Commands concurrently while still serializing browser/session actions and allowing read-only list/config actions to run in parallel. In that case `limit` should represent total local command slots, and the Agent remains responsible for any stricter per-resource locking.
+Agents MAY also apply narrower internal execution locks per action class. For example, an Agent can poll several
+Commands concurrently while still serializing browser/session actions and allowing read-only list/config actions to run
+in parallel. In that case `limit` should represent total local command slots, and the Agent remains responsible for any
+stricter per-resource locking.
 
 Response (matches OpenAPI `SuccessEnvelope` with `data: Command[]`):
 
@@ -405,7 +419,9 @@ Response (matches OpenAPI `SuccessEnvelope` with `data: Command[]`):
 }
 ```
 
-Agents SHOULD add jitter and idle backoff to command polling. For CE-scale deployments, a typical policy is: poll quickly when commands are returned, add a small random jitter to every poll, and back off gradually when consecutive polls return no commands. This avoids synchronized polling spikes while keeping the CE implementation simple.
+Agents SHOULD add jitter and idle backoff to command polling. For CE-scale deployments, a typical policy is: poll
+quickly when commands are returned, add a small random jitter to every poll, and back off gradually when consecutive
+polls return no commands. This avoids synchronized polling spikes while keeping the CE implementation simple.
 
 Backend responsibilities:
 
@@ -511,7 +527,8 @@ The Command row separately tracks `startedAt` (set during polling) and `complete
 
 ### 12.5 Optional timing fields
 
-The Agent MAY include `startedAt` and `finishedAt` (ISO-8601). Backend uses them only to refine `Command.startedAt` / `Command.completedAt` if the Agent's clock is trustworthy; Backend's own clock is authoritative.
+The Agent MAY include `startedAt` and `finishedAt` (ISO-8601). Backend uses them only to refine `Command.startedAt` /
+`Command.completedAt` if the Agent's clock is trustworthy; Backend's own clock is authoritative.
 
 ---
 
@@ -538,7 +555,10 @@ Request body (matches OpenAPI `ReportCommandResultRequest`):
 ```
 
 
-Backend SHOULD enforce a maximum serialized CommandResult payload size. CE v0.1 uses `OPSTAGE_COMMAND_RESULT_MAX_BYTES` (default `1000000`). If the serialized `message` + `data` + `error` payload exceeds the limit, Backend rejects the report with `413 COMMAND_RESULT_TOO_LARGE`. CommandResult should remain concise; large logs or artifacts belong to future log/artifact collection capabilities.
+Backend SHOULD enforce a maximum serialized CommandResult payload size. CE v0.1 uses `OPSTAGE_COMMAND_RESULT_MAX_BYTES`
+(default `1000000`). If the serialized `message` + `data` + `error` payload exceeds the limit, Backend rejects the
+report with `413 COMMAND_RESULT_TOO_LARGE`. CommandResult should remain concise; large logs or artifacts belong to
+future log/artifact collection capabilities.
 
 Backend responsibilities:
 
@@ -935,7 +955,8 @@ This makes Capsule Service operations visible, safe, and auditable while keeping
 
 ### 11.1 Payload storage and display
 
-When Backend creates an `ACTION_EXECUTE` Command, it must persist the raw payload in `commands.payloadJson`; otherwise the Agent cannot receive secrets such as passwords, tokens, or API keys.
+When Backend creates an `ACTION_EXECUTE` Command, it must persist the raw payload in `commands.payloadJson`; otherwise
+the Agent cannot receive secrets such as passwords, tokens, or API keys.
 
 Admin APIs and UI views must redact payloads for display. Recommended rule:
 

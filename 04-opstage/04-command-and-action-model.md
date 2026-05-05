@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Command and Action Model
 
 - Status: Implementation Guidance
@@ -5,7 +12,11 @@
 - Priority: High
 - Audience: backend developers, frontend developers, agent SDK developers, Capsule Service developers, architects, security reviewers, AI coding agents
 
-> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1. In particular: CE v0.1 Command states are `PENDING | RUNNING | SUCCEEDED | FAILED | EXPIRED | CANCELLED` (no `DISPATCHED`), CommandResult uses `success / message / data / error`, ActionDefinition uses `requiresConfirmation`, and `dangerLevel` is `LOW | MEDIUM | HIGH` (no `CRITICAL`). Sections that still mention older terminology are kept for historical context but should not be implemented.
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/`
+> (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE v0.1.
+> In particular: CE v0.1 Command states are
+> `PENDING | RUNNING | SUCCEEDED | FAILED | EXPIRED | CANCELLED` (no `DISPATCHED`),
+> CommandResult uses `success` plus `message/data/error`, and Actions require explicit confirmation for dangerous operations.
 
 This document defines the **Command and Action Model** for Opstage.
 
@@ -685,7 +696,10 @@ Good result:
 
 ## 23. Action Execution Flow
 
-End-to-end action flow has three visible layers: Action Catalog, prepare, and execute. Service report only publishes the stable Action Catalog for button/list display. Opening an action panel creates an `ACTION_PREPARE` Command; the Agent prepare handler returns dynamic metadata, `inputSchema`, current options, and initial payload. Running an action creates an `ACTION_EXECUTE` Command that is eligible for business execution.
+End-to-end action flow has three visible layers: Action Catalog, prepare, and execute. Service report only publishes the
+stable Action Catalog for button/list display. Opening an action panel creates an `ACTION_PREPARE` Command; the Agent
+prepare handler returns dynamic metadata, `inputSchema`, current options, and initial payload. Running an action creates
+an `ACTION_EXECUTE` Command that is eligible for business execution.
 
 ```text
 User opens Capsule Service Detail
@@ -848,7 +862,9 @@ async function createActionCommand(req, res) {
 }
 ```
 
-Failure rules (these MUST also produce a `COMMAND.CREATE` AuditEvent with `result: FAILURE` and the same target/metadata, except the AuditEvent is written from the error handler so the transaction can roll back the half-built Command):
+Failure rules (these MUST also produce a `COMMAND.CREATE` AuditEvent with `result: FAILURE` and the same
+target/metadata, except the AuditEvent is written from the error handler so the transaction can roll back the half-built
+Command):
 
 | Condition                                     | HTTP | error.code                       |
 |-----------------------------------------------|------|----------------------------------|

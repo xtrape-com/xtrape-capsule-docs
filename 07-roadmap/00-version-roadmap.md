@@ -1,3 +1,10 @@
+---
+status: draft
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Version Roadmap
 
 - Status: Implementation Guidance
@@ -7,7 +14,8 @@
 
 This document defines the version roadmap for the `xtrape-capsule` product family.
 
-The current implementation focus is **CE v0.1**. CE v0.1 should prove the complete lightweight Capsule governance loop with Opstage Backend, Opstage UI, SQLite, and the Node.js Embedded Agent SDK.
+The current implementation focus is **CE v0.1**. CE v0.1 should prove the complete lightweight Capsule governance loop
+with Opstage Backend, Opstage UI, SQLite, and the Node.js Embedded Agent SDK.
 
 EE and Cloud are future commercialization tracks. They should influence extension-point design, but they must not expand the CE v0.1 implementation scope.
 

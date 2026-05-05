@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -25,7 +35,9 @@ This document 定义 the **Agent（代理） Permission Model** for the `xtrape-
 
 Agent（代理） permission is the security boundary that decides what an authenticated Agent（代理） is allowed to report, poll, execute, and update in Opstage（运维舞台）.
 
-The current implementation focus is **CE（社区版）**. CE（社区版） v0.1 implements a simple but strict Agent（代理） permission model for the Node.js Embedded Agent（代理）. EE（企业版） and Cloud（云版） may later add workspace-scoped policies, Agent（代理） groups, capability scopes, token rotation, and richer permission controls.
+The current implementation focus is **CE（社区版）**. CE（社区版） v0.1 implements a simple but strict Agent（代理） permission model
+for the Node.js Embedded Agent（代理）. EE（企业版） and Cloud（云版） may later add workspace-scoped policies, Agent（代理） groups,
+capability scopes, token rotation, and richer permission controls.
 
 ---
 

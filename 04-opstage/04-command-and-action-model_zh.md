@@ -1,3 +1,13 @@
+---
+status: draft
+audience: architects
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -21,13 +31,18 @@
 - Priority: 高
 - Audience: backend developers, frontend developers, agent SDK developers, Capsule Service（胶囊服务） developers, architects, security reviewers, AI coding agents
 
-> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/` (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE（社区版） v0.1. In particular: CE（社区版） v0.1 Command states are `PENDING | RUNNING | SUCCEEDED | FAILED | EXPIRED | CANCELLED` (no `DISPATCHED`), CommandResult uses `success / message / data / error`, ActionDefinition uses `requiresConfirmation`, and `dangerLevel` is `LOW | MEDIUM | HIGH` (no `CRITICAL`). Sections that still mention older terminology are kept for historical context but should not be implemented.
+> **Precedence rule**: When this document and `08-decisions/` ADRs or `09-contracts/`
+> (OpenAPI / Prisma) disagree, the ADRs and contracts win for CE（社区版） v0.1.
+> In particular: CE（社区版） v0.1 Command states are
+> `PENDING | RUNNING | SUCCEEDED | FAILED | EXPIRED | CANCELLED` (no `DISPATCHED`),
+> CommandResult uses `success` plus `message/data/error`, and Actions require explicit confirmation for dangerous operations.
 
 This document 定义 the **Command and Action Model** for Opstage（运维舞台）.
 
 Commands and Actions are the core operation mechanism that allows Opstage（运维舞台） UI users to request safe, predefined operations on Capsule Services through Agents.
 
-The current implementation focus is **Opstage（运维舞台） CE（社区版）**. EE（企业版） and Cloud（云版） command capabilities are future planning tracks and must not expand the CE（社区版） v0.1 implementation scope.
+The current implementation focus is **Opstage（运维舞台） CE（社区版）**. EE（企业版） and Cloud（云版） command capabilities are future
+planning tracks and must not expand the CE（社区版） v0.1 implementation scope.
 
 ---
 
@@ -701,7 +716,9 @@ Good result:
 
 ## 23. Action Execution Flow
 
-端到端 Action 流程分为三层：Action Catalog、prepare 和 execute。Service report 只发布稳定的 Action Catalog，用于按钮/列表展示；打开 Action 面板会创建一条 `ACTION_PREPARE` Command，由 Agent prepare handler 返回动态 metadata、`inputSchema`、当前选项和初始 payload；执行 Action 会创建一条真正执行业务的 `ACTION_EXECUTE` Command。
+端到端 Action 流程分为三层：Action Catalog、prepare 和 execute。Service report 只发布稳定的 Action Catalog，用于按钮/列表展示；打开 Action 面板会创建一条
+`ACTION_PREPARE` Command，由 Agent prepare handler 返回动态 metadata、`inputSchema`、当前选项和初始 payload；执行 Action 会创建一条真正执行业务的
+`ACTION_EXECUTE` Command。
 
 ```text
 User opens Capsule Service Detail
@@ -864,7 +881,9 @@ async function createActionCommand(req, res) {
 }
 ```
 
-Failure rules (these MUST also produce a `COMMAND.CREATE` AuditEvent with `result: FAILURE` and the same target/metadata, except the AuditEvent is written from the error handler so the transaction can roll back the half-built Command):
+Failure rules (these MUST also produce a `COMMAND.CREATE` AuditEvent with `result: FAILURE` and the same
+target/metadata, except the AuditEvent is written from the error handler so the transaction can roll back the half-built
+Command):
 
 ||Condition|HTTP|error.code||
 |-----------------------------------------------|------|----------------------------------|

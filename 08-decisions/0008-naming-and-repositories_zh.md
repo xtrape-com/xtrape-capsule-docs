@@ -1,3 +1,13 @@
+---
+status: draft
+audience: ai-coding-agents
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -16,6 +26,41 @@
 
 # ADR 0008: Naming and Repositories
 
+## Status
+
+Draft
+
+## Date
+
+2026-05-05
+
+## Context
+
+本 ADR 记录当前 Xtrape Capsule CE 设计基线中的一项架构或实现决策。详细背景见下方原始决策内容。
+
+## Decision
+
+采用下方“Decision/决策”内容作为当前基线。
+
+## Consequences
+
+该决策会影响 CE 当前实现、相关规范和后续文档维护。具体取舍见下方原始内容。
+
+## Alternatives Considered
+
+未在本模板区单独展开；如原始内容中记录了备选方案，以原始内容为准。
+
+## Implementation Notes
+
+实现和文档引用应优先遵循本 ADR 的 accepted/proposed 状态，并与 `02-specs/`、`10-implementation/` 中的当前 CE 文档保持一致。
+
+## Supersedes / Superseded By
+
+None.
+
+## Original Decision Notes
+
+
 - Status: Accepted
 - Edition: 共享 (CE（社区版） v0.1 actionable; EE（企业版）/Cloud（云版） aligned)
 - Priority: Current
@@ -23,9 +68,13 @@
 
 ## Decision
 
-Opstage（运维舞台） CE（社区版） v0.1 ships as **four repositories** under a single GitHub organization, with strict separation between edition-bound and edition-agnostic codebases. All names, scopes, and registries below are **normative**: implementation MUST follow them and downstream documentation MUST reference them by these exact strings.
+Opstage（运维舞台） CE（社区版） v0.1 ships as **four repositories** under a single GitHub organization, with strict separation
+between edition-bound and edition-agnostic codebases. All names, scopes, and registries below are **normative**:
+implementation MUST follow them and downstream documentation MUST reference them by these exact strings.
 
-This ADR is the single source of truth for repository names, package names, container image names, GitHub organization, and npm scope. Older documents (including `03-editions/ce/11-ce-open-source-strategy.md` §6 and `10-implementation/00-repository-structure.md`) MUST defer to this ADR when they disagree.
+This ADR is the single source of truth for repository names, package names, container image names, GitHub organization,
+and npm scope. Older documents (including `03-editions/ce/11-ce-open-source-strategy.md` §6 and
+`10-implementation/00-repository-structure.md`) MUST defer to this ADR when they disagree.
 
 ## Identity
 
@@ -112,7 +161,8 @@ xtrape-capsule-agent-node            xtrape-capsule-ce
                                       (demo-capsule-service inside CE)
 ```
 
-CE（社区版） consumes both `@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` from npm. Agent（代理）-node consumes `@xtrape/capsule-contracts-node` from npm. Nothing depends on CE（社区版）.
+CE（社区版） consumes both `@xtrape/capsule-contracts-node` and `@xtrape/capsule-agent-node` from npm. Agent（代理）-node
+consumes `@xtrape/capsule-contracts-node` from npm. Nothing depends on CE（社区版）.
 
 ### Rule 3: Language suffix in repo and package matches
 

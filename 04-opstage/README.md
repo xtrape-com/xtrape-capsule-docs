@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Opstage Documents
 
 - Status: Implementation Guidance
@@ -7,7 +14,8 @@
 
 This directory contains the Opstage subsystem documents for the `xtrape-capsule` product family.
 
-Opstage is the runtime governance platform for Capsule Services. It provides the UI, Backend, and Agent integration model that makes lightweight services visible, operable, and auditable.
+Opstage is the runtime governance platform for Capsule Services. It provides the UI, Backend, and Agent integration
+model that makes lightweight services visible, operable, and auditable.
 
 The current implementation focus is **Opstage CE**.
 

@@ -1,3 +1,12 @@
+---
+status: implemented
+audience: ai-coding-agents
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE v0.1 CI/CD Pipelines
 
 - Status: Implementation Guidance
@@ -165,7 +174,8 @@ jobs:
           labels: spec-bump,automated
 ```
 
-If conformance fails, this job exits non-zero **without** opening a PR; instead a separate workflow opens an **issue** with the failure log so a human can decide whether the spec or the binding needs to change.
+If conformance fails, this job exits non-zero **without** opening a PR; instead a separate workflow opens an **issue**
+with the failure log so a human can decide whether the spec or the binding needs to change.
 
 #### `release.yml`
 
@@ -204,7 +214,8 @@ jobs:
 
 ### 3.3 `xtrape-capsule-agent-node/.github/workflows/`
 
-Same shape as `xtrape-capsule-contracts-node` minus the `upstream-bump.yml`. Instead of mirroring `09-contracts/`, it relies on Renovate to bump `@xtrape/capsule-contracts-node` automatically.
+Same shape as `xtrape-capsule-contracts-node` minus the `upstream-bump.yml`. Instead of mirroring `09-contracts/`, it
+relies on Renovate to bump `@xtrape/capsule-contracts-node` automatically.
 
 #### `ci.yml`
 

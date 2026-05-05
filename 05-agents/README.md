@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Agent Documents
 
 - Status: Implementation Guidance
@@ -9,7 +16,9 @@ This directory contains the Agent-related documents for the `xtrape-capsule` pro
 
 An Agent is the authorized runtime bridge that connects Capsule Services to Opstage governance.
 
-The current implementation focus is **CE**. CE v0.1 implements only the **Node.js Embedded Agent SDK**. Sidecar Agent, External Agent, multi-language SDKs, Agent Gateway, and advanced Agent policy capabilities are future EE/Cloud extension tracks and must not expand the CE v0.1 implementation scope.
+The current implementation focus is **CE**. CE v0.1 implements only the **Node.js Embedded Agent SDK**. Sidecar Agent,
+External Agent, multi-language SDKs, Agent Gateway, and advanced Agent policy capabilities are future EE/Cloud extension
+tracks and must not expand the CE v0.1 implementation scope.
 
 ---
 

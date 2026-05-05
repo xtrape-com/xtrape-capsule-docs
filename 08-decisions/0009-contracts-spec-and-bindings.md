@@ -1,4 +1,46 @@
+---
+status: accepted
+audience: ai-coding-agents
+stability: stable
+last_reviewed: 2026-05-05
+---
+
 # ADR 0009: Contracts Spec and Bindings
+
+## Status
+
+Accepted
+
+## Date
+
+2026-05-05
+
+## Context
+
+This ADR records an architecture or implementation decision for the current Xtrape Capsule CE design baseline. See the original decision notes below for the detailed background.
+
+## Decision
+
+Use the decision content below as the current baseline for this topic.
+
+## Consequences
+
+This decision constrains CE implementation work, related specifications, and future documentation maintenance. Detailed trade-offs are captured in the original decision notes below where available.
+
+## Alternatives Considered
+
+Not separately captured in this standardized template section. If alternatives are described in the original decision notes below, those notes remain authoritative.
+
+## Implementation Notes
+
+Implementation and documentation updates should follow this ADR status first, then align related `02-specs/` and current CE `10-implementation/` documents.
+
+## Supersedes / Superseded By
+
+None.
+
+## Original Decision Notes
+
 
 - Status: Accepted
 - Edition: Shared (CE v0.1 actionable; EE/Cloud aligned)
@@ -12,7 +54,9 @@ The word "contracts" in this project refers to **two distinct layers** that MUST
 1. **Layer 1 — Spec** (machine-readable, language-agnostic, human-authored)
 2. **Layer 2 — Bindings** (per-language code, generated from Layer 1)
 
-CE v0.1 chooses **Path C** of the contracts strategy: Layer 1 lives in the `xtrape-capsule-docs` repository under `09-contracts/`; Layer 2 lives in **per-language repositories** (`xtrape-capsule-contracts-node`, future `-python`, `-java`, `-go`).
+CE v0.1 chooses **Path C** of the contracts strategy: Layer 1 lives in the `xtrape-capsule-docs` repository under
+`09-contracts/`; Layer 2 lives in **per-language repositories** (`xtrape-capsule-contracts-node`, future `-python`,
+`-java`, `-go`).
 
 This ADR defines what each layer contains, where it lives, how Layer 2 is generated and validated, and how the layers stay synchronized.
 
@@ -130,8 +174,11 @@ xtrape-capsule-contracts-node/
 
 1. **`spec/` is read-only and mirrored**, not authored. PRs MAY NOT edit `spec/` directly. The `tools/sync-spec.ts` script is the only writer.
 2. **All `*.gen.*` files are committed** (so consumers can read them on GitHub) but CI runs `codegen --check` to ensure they match the inputs in `spec/`.
-3. **A `spec/.source` file** records the commit SHA in `xtrape-capsule-docs` that the current `spec/` copy mirrors. This is how downstream agent SDK CI proves "I am building against docs commit `abc1234`".
-4. **Conformance tests are non-skippable**: every `spec/examples/*.json` MUST parse with the binding's runtime schemas. If a fixture doesn't parse, the binding repo's CI fails until either the binding is fixed or the fixture is updated upstream.
+3. **A `spec/.source` file** records the commit SHA in `xtrape-capsule-docs` that the current `spec/` copy mirrors. This
+is how downstream agent SDK CI proves "I am building against docs commit `abc1234`".
+4. **Conformance tests are non-skippable**: every `spec/examples/*.json` MUST parse with the binding's runtime schemas.
+If a fixture doesn't parse, the binding repo's CI fails until either the binding is fixed or the fixture is updated
+upstream.
 5. **No reverse dependencies**: a binding repo MUST NOT import from any agent SDK or any backend repo (enforced via ADR 0008's reverse-dep CI rule).
 
 ## Sync Workflow: Layer 1 → Layer 2
@@ -159,7 +206,8 @@ A scheduled workflow (`cron: '0 6 * * *'` daily) in each binding repo:
 5. If `git status` is dirty, opens a PR titled `chore(spec): bump to xtrape-capsule-docs@<sha>` with the diff;
 6. Updates `spec/.source` to the new SHA in the same commit.
 
-If conformance fails, the workflow opens an **issue** instead of a PR, with the failing test output, so a human author can update the binding's hand-written code (e.g. add a new Zod schema for a new endpoint).
+If conformance fails, the workflow opens an **issue** instead of a PR, with the failing test output, so a human author
+can update the binding's hand-written code (e.g. add a new Zod schema for a new endpoint).
 
 ### Step 3: Binding repo human reviews and merges
 
@@ -171,7 +219,8 @@ The PR opened by `upstream-bump.yml` runs the full CI:
 - `pnpm lint`
 - `pnpm typecheck`
 
-A human reviewer ensures any new hand-written code (new Zod schema, new helper) is correct, then merges. Changesets bumps the version (typically `minor` for new fields, `major` for incompatible removals).
+A human reviewer ensures any new hand-written code (new Zod schema, new helper) is correct, then merges. Changesets
+bumps the version (typically `minor` for new fields, `major` for incompatible removals).
 
 ### Step 4: Release publishes Layer 2
 
@@ -183,11 +232,15 @@ A human reviewer ensures any new hand-written code (new Zod schema, new helper) 
 
 ### Step 5: Downstream consumers (agent + CE) get the new version
 
-Renovate in `xtrape-capsule-agent-node` and `xtrape-capsule-ce` opens a PR within ~1 hour of the npm publish (configurable). Each consumer's CI runs against the new bindings; on green, the PR is auto-merged (patch) or reviewed (minor/major).
+Renovate in `xtrape-capsule-agent-node` and `xtrape-capsule-ce` opens a PR within ~1 hour of the npm publish
+(configurable). Each consumer's CI runs against the new bindings; on green, the PR is auto-merged (patch) or reviewed
+(minor/major).
 
 ## Render Tools (live in the docs repo)
 
-The docs repo MUST contain a tiny `09-contracts/tools/` directory with renderers that turn the JSON SSOTs into human-readable markdown. CI in `xtrape-capsule-docs` runs them in `--check` mode and fails the PR if a generated file is stale.
+The docs repo MUST contain a tiny `09-contracts/tools/` directory with renderers that turn the JSON SSOTs into
+human-readable markdown. CI in `xtrape-capsule-docs` runs them in `--check` mode and fails the PR if a generated file is
+stale.
 
 ```text
 xtrape-capsule-docs/09-contracts/tools/
@@ -196,7 +249,8 @@ xtrape-capsule-docs/09-contracts/tools/
 └── render-audit-actions.ts            (enums/audit-actions.json → 02-specs/08-audit-event-spec.md sections)
 ```
 
-These renderers are hand-written, dependency-free TypeScript scripts (run via `tsx`). They do NOT generate code — only documentation. They keep the human-readable `*.md` files in sync with the machine-readable JSON.
+These renderers are hand-written, dependency-free TypeScript scripts (run via `tsx`). They do NOT generate code — only
+documentation. They keep the human-readable `*.md` files in sync with the machine-readable JSON.
 
 ## Conformance Tests
 

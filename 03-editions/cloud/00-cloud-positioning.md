@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: cloud
+phase: future
+---
+
 # Cloud Positioning
 
 - Status: Planning
@@ -7,7 +16,8 @@
 
 This document defines the product positioning of **Opstage Cloud**.
 
-Opstage Cloud is the future hosted SaaS edition of the `xtrape-capsule` product family. It should extend the same Agent-based Capsule governance model used by CE and EE, but provide it as a managed cloud service.
+Opstage Cloud is the future hosted SaaS edition of the `xtrape-capsule` product family. It should extend the same
+Agent-based Capsule governance model used by CE and EE, but provide it as a managed cloud service.
 
 Cloud is not a CE v0.1 implementation requirement.
 

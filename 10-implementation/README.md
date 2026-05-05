@@ -1,3 +1,12 @@
+---
+status: implemented
+audience: ai-coding-agents
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE v0.1 Implementation Plans
 
 - Status: Implementation Guidance
@@ -51,3 +60,13 @@ Implementation should follow this priority:
 ```
 
 If this directory conflicts with accepted ADRs or contracts, update this directory rather than changing the ADRs silently.
+
+## Current vs Future Guidance
+
+This directory keeps implementation guidance in place to avoid breaking references. Use frontmatter metadata to determine applicability:
+
+- `edition: ce` and `phase: current` apply to current CE implementation work.
+- `edition: ee` or `edition: cloud` are future planning unless an accepted ADR says otherwise.
+- `phase: future` and roadmap-only notes must not be treated as current coding requirements.
+
+AI coding agents should read `AI_READING_GUIDE.md` before using this directory as implementation input.

@@ -1,3 +1,12 @@
+---
+status: proposed
+audience: founders
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE Scope
 
 - Status: Implementation Target
@@ -9,7 +18,8 @@
 
 This document defines the implementation scope of **Opstage CE / Community Edition**.
 
-CE v0.1 should deliver the smallest useful version of Opstage that proves the Capsule Service governance model through a Node.js embedded Agent, a Backend control plane, and a Web UI.
+CE v0.1 should deliver the smallest useful version of Opstage that proves the Capsule Service governance model through a
+Node.js embedded Agent, a Backend control plane, and a Web UI.
 
 ---
 

@@ -1,3 +1,10 @@
+---
+status: accepted
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Health Specification
 
 - Status: Specification
@@ -479,7 +486,9 @@ Threshold relationship:
 agentOfflineThresholdSeconds (90s) < healthStaleThresholdSeconds (120s)
 ```
 
-This creates a deliberate 30-second grace window (90–120s): an Agent that has just gone OFFLINE will have its Agent status set to OFFLINE first, but its last health report is still considered FRESH until 120s passes. This avoids a race condition where a momentary Agent dropout causes the health display to show STALE immediately.
+This creates a deliberate 30-second grace window (90–120s): an Agent that has just gone OFFLINE will have its Agent
+status set to OFFLINE first, but its last health report is still considered FRESH until 120s passes. This avoids a race
+condition where a momentary Agent dropout causes the health display to show STALE immediately.
 
 During the 90–120s window, `effectiveStatus` is STALE (driven by Agent OFFLINE), but `freshness` is still FRESH. After 120s, both are STALE.
 

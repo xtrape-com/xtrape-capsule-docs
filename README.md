@@ -1,17 +1,42 @@
-# xtrape-capsule Documentation
-
-- Status: Implementation Guidance
-- Edition: Shared
-- Priority: High
-- Audience: founders, architects, product designers, backend developers, frontend developers, agent SDK developers, AI coding agents
-
-This repository contains the documentation set for the `xtrape-capsule` product family.
-
-`xtrape-capsule` defines the lightweight Capsule Service architecture domain in the Xtrape ecosystem. It covers the Capsule Service concept, shared specifications, edition boundaries, Opstage runtime governance, Agent integration, runtime support, and the CE/EE/Cloud roadmap.
-
-This documentation is for the whole `xtrape-capsule` domain, not only for `xtrape-capsule-opstage`. Opstage is the first major runtime governance subsystem under this domain.
-
 ---
+status: implemented
+audience: ai-coding-agents
+stability: stable
+last_reviewed: 2026-05-05
+canonical_language: en
+repository_role: private-design-source-of-truth
+---
+
+# xtrape-capsule Design Documentation
+
+> **Status:** Private design documentation and implementation guidance  
+> **Audience:** founders, architects, maintainers, and AI coding agents  
+> **Public documentation:** `xtrape-capsule-site`  
+> **Stability:** Documents may include drafts, accepted decisions, implementation notes, roadmap ideas, and commercial planning. Public-facing content must be extracted and rewritten before being published.
+
+This repository is the private design knowledge base for the Xtrape Capsule product family.
+
+It contains architecture notes, ADRs, specification drafts, implementation guidance, internal planning materials, and AI coding agent context.
+
+For public-facing product documentation, quick start guides, SDK guides, and product positioning, use `xtrape-capsule-site`.
+
+English documents are canonical unless a document explicitly states otherwise. Chinese translation files marked as draft or machine-assisted are not authoritative.
+
+## Repository Role
+
+- **Private source of design truth:** architecture, ADRs, specs, implementation guidance, internal planning.
+- **Not public product narrative:** do not copy private text directly into public docs.
+- **Public extraction target:** stable, approved content should be rewritten into `xtrape-capsule-site` using `PUBLIC_EXTRACTION_GUIDE.md`.
+- **AI coding context:** coding agents should start with `AI_READING_GUIDE.md` and follow the authority order defined there.
+
+
+## Maintenance Guides
+
+- `AI_READING_GUIDE.md` — authority order and required reading for AI coding agents.
+- `PUBLIC_EXTRACTION_GUIDE.md` — safe process for rewriting private content into public docs.
+- `SENSITIVE_CONTENT_CHECKLIST.md` — scan terms and review checklist before public extraction.
+- `REPO_MAP.md` — directory roles and authority map.
+- `DOCS_MAINTENANCE.md` — formatting, metadata, and link-check guidance.
 
 ## 1. Current Focus
 
@@ -106,7 +131,8 @@ Defines shared cross-edition specifications:
 - AuditEvent;
 - Status Model.
 
-These specifications should remain stable across CE, EE, and Cloud. CE v0.1 may implement only the required subset, but it should not introduce concepts that conflict with the long-term specs.
+These specifications should remain stable across CE, EE, and Cloud. CE v0.1 may implement only the required subset, but
+it should not introduce concepts that conflict with the long-term specs.
 
 ### 3.3 `03-editions/`
 

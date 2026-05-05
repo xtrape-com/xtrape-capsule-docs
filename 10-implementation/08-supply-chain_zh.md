@@ -1,3 +1,15 @@
+---
+status: draft
+audience: ai-coding-agents
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -31,7 +43,8 @@ This document 描述 the supply-chain hygiene requirements for Opstage（运维�
 
 ## 1. License Policy
 
-CE（社区版） v0.1 is published under a permissive open-source license (see top-level `LICENSE`). All transitive dependencies MUST carry an SPDX-recognised license that is compatible with that policy.
+CE（社区版） v0.1 is published under a permissive open-source license (see top-level `LICENSE`). All transitive dependencies
+MUST carry an SPDX-recognised license that is compatible with that policy.
 
 Allowed licenses (from `pnpm dlx license-checker --onlyAllow`):
 
@@ -89,7 +102,8 @@ The Docker image MUST embed `/app/sbom.json` and expose it via:
 GET /api/system/sbom        (System API; unauthenticated; returns CycloneDX JSON)
 ```
 
-Adding this endpoint is OPTIONAL for CE（社区版） v0.1; the GitHub Release attachment is the primary distribution channel. If implemented, the endpoint MUST be served from the System API namespace per ADR 0002.
+Adding this endpoint is OPTIONAL for CE（社区版） v0.1; the GitHub Release attachment is the primary distribution channel. If
+implemented, the endpoint MUST be served from the System API namespace per ADR 0002.
 
 ## 3. Vulnerability Scanning
 
@@ -143,7 +157,9 @@ provenance: true
 sbom:       true
 ```
 
-This ensures GitHub Container Registry stores SLSA build provenance and an in-registry SBOM for `ghcr.io/xtrape/opstage-ce:<tag>` and `ghcr.io/xtrape/demo-capsule-service:<tag>` per [ADR 0008](../08-decisions/0008-naming-and-repositories.md).
+This ensures GitHub Container Registry stores SLSA build provenance and an in-registry SBOM for
+`ghcr.io/xtrape/opstage-ce:<tag>` and `ghcr.io/xtrape/demo-capsule-service:<tag>` per [ADR
+0008](../08-decisions/0008-naming-and-repositories.md).
 
 ## 6. Acceptance Criteria
 

@@ -1,3 +1,12 @@
+---
+status: implemented
+audience: ai-coding-agents
+stability: evolving
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+---
+
 # CE v0.1 API and Security Implementation
 
 - Status: Implementation Record
@@ -75,7 +84,8 @@ Implemented roles:
 | operator | yes | yes | no | no |
 | viewer | yes | no | no | no |
 
-Owner-only operations include user create/update/reset-password and SQLite backup. Operator-or-owner operations include registration token creation/revocation, command creation/cancel, Agent disable/revoke, and maintenance trigger.
+Owner-only operations include user create/update/reset-password and SQLite backup. Operator-or-owner operations include
+registration token creation/revocation, command creation/cancel, Agent disable/revoke, and maintenance trigger.
 
 ## 5. Admin API route inventory
 
@@ -134,7 +144,8 @@ Implemented defaults:
 
 ## 8. Proxy/TLS notes
 
-CE v0.1 should be served behind TLS in production-like environments. The backend sets `Secure` cookie only when `NODE_ENV=production`; deployments must ensure browser access uses HTTPS and the reverse proxy preserves:
+CE v0.1 should be served behind TLS in production-like environments. The backend sets `Secure` cookie only when
+`NODE_ENV=production`; deployments must ensure browser access uses HTTPS and the reverse proxy preserves:
 
 ```text
 Cookie

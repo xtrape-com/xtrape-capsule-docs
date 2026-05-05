@@ -1,3 +1,10 @@
+---
+status: proposed
+audience: architects
+stability: evolving
+last_reviewed: 2026-05-05
+---
+
 # Capsule Service Concept
 
 - Status: Conceptual Guidance
@@ -13,7 +20,9 @@ A Capsule Service is the main object that Opstage observes, configures, audits, 
 
 ## 1. Definition
 
-A **Capsule Service** is a lightweight, self-contained, independently runnable, agent-governed service unit that provides a clear capability, connector, worker process, automation function, account resource, session resource, or runtime adapter.
+A **Capsule Service** is a lightweight, self-contained, independently runnable, agent-governed service unit that
+provides a clear capability, connector, worker process, automation function, account resource, session resource, or
+runtime adapter.
 
 A Capsule Service is not defined by a specific language, framework, protocol, or deployment model. It is defined by its governance shape:
 
@@ -208,7 +217,8 @@ These are infrastructure dependencies. They may be monitored by Opstage in the f
 
 ### 4.2 Large business domain service without lightweight governance boundary
 
-A large payment or order service may be a traditional microservice. It becomes a Capsule Service only if it intentionally exposes Capsule governance metadata, health, actions, or management resources.
+A large payment or order service may be a traditional microservice. It becomes a Capsule Service only if it
+intentionally exposes Capsule governance metadata, health, actions, or management resources.
 
 ### 4.3 Random script without identity
 

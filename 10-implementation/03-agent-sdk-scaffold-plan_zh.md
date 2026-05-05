@@ -1,3 +1,15 @@
+---
+status: draft
+audience: ai-coding-agents
+stability: unstable
+last_reviewed: 2026-05-05
+edition: ce
+phase: current
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -27,11 +39,14 @@
 
 Build the Node Embedded Agent（代理） SDK for CE（社区版） v0.1.
 
-The SDK should make it easy for a Node.js Capsule Service（胶囊服务） to register with Opstage（运维舞台）, report metadata, poll Commands, execute predefined actions, and report results safely.
+The SDK should make it easy for a Node.js Capsule Service（胶囊服务） to register with Opstage（运维舞台）, report metadata, poll
+Commands, execute predefined actions, and report results safely.
 
 ## 2. Repository
 
-The Node Agent（代理） SDK lives in a **dedicated edition-agnostic repository**: `xtrape-capsule-agent-node` (see [ADR 0008 — Naming and Repositories](../08-decisions/0008-naming-and-repositories.md)). It is NOT a workspace package inside the CE（社区版） monorepo.
+The Node Agent（代理） SDK lives in a **dedicated edition-agnostic repository**: `xtrape-capsule-agent-node` (see [ADR 0008
+— Naming and Repositories](../08-decisions/0008-naming-and-repositories.md)). It is NOT a workspace package inside the
+CE（社区版） monorepo.
 
 Published npm package:
 

@@ -1,3 +1,10 @@
+---
+status: accepted
+audience: ai-coding-agents
+stability: stable
+last_reviewed: 2026-05-05
+---
+
 # Architecture Decision Records
 
 - Status: Implementation Guidance
@@ -22,3 +29,43 @@ For CE v0.1, read in this order:
 ```
 
 When implementation documents disagree, accepted ADRs should be treated as the higher-priority current decision until the conflicting documents are updated.
+
+## ADR Template
+
+New ADRs should use this structure:
+
+```md
+# ADR-000X: Title
+
+## Status
+
+Accepted / Proposed / Superseded / Deprecated
+
+## Date
+
+YYYY-MM-DD
+
+## Context
+
+What problem or decision pressure led to this decision?
+
+## Decision
+
+What was decided?
+
+## Consequences
+
+What becomes easier? What becomes harder? What trade-offs are accepted?
+
+## Alternatives Considered
+
+What options were considered and rejected?
+
+## Implementation Notes
+
+Where is this decision reflected in code/docs?
+
+## Supersedes / Superseded By
+
+Optional.
+```

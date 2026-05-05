@@ -1,3 +1,13 @@
+---
+status: draft
+audience: founders
+stability: unstable
+last_reviewed: 2026-05-05
+translation_status: draft-machine-assisted
+---
+
+> Translation status: Draft / machine-assisted. Review before use. English docs are canonical unless explicitly stated otherwise.
+
 <!-- 
 ================================================================================
 中文翻译版本 / Chinese Translation Version
@@ -23,7 +33,8 @@
 
 This document 定义 the version roadmap for the `xtrape-capsule` product family.
 
-The current implementation focus is **CE（社区版） v0.1**. CE（社区版） v0.1 should prove the complete lightweight Capsule governance loop with Opstage（运维舞台） Backend, Opstage（运维舞台） UI, SQLite, and the Node.js Embedded Agent（代理） SDK.
+The current implementation focus is **CE（社区版） v0.1**. CE（社区版） v0.1 should prove the complete lightweight Capsule
+governance loop with Opstage（运维舞台） Backend, Opstage（运维舞台） UI, SQLite, and the Node.js Embedded Agent（代理） SDK.
 
 EE（企业版） and Cloud（云版） are future commercialization tracks. They should influence extension-point design, but they must not expand the CE（社区版） v0.1 implementation scope.
 
