@@ -391,9 +391,11 @@ CE（社区版） v0.1 should use polling for command delivery.
 Agent（代理） polls Backend:
 
 ```http
-GET /api/agents/{agentId}/commands
+GET /api/agents/{agentId}/commands?limit=1
 Authorization: Bearer <agentToken>
 ```
+
+`limit` 是可选参数。Backend SHOULD 将它限制在安全范围内，例如 `1..10`。Agent（代理） SHOULD 将其设置为本地剩余 command 执行容量，避免 Backend 将超过 Agent（代理）可执行数量的 Command 转为 `RUNNING`。
 
 Response (matches OpenAPI `SuccessEnvelope` with `data: Command[]`):
 
@@ -417,14 +419,17 @@ Response (matches OpenAPI `SuccessEnvelope` with `data: Command[]`):
 }
 ```
 
+Agent（代理） SHOULD 为 command polling 增加 jitter 和空闲退避。对于 CE（社区版）规模部署，一个典型策略是：有 command 时快速轮询，每次轮询增加少量随机 jitter，连续空轮询时逐步退避。这样可以避免多个 Agent（代理）同步请求形成尖峰，同时保持 CE（社区版）实现简单。
+
 Backend responsibilities:
 
 1. authenticate Agent（代理） token;
 2. verify Agent（代理） is not disabled or revoked;
-3. fetch `PENDING` Commands assigned to Agent（代理）;
-4. exclude expired Commands;
-5. transition returned Commands from `PENDING` to `RUNNING` and set `startedAt`;
-6. return Commands in stable order, usually by `createdAt`.
+3. update `Agent.lastHeartbeatAt` and set Agent（代理） status to `ONLINE`（CE（社区版） v0.1 中 command polling 同时作为轻量 heartbeat）;
+4. fetch `PENDING` Commands assigned to Agent（代理）;
+5. exclude expired Commands;
+6. transition returned Commands from `PENDING` to `RUNNING` and set `startedAt`;
+7. return Commands in stable order, usually by `createdAt`.
 
 ---
 
@@ -545,6 +550,8 @@ Request body (matches OpenAPI `ReportCommandResultRequest`):
   }
 }
 ```
+
+Agent（代理） SHOULD 为 command polling 增加 jitter 和空闲退避。对于 CE（社区版）规模部署，一个典型策略是：有 command 时快速轮询，每次轮询增加少量随机 jitter，连续空轮询时逐步退避。这样可以避免多个 Agent（代理）同步请求形成尖峰，同时保持 CE（社区版）实现简单。
 
 Backend responsibilities:
 

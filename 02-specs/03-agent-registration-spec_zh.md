@@ -408,6 +408,8 @@ Authorization: Bearer <agentToken>
 
 Both `serviceId` and `health` are optional. A heartbeat with an empty body `{}` is valid and only updates `Agent.lastHeartbeatAt`.
 
+CE（社区版） v0.1 也会把成功的 command polling（`GET /api/agents/{agentId}/commands`）视为轻量 heartbeat：它会更新 `Agent.lastHeartbeatAt` 并把 Agent（代理）置为 `ONLINE`。如果 Agent（代理）已经高频轮询 commands，除非需要通过 heartbeat endpoint 上报单个 service health，否则不需要单独 heartbeat loop。
+
 A heartbeat reports health for at most one service per call. Multi-service Agents should send one heartbeat per service or rely on the dedicated `POST /api/agents/{agentId}/services/report` endpoint.
 
 ### 9.3 Response (envelope omitted; matches OpenAPI `AgentHeartbeatResponse`)

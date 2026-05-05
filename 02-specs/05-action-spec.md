@@ -885,3 +885,91 @@ Sensitive fields should allow sufficiently long values. Passwords, tokens, API k
 ```
 
 When executing an action, POST execute creates an `ACTION_EXECUTE` Command. Backend should redact payloads for Admin display, but payloads delivered to the Agent must retain raw values.
+
+---
+
+## 11. Action Result List Display Convention
+
+For business-facing list actions, a Capsule Service MAY return a `list` object inside `CommandResult.data`. When present, Opstage UI SHOULD render the `list` as a table above the raw JSON result. The raw JSON result MUST remain available as a fallback/debug view.
+
+Minimum shape:
+
+```json
+{
+  "list": {
+    "title": "API Keys",
+    "data": [
+      {
+        "id": "apk_xxx",
+        "name": "default-client",
+        "keyPreview": "capi_a…9zQ",
+        "status": "ACTIVE"
+      }
+    ]
+  }
+}
+```
+
+Full shape:
+
+```json
+{
+  "list": {
+    "title": "API Keys",
+    "data": [],
+    "columns": [
+      { "key": "name", "label": "Name" },
+      { "key": "id", "label": "ID", "format": "code", "copyable": true },
+      { "key": "status", "label": "Status", "format": "status" },
+      { "key": "expiresAt", "label": "Expires At", "format": "datetime" }
+    ],
+    "rowActions": [
+      {
+        "label": "Disable",
+        "action": "disableApiKey",
+        "payload": { "id": "$row.id" },
+        "danger": true,
+        "confirm": true
+      }
+    ]
+  }
+}
+```
+
+### 11.1 Columns
+
+If `columns` is omitted, UI MAY infer columns from the first row. Column fields:
+
+| Field | Type | Required | Description |
+|---|---|---:|---|
+| `key` | string | yes | Row field path. Dot paths such as `metadata.status` MAY be supported by UI. |
+| `label` | string | no | Human-readable column label. Defaults to `key`. |
+| `format` | string | no | Suggested display format: `text`, `status`, `datetime`, `boolean`, or `code`. |
+| `copyable` | boolean | no | Whether UI should offer a copy affordance for the cell value. |
+
+### 11.2 Row Actions
+
+`rowActions` describes row-level operators. A row action creates a normal `ACTION_EXECUTE` command for the referenced action.
+
+| Field | Type | Required | Description |
+|---|---|---:|---|
+| `label` | string | yes | Button label. |
+| `action` | string | yes | Target action name in the same Capsule Service. |
+| `payload` | object | no | Payload template. String values of the form `$row.<path>` are substituted from the clicked row. |
+| `danger` | boolean | no | UI hint for destructive operations. |
+| `confirm` | boolean | no | UI hint that confirmation should be required before creating the command. |
+
+Example payload substitution:
+
+```json
+{
+  "payload": {
+    "accountId": "$row.id",
+    "clearCooldown": true
+  }
+}
+```
+
+If the UI does not support `list`, `columns`, or `rowActions`, it MUST still display the raw JSON result. Services MUST NOT depend on row actions for correctness; they are UI affordances over normal actions.
+
+GET prepare MAY expose list filters through the existing `inputSchema` and `initialPayload`; execute receives the filter values as its normal payload and may return a filtered `list.data`.

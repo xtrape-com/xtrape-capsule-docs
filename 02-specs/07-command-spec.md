@@ -375,9 +375,11 @@ CE v0.1 should use polling for command delivery.
 Agent polls Backend:
 
 ```http
-GET /api/agents/{agentId}/commands
+GET /api/agents/{agentId}/commands?limit=1
 Authorization: Bearer <agentToken>
 ```
+
+`limit` is optional. Backend SHOULD clamp it to a safe range, for example `1..10`. Agents SHOULD set it to their remaining local command execution capacity so Backend does not transition more Commands to `RUNNING` than the Agent can execute.
 
 Response (matches OpenAPI `SuccessEnvelope` with `data: Command[]`):
 
@@ -401,14 +403,17 @@ Response (matches OpenAPI `SuccessEnvelope` with `data: Command[]`):
 }
 ```
 
+Agents SHOULD add jitter and idle backoff to command polling. For CE-scale deployments, a typical policy is: poll quickly when commands are returned, add a small random jitter to every poll, and back off gradually when consecutive polls return no commands. This avoids synchronized polling spikes while keeping the CE implementation simple.
+
 Backend responsibilities:
 
 1. authenticate Agent token;
 2. verify Agent is not disabled or revoked;
-3. fetch `PENDING` Commands assigned to Agent;
-4. exclude expired Commands;
-5. transition returned Commands from `PENDING` to `RUNNING` and set `startedAt`;
-6. return Commands in stable order, usually by `createdAt`.
+3. update `Agent.lastHeartbeatAt` and set Agent status to `ONLINE` (command polling is a lightweight heartbeat in CE v0.1);
+4. fetch `PENDING` Commands assigned to Agent;
+5. exclude expired Commands;
+6. transition returned Commands from `PENDING` to `RUNNING` and set `startedAt`;
+7. return Commands in stable order, usually by `createdAt`.
 
 ---
 
@@ -529,6 +534,8 @@ Request body (matches OpenAPI `ReportCommandResultRequest`):
   }
 }
 ```
+
+Agents SHOULD add jitter and idle backoff to command polling. For CE-scale deployments, a typical policy is: poll quickly when commands are returned, add a small random jitter to every poll, and back off gradually when consecutive polls return no commands. This avoids synchronized polling spikes while keeping the CE implementation simple.
 
 Backend responsibilities:
 

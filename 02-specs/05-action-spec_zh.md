@@ -901,3 +901,91 @@ Action Catalog 只上报稳定列表和展示元数据，例如 `name`、`label`
 ```
 
 执行 action 时，POST execute 创建 `ACTION_EXECUTE` Command。Backend 对 Admin 展示脱敏 payload，但发送给 Agent 的 payload 必须保留原始值。
+
+---
+
+## 11. Action Result List Display Convention（Action 结果列表展示约定）
+
+面向业务用户的 list 类 action，可以在 `CommandResult.data` 中返回 `list` 对象。只要存在 `list`，Opstage UI 应优先在原始 JSON result 上方以表格方式展示。原始 JSON result 必须保留，用作 fallback / debug 视图。
+
+最小结构：
+
+```json
+{
+  "list": {
+    "title": "API Keys",
+    "data": [
+      {
+        "id": "apk_xxx",
+        "name": "default-client",
+        "keyPreview": "capi_a…9zQ",
+        "status": "ACTIVE"
+      }
+    ]
+  }
+}
+```
+
+完整结构：
+
+```json
+{
+  "list": {
+    "title": "API Keys",
+    "data": [],
+    "columns": [
+      { "key": "name", "label": "Name" },
+      { "key": "id", "label": "ID", "format": "code", "copyable": true },
+      { "key": "status", "label": "Status", "format": "status" },
+      { "key": "expiresAt", "label": "Expires At", "format": "datetime" }
+    ],
+    "rowActions": [
+      {
+        "label": "Disable",
+        "action": "disableApiKey",
+        "payload": { "id": "$row.id" },
+        "danger": true,
+        "confirm": true
+      }
+    ]
+  }
+}
+```
+
+### 11.1 Columns
+
+如果省略 `columns`，UI 可以根据第一行数据自动推断列。Column 字段：
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `key` | string | 是 | 行字段路径。UI 可以支持 `metadata.status` 这类 dot path。 |
+| `label` | string | 否 | 面向用户的列名，默认使用 `key`。 |
+| `format` | string | 否 | 推荐展示格式：`text`、`status`、`datetime`、`boolean` 或 `code`。 |
+| `copyable` | boolean | 否 | 是否为单元格提供复制操作。 |
+
+### 11.2 Row Actions
+
+`rowActions` 描述行级 operator。行级 operator 会为同一个 Capsule Service 中的目标 action 创建普通 `ACTION_EXECUTE` command。
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `label` | string | 是 | 按钮文案。 |
+| `action` | string | 是 | 同一个 Capsule Service 中的目标 action name。 |
+| `payload` | object | 否 | Payload 模板。形如 `$row.<path>` 的字符串会用当前行字段替换。 |
+| `danger` | boolean | 否 | 破坏性操作的 UI 提示。 |
+| `confirm` | boolean | 否 | 是否需要二次确认。 |
+
+Payload 替换示例：
+
+```json
+{
+  "payload": {
+    "accountId": "$row.id",
+    "clearCooldown": true
+  }
+}
+```
+
+如果 UI 暂不支持 `list`、`columns` 或 `rowActions`，仍必须展示原始 JSON result。Service 不能依赖 row actions 保证业务正确性；它们只是普通 action 之上的 UI 便利层。
+
+GET prepare 可以通过现有 `inputSchema` 和 `initialPayload` 暴露列表筛选条件；execute 会收到这些筛选值作为普通 payload，并可返回过滤后的 `list.data`。
