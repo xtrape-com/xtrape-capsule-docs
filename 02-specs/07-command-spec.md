@@ -381,6 +381,8 @@ Authorization: Bearer <agentToken>
 
 `limit` is optional. Backend SHOULD clamp it to a safe range, for example `1..10`. Agents SHOULD set it to their remaining local command execution capacity so Backend does not transition more Commands to `RUNNING` than the Agent can execute.
 
+Agents MAY also apply narrower internal execution locks per action class. For example, an Agent can poll several Commands concurrently while still serializing browser/session actions and allowing read-only list/config actions to run in parallel. In that case `limit` should represent total local command slots, and the Agent remains responsible for any stricter per-resource locking.
+
 Response (matches OpenAPI `SuccessEnvelope` with `data: Command[]`):
 
 ```json

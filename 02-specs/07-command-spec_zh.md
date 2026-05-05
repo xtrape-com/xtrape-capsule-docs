@@ -397,6 +397,8 @@ Authorization: Bearer <agentToken>
 
 `limit` 是可选参数。Backend SHOULD 将它限制在安全范围内，例如 `1..10`。Agent（代理） SHOULD 将其设置为本地剩余 command 执行容量，避免 Backend 将超过 Agent（代理）可执行数量的 Command 转为 `RUNNING`。
 
+Agent 也 MAY 按 action 类型应用更细的内部执行锁。例如，Agent 可以同时领取多个 Command，但仍对浏览器/session 类 action 串行执行，并允许只读 list/config 类 action 并行执行。在这种情况下，`limit` 表示本地总 command 槽位；更严格的资源级锁由 Agent 自己负责。
+
 Response (matches OpenAPI `SuccessEnvelope` with `data: Command[]`):
 
 ```json
