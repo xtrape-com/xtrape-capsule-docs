@@ -949,6 +949,8 @@ Action Catalog 只上报稳定列表和展示元数据，例如 `name`、`label`
   "list": {
     "title": "API Keys",
     "data": [],
+    "emptyText": "No API keys",
+    "pageSize": 10,
     "columns": [
       { "key": "name", "label": "Name" },
       { "key": "id", "label": "ID", "format": "code", "copyable": true },
@@ -976,8 +978,17 @@ Action Catalog 只上报稳定列表和展示元数据，例如 `name`、`label`
 |---|---|---:|---|
 | `key` | string | 是 | 行字段路径。UI 可以支持 `metadata.status` 这类 dot path。 |
 | `label` | string | 否 | 面向用户的列名，默认使用 `key`。 |
-| `format` | string | 否 | 推荐展示格式：`text`、`status`、`datetime`、`boolean` 或 `code`。 |
+| `format` | string | 否 | 推荐展示格式：`text`、`status`、`datetime`、`boolean`、`code`、`duration`、`relativeTime` 或 `bytes`。 |
 | `copyable` | boolean | 否 | 是否为单元格提供复制操作。 |
+| `ellipsis` | boolean | 否 | 是否在支持的 UI 中对过长文本做截断并提供 tooltip。 |
+| `width` | number/string | 否 | UI 支持时的建议列宽。 |
+
+List 级可选字段：
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `emptyText` | string | `data` 为空时的空状态文案。 |
+| `pageSize` | number | UI 分页的建议 page size。 |
 
 ### 11.2 Row Actions
 
@@ -1004,6 +1015,6 @@ Payload 替换示例：
 
 如果 UI 暂不支持 `list`、`columns` 或 `rowActions`，仍必须展示原始 JSON result。Service 不能依赖 row actions 保证业务正确性；它们只是普通 action 之上的 UI 便利层。
 
-行级 operator 完成后，UI 可以使用当前筛选条件/payload 重新执行当前 list action，以刷新 `list.data`。对于长任务 row action，UI 可以持续轮询创建出的 Command，并在 Command 进入终态后刷新列表。
+行级 operator 完成后，UI 可以使用当前筛选条件/payload 重新执行当前 list action，以刷新 `list.data`。对于长任务 row action，UI 可以持续轮询创建出的 Command，并在 Command 进入终态后刷新列表。row action 运行过程中，UI SHOULD 提供行级 loading/disabled 状态。
 
 GET prepare 可以通过现有 `inputSchema` 和 `initialPayload` 暴露列表筛选条件；execute 会收到这些筛选值作为普通 payload，并可返回过滤后的 `list.data`。

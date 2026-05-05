@@ -934,6 +934,8 @@ Full shape:
   "list": {
     "title": "API Keys",
     "data": [],
+    "emptyText": "No API keys",
+    "pageSize": 10,
     "columns": [
       { "key": "name", "label": "Name" },
       { "key": "id", "label": "ID", "format": "code", "copyable": true },
@@ -961,8 +963,17 @@ If `columns` is omitted, UI MAY infer columns from the first row. Column fields:
 |---|---|---:|---|
 | `key` | string | yes | Row field path. Dot paths such as `metadata.status` MAY be supported by UI. |
 | `label` | string | no | Human-readable column label. Defaults to `key`. |
-| `format` | string | no | Suggested display format: `text`, `status`, `datetime`, `boolean`, or `code`. |
+| `format` | string | no | Suggested display format: `text`, `status`, `datetime`, `boolean`, `code`, `duration`, `relativeTime`, or `bytes`. |
 | `copyable` | boolean | no | Whether UI should offer a copy affordance for the cell value. |
+| `ellipsis` | boolean | no | Whether UI should truncate long cell text with a tooltip where supported. |
+| `width` | number/string | no | Suggested column width where supported. |
+
+List-level optional fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `emptyText` | string | Empty-state text when `data` is empty. |
+| `pageSize` | number | Suggested page size for UI pagination. |
 
 ### 11.2 Row Actions
 
@@ -989,6 +1000,6 @@ Example payload substitution:
 
 If the UI does not support `list`, `columns`, or `rowActions`, it MUST still display the raw JSON result. Services MUST NOT depend on row actions for correctness; they are UI affordances over normal actions.
 
-After a row action finishes, UI MAY re-run the current list action with the current filters/payload to refresh `list.data`. For long-running row actions, UI MAY keep polling the created Command and refresh the list after the Command reaches a terminal status.
+After a row action finishes, UI MAY re-run the current list action with the current filters/payload to refresh `list.data`. For long-running row actions, UI MAY keep polling the created Command and refresh the list after the Command reaches a terminal status. UI SHOULD expose row-level loading/disabled states while a row action is running.
 
 GET prepare MAY expose list filters through the existing `inputSchema` and `initialPayload`; execute receives the filter values as its normal payload and may return a filtered `list.data`.
