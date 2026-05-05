@@ -48,6 +48,19 @@ UI tests pass.
 No TypeScript errors.
 ```
 
+### 自动化本地 smoke 脚本
+
+CE 仓库也提供了一个进程内 smoke 脚本。它会使用临时 SQLite 数据库启动 backend，注册 embedded demo Agent，并验证 action prepare、action execute、list result、row action metadata 和敏感配置脱敏：
+
+```bash
+cd xtrape-capsule-ce
+node --import tsx scripts/smoke-demo.mjs
+# 如果你的流程要求先 build，也可以使用：
+pnpm smoke:demo
+```
+
+当需要验证浏览器/UI 行为或真实外部 service 时，再使用下面的手动步骤。
+
 ---
 
 ## 3. 本地启动 CE

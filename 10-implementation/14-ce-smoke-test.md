@@ -48,6 +48,19 @@ UI tests pass.
 No TypeScript errors.
 ```
 
+### Automated local smoke script
+
+The CE repository also provides an in-process smoke script that starts the backend with a temporary SQLite database, registers an embedded demo Agent, verifies action prepare, action execute, list results, row action metadata, and sensitive config redaction:
+
+```bash
+cd xtrape-capsule-ce
+node --import tsx scripts/smoke-demo.mjs
+# or, after builds are required in your workflow:
+pnpm smoke:demo
+```
+
+Use the manual steps below when you need to verify browser/UI behavior or a real external service.
+
 ---
 
 ## 3. Start CE Locally
