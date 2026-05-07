@@ -2,7 +2,7 @@
 status: draft
 audience: founders
 stability: evolving
-last_reviewed: 2026-05-05
+last_reviewed: 2026-05-07
 ---
 
 # Version Roadmap
@@ -14,10 +14,22 @@ last_reviewed: 2026-05-05
 
 This document defines the version roadmap for the `xtrape-capsule` product family.
 
-The current implementation focus is **CE v0.1**. CE v0.1 should prove the complete lightweight Capsule governance loop
-with Opstage Backend, Opstage UI, SQLite, and the Node.js Embedded Agent SDK.
+The current implementation focus is **CE v0.1**. CE v0.1 should prove the complete lightweight Capsule governance loop with Opstage Backend, Opstage UI, SQLite, and the Node.js Embedded Agent SDK.
 
 EE and Cloud are future commercialization tracks. They should influence extension-point design, but they must not expand the CE v0.1 implementation scope.
+
+The roadmap is now organized around four progressive concerns:
+
+```text
+1. Governance kernel
+2. Productized CE operation
+3. Lightweight service coordination
+4. Private AI service stack integration
+```
+
+The most important roadmap rule is:
+
+> Build the smallest complete governance loop first, then automate its maintenance, then add lightweight service coordination, and only then expand into enterprise, cloud, and AI-native runtime integration.
 
 ---
 
@@ -28,6 +40,11 @@ The purpose of this roadmap is to define:
 - what should be built first;
 - what belongs to CE v0.1;
 - what belongs to later CE stabilization;
+- when AI-assisted product maintenance becomes relevant;
+- when lightweight service communication becomes relevant;
+- when Capsule Bus becomes relevant;
+- when xtrape-hammers integration becomes relevant;
+- when vieup-forge integration becomes relevant;
 - when Agent modes should expand;
 - when EE private deployment should become relevant;
 - when Cloud SaaS should become relevant;
@@ -35,7 +52,7 @@ The purpose of this roadmap is to define:
 
 The key rule is:
 
-> Build CE v0.1 as a complete lightweight governance kernel before expanding editions, runtimes, Agent modes, and commercial packaging.
+> CE v0.1 proves the governance loop. Later versions may improve automation, communication, AI runtime integration, and commercial packaging, but they must not dilute the CE v0.1 kernel.
 
 ---
 
@@ -45,13 +62,21 @@ The roadmap follows this sequence:
 
 ```text
 1. CE v0.1 — prove the governance loop
-2. CE v0.2/v0.3 — stabilize and improve the open-source kernel
-3. CE v1.0 — publish a reliable community edition
-4. EE — add enterprise private-deployment capabilities
-5. Cloud — add hosted SaaS capabilities
+2. CE v0.2 — stabilize the CE kernel and productized release process
+3. CE v0.3 — improve DX, packaging, diagnostics, and AI-maintenance readiness
+4. CE v0.4 — introduce lightweight service communication metadata
+5. CE v0.5 — introduce early internal coordination and Capsule Bus planning
+6. CE v1.0 — publish a reliable community edition
+7. Private AI Stack Track — integrate xtrape-hammers and vieup-forge as managed services
+8. EE — add enterprise private-deployment capabilities
+9. Cloud — add hosted SaaS capabilities
 ```
 
 Do not build EE or Cloud infrastructure before CE proves the product kernel.
+
+Do not implement Capsule Bus before static internal communication, service manifests, and service identity are stable.
+
+Do not turn xtrape-capsule into an AI runtime. AI runtime belongs to `xtrape-hammers`; task-flow automation belongs to `vieup-forge`.
 
 ---
 
@@ -79,11 +104,43 @@ Audit log
 
 Every roadmap stage should preserve this kernel.
 
-Future versions may add scale, security, identity, observability, and commercialization, but they should not redefine the kernel.
+Future versions may add scale, security, identity, observability, service communication, AI runtime integration, and commercialization, but they should not redefine the kernel.
 
 ---
 
-## 4. CE v0.1 Goal
+## 4. Roadmap Layers
+
+The roadmap should be understood as layered expansion, not feature accumulation.
+
+```text
+Layer 1: Governance Kernel
+  Agent registration, service report, heartbeat, command lifecycle, audit log.
+
+Layer 2: Product Operation Automation
+  Release process, AI-maintenance documents, issue triage readiness, CI/CD, changelog, docs sync.
+
+Layer 3: Lightweight Service Communication
+  Service manifest, endpoint metadata, internal URLs, service capabilities, service identity.
+
+Layer 4: Capsule Bus
+  Future bus-style internal communication for commands, events, and request/reply.
+
+Layer 5: Private AI Stack Integration
+  xtrape-hammers as AI runtime service, vieup-forge as TaskFlow automation/control plane.
+
+Layer 6: Enterprise and Cloud Expansion
+  RBAC, SSO, HA, Kubernetes, hosted service, billing, usage metering.
+```
+
+Capsule owns service governance and operation.
+
+Hammers owns AI sessions, contexts, providers, prompts, and AI runtime calls.
+
+Forge owns TaskFlow, Gate, task spiral, automation planning, and execution visibility.
+
+---
+
+## 5. CE v0.1 Goal
 
 CE v0.1 goal:
 
@@ -102,7 +159,7 @@ CE v0.1 does not need to be enterprise-grade.
 
 ---
 
-## 5. CE v0.1 Scope
+## 6. CE v0.1 Scope
 
 CE v0.1 should include:
 
@@ -128,13 +185,15 @@ basic AuditEvents
 Dashboard summary
 System health endpoint
 Docker quick start
+minimal release notes
+minimal troubleshooting guide
 ```
 
 This is the current implementation target.
 
 ---
 
-## 6. CE v0.1 Non-Goals
+## 7. CE v0.1 Non-Goals
 
 CE v0.1 should not include:
 
@@ -162,13 +221,21 @@ secret vault
 license enforcement
 remote shell
 arbitrary script execution
+Capsule Bus
+internal service gateway
+service mesh
+AI runtime calling layer
+xtrape-hammers integration
+vieup-forge integration
+AI-assisted issue triage automation
+AI-assisted release automation
 ```
 
 These are future roadmap items.
 
 ---
 
-## 7. CE v0.1 Recommended Implementation Order
+## 8. CE v0.1 Recommended Implementation Order
 
 Recommended implementation order:
 
@@ -201,7 +268,7 @@ The order may be adjusted during implementation, but the vertical governance loo
 
 ---
 
-## 8. CE v0.1 Acceptance Criteria
+## 9. CE v0.1 Acceptance Criteria
 
 CE v0.1 is acceptable when:
 
@@ -230,7 +297,7 @@ CE v0.1 is acceptable when:
 
 ---
 
-## 9. CE v0.2 Direction
+## 10. CE v0.2 Direction — Kernel Stabilization and Release Discipline
 
 CE v0.2 should stabilize the CE kernel after v0.1 feedback.
 
@@ -246,32 +313,145 @@ Possible focus areas:
 - add better local development scripts;
 - add more tests;
 - add migration discipline;
-- improve documentation.
+- improve documentation;
+- add release checklist;
+- add changelog discipline;
+- add basic contribution guide;
+- add issue and PR templates.
 
 CE v0.2 should still avoid EE/Cloud complexity.
 
+CE v0.2 should not add Capsule Bus or AI runtime capabilities.
+
 ---
 
-## 10. CE v0.3 Direction
+## 11. CE v0.3 Direction — AI-Maintenance Readiness
 
-CE v0.3 may add selected open-source improvements if the kernel is stable.
+CE v0.3 should make xtrape-capsule easier to maintain with AI-assisted workflows.
 
 Possible focus areas:
 
-- better command lifecycle handling;
-- simple Command expiration cleanup;
-- simple health history if needed;
+- `AI_MAINTENANCE.md`;
+- `RELEASE_AUTOMATION.md`;
+- `PRODUCT_BOUNDARY.md`;
+- repository review checklist;
+- version synchronization checklist;
+- docs synchronization checklist;
+- standard AI task prompt templates;
+- standard release prompt templates;
+- standard issue triage prompt templates;
 - better demo service examples;
 - improved SDK logging and diagnostics;
 - improved local settings page;
-- optional PostgreSQL/MySQL experimental adapter only if strongly justified;
+- better command lifecycle handling;
+- simple Command expiration cleanup;
+- simple health history if needed;
 - better release packaging.
 
-CE v0.3 should remain lightweight.
+CE v0.3 should prepare the project to be managed by `vieup-forge-runtime`, but it should not depend on vieup-forge.
+
+The purpose of CE v0.3 is to reduce long-term maintainer burden before the product grows.
 
 ---
 
-## 11. CE v1.0 Direction
+## 12. CE v0.4 Direction — Lightweight Service Communication Metadata
+
+CE v0.4 may introduce lightweight service communication metadata if the governance kernel is stable.
+
+The goal is not to implement full service governance. The goal is to standardize how capsule-managed services describe their internal endpoints and capabilities.
+
+Possible focus areas:
+
+- Service Manifest v1;
+- internal endpoint metadata;
+- public/admin/internal endpoint visibility;
+- service capability metadata;
+- static internal URL documentation;
+- Docker Compose internal service naming convention;
+- environment variable injection convention;
+- basic service dependency metadata;
+- basic service topology view in Opstage if simple enough.
+
+Example Service Manifest direction:
+
+```yaml
+service:
+  id: xtrape-hammers
+  type: ai-runtime
+  version: 0.1.0
+
+network:
+  internalBaseUrl: http://xtrape-hammers:8080
+
+endpoints:
+  - name: chat
+    method: POST
+    path: /v1/chat/completions
+    visibility: internal
+  - name: health
+    method: GET
+    path: /health
+    visibility: internal
+
+capabilities:
+  - llm.chat
+  - llm.embedding
+  - task.plan
+```
+
+CE v0.4 should still avoid:
+
+```text
+service mesh
+mTLS everywhere
+complex routing
+load balancing
+message broker requirement
+queue requirement
+Capsule Bus runtime
+```
+
+---
+
+## 13. CE v0.5 Direction — Capsule Bus Planning and Early Coordination
+
+CE v0.5 may introduce early planning and limited prototypes for `Capsule Bus` if CE v0.4 proves the service metadata model.
+
+Capsule Bus is a planned internal communication layer for capsule-managed lightweight services.
+
+It aims to reduce direct service-to-service coupling in private and edge deployments by providing a lightweight bus-style communication model for commands, events, and request/reply interactions.
+
+Recommended CE v0.5 scope:
+
+- define Capsule Bus concept document;
+- define command/event/request-reply vocabulary;
+- define service identity requirements;
+- define bus message envelope;
+- define audit requirements;
+- define security boundaries;
+- optionally implement an experimental in-process or local prototype;
+- keep the prototype disabled by default.
+
+Capsule Bus should support these future communication modes:
+
+```text
+Command
+  service-a requests service-b to perform an operation.
+
+Event
+  service-a publishes a state change for interested services.
+
+Request/Reply
+  service-a asks service-b for a response without hardcoding direct endpoint details.
+```
+
+CE v0.5 should not require Redis, RabbitMQ, NATS, Kafka, or any external queue by default.
+
+Any bus implementation must remain optional until the product has strong evidence that it is needed.
+
+---
+
+## 14. CE v1.0 Direction
 
 CE v1.0 should be a reliable community release.
 
@@ -286,13 +466,92 @@ Expected qualities:
 - reliable Docker quick start;
 - clear security notes;
 - clear CE/EE/Cloud boundaries;
-- useful open-source experience.
+- useful open-source experience;
+- documented service manifest model if introduced before v1.0;
+- documented future Capsule Bus direction if introduced before v1.0.
 
 CE v1.0 should still be self-hosted and lightweight.
 
+Capsule Bus is not required for CE v1.0 unless the previous versions prove it is essential.
+
 ---
 
-## 12. Agent Expansion Roadmap
+## 15. Private AI Stack Track
+
+The Private AI Stack Track is a future product integration track, not a CE v0.1 requirement.
+
+It connects three projects:
+
+```text
+xtrape-capsule
+  Service operation plane.
+
+xtrape-hammers
+  AI runtime plane.
+
+vieup-forge
+  TaskFlow and automation control plane.
+```
+
+Recommended relationship:
+
+```text
+vieup-forge
+  ↓ TaskFlow / Gate / Node execution planning
+xtrape-hammers
+  ↓ AI session / context / provider / prompt runtime
+xtrape-capsule
+  ↓ service deployment / health / config / command / audit governance
+capsule-managed services
+```
+
+This track should begin only after CE can manage a real service reliably.
+
+---
+
+## 16. xtrape-hammers Integration Direction
+
+`xtrape-hammers` should be integrated as a managed Capsule Service, not as part of Capsule core.
+
+Potential integration scope:
+
+- hammers service manifest;
+- hammers health and config metadata;
+- hammers predefined actions;
+- hammers provider status visibility;
+- hammers logs and diagnostics through Capsule governance;
+- hammers as an example `ai-runtime` capsule service;
+- optional hammers demo stack in Docker Compose.
+
+Capsule should not implement AI session management, model provider routing, prompt management, memory, or tool-calling runtime directly.
+
+Those belong to hammers.
+
+---
+
+## 17. vieup-forge Integration Direction
+
+`vieup-forge` should be integrated as an automation/control-plane consumer of Capsule, not as part of Capsule core.
+
+Potential integration scope:
+
+- manage capsule release tasks through TaskFlow;
+- generate Capsule maintenance plans;
+- triage issues into TaskFlow nodes;
+- produce release checklists;
+- generate documentation update tasks;
+- execute predefined Capsule actions through approved Gates;
+- record Capsule maintenance decisions.
+
+Capsule should expose enough metadata for forge to reason about services, agents, commands, and audit events.
+
+Capsule should not implement TaskFlow, Gate, task spiral, or AI planning directly.
+
+Those belong to forge.
+
+---
+
+## 18. Agent Expansion Roadmap
 
 Agent expansion should happen after the CE Embedded Agent model is validated.
 
@@ -314,9 +573,11 @@ This order is not fixed, but the first step is fixed:
 Node.js Embedded Agent first
 ```
 
+Agent expansion should not happen before the Node.js SDK proves the governance contract.
+
 ---
 
-## 13. Runtime Expansion Roadmap
+## 19. Runtime Expansion Roadmap
 
 Runtime expansion should happen after Node.js is stable.
 
@@ -333,9 +594,11 @@ Recommended order:
 
 Runtime expansion should preserve the same governance contract.
 
+Runtime expansion should not redefine service communication or Capsule Bus prematurely.
+
 ---
 
-## 14. EE Roadmap Direction
+## 20. EE Roadmap Direction
 
 EE should start after CE has a stable kernel and real usage signals.
 
@@ -357,13 +620,16 @@ Potential EE focus areas:
 - Kubernetes / Helm deployment;
 - support bundle;
 - private deployment package;
-- commercial support.
+- commercial support;
+- enterprise service identity;
+- enterprise service communication policy;
+- managed Capsule Bus only if demand is proven.
 
 EE should sell enterprise value, not cripple CE.
 
 ---
 
-## 15. Cloud Roadmap Direction
+## 21. Cloud Roadmap Direction
 
 Cloud should start after CE/EE concepts are sufficiently validated.
 
@@ -381,13 +647,17 @@ Potential Cloud focus areas:
 - Cloud support workflows;
 - data export and deletion workflows;
 - Cloud operational monitoring;
-- SaaS onboarding UX.
+- SaaS onboarding UX;
+- optional hosted Opstage for private agents;
+- optional managed coordination layer if Capsule Bus matures.
 
 Cloud should remain compatible with the same Agent governance model.
 
+Cloud should not require customers to expose private service internals unless explicitly configured.
+
 ---
 
-## 16. Version Naming
+## 22. Version Naming
 
 Recommended version naming:
 
@@ -395,7 +665,11 @@ Recommended version naming:
 CE v0.1
 CE v0.2
 CE v0.3
+CE v0.4
+CE v0.5
 CE v1.0
+Private AI Stack Alpha
+Private AI Stack Beta
 EE Alpha
 EE Beta
 EE v1.0
@@ -406,9 +680,11 @@ Cloud v1.0
 
 Avoid using enterprise or Cloud version names before the CE kernel is stable.
 
+Avoid using Private AI Stack version names before xtrape-hammers and vieup-forge have minimal usable forms.
+
 ---
 
-## 17. Release Artifact Direction
+## 23. Release Artifact Direction
 
 CE release artifacts may include:
 
@@ -421,6 +697,19 @@ Node demo Capsule Service
 migration files
 quick start guide
 release notes
+troubleshooting guide
+AI maintenance guide after CE v0.3
+service manifest examples after CE v0.4
+```
+
+Future Private AI Stack artifacts may include:
+
+```text
+capsule + hammers Docker Compose example
+hammers service manifest
+forge maintenance TaskFlow templates
+private AI service stack quick start
+AI runtime service demo
 ```
 
 Future EE artifacts may include:
@@ -440,7 +729,7 @@ Future Cloud artifacts are mainly hosted service releases and customer-facing on
 
 ---
 
-## 18. Documentation Roadmap
+## 24. Documentation Roadmap
 
 Documentation should evolve with versions.
 
@@ -457,6 +746,47 @@ Required:
 - security notes;
 - troubleshooting.
 
+### CE v0.2 documentation
+
+Add:
+
+- release checklist;
+- contribution guide;
+- issue and PR template guide;
+- changelog policy;
+- local development guide.
+
+### CE v0.3 documentation
+
+Add:
+
+- AI maintenance guide;
+- release automation guide;
+- product boundary guide;
+- AI-assisted issue triage guide;
+- AI-assisted docs update guide;
+- multi-repository maintenance guide if needed.
+
+### CE v0.4 documentation
+
+Add:
+
+- service manifest guide;
+- endpoint visibility guide;
+- internal URL convention;
+- capability metadata guide;
+- lightweight service communication guide.
+
+### CE v0.5 documentation
+
+Add:
+
+- Capsule Bus concept;
+- bus message envelope draft;
+- command/event/request-reply model;
+- service identity draft;
+- Capsule Bus non-goals.
+
 ### CE v1.0 documentation
 
 Add:
@@ -465,8 +795,17 @@ Add:
 - API reference;
 - SDK reference;
 - deployment guide;
-- contribution guide;
-- release process.
+- stable contribution guide;
+- stable release process.
+
+### Private AI Stack documentation
+
+Add:
+
+- hammers as capsule service guide;
+- forge-managed capsule maintenance guide;
+- private AI service stack quick start;
+- AI runtime service observability guide.
 
 ### EE documentation
 
@@ -494,7 +833,7 @@ Add:
 
 ---
 
-## 19. Roadmap Guardrails
+## 25. Roadmap Guardrails
 
 Follow these guardrails:
 
@@ -508,12 +847,19 @@ Follow these guardrails:
 8. Do not store raw secrets by default.
 9. Do not break CE trust with artificial limitations.
 10. Do not redefine the Capsule governance kernel per edition.
+11. Do not implement Capsule Bus before service manifest and service identity are clear.
+12. Do not turn Capsule into a service mesh.
+13. Do not turn Capsule into an AI runtime.
+14. Do not implement TaskFlow or Gate inside Capsule core.
+15. Do not add external queue requirements to CE by default.
+16. Do not expand Private AI Stack before hammers and forge have minimal usable forms.
+17. Do not make OpenClaw or any third-party agent runtime a hard dependency.
 
 ---
 
-## 20. Decision Checkpoints
+## 26. Decision Checkpoints
 
-Before moving from CE v0.1 to later roadmap stages, review these checkpoints.
+Before moving between roadmap stages, review these checkpoints.
 
 ### Before CE v0.2
 
@@ -524,6 +870,36 @@ Ask:
 - Is the Node SDK developer experience acceptable?
 - Are status and freshness understandable?
 - Are users able to run demo actions successfully?
+- Is Docker quick start reliable?
+
+### Before CE v0.3
+
+Ask:
+
+- Is the release process repeatable?
+- Are issue templates and PR templates in place?
+- Can AI coding agents understand the project boundaries?
+- Is there a documented maintenance process?
+- Is the maintainer burden acceptable?
+
+### Before CE v0.4
+
+Ask:
+
+- Are service manifests stable enough to extend?
+- Do users need internal service endpoint metadata?
+- Is there a real example service that needs internal communication?
+- Can static internal URLs and environment variables solve the current need?
+
+### Before CE v0.5
+
+Ask:
+
+- Is point-to-point service communication becoming a real pain?
+- Are command/event/request-reply semantics clear?
+- Is service identity clear enough?
+- Is an optional local prototype enough?
+- Can Capsule Bus remain optional?
 
 ### Before CE v1.0
 
@@ -534,6 +910,17 @@ Ask:
 - Is documentation sufficient?
 - Is the security boundary clear?
 - Is CE useful as an open-source product?
+- Are future features clearly separated from stable CE guarantees?
+
+### Before Private AI Stack
+
+Ask:
+
+- Can Capsule manage hammers as a normal service?
+- Does hammers have a minimal AI runtime API?
+- Does forge have a minimal TaskFlow runtime?
+- Is the integration useful without becoming a hard dependency?
+- Is the private AI service stack story clear?
 
 ### Before EE
 
@@ -544,6 +931,7 @@ Ask:
 - Which database/deployment mode is required first?
 - Which Agent expansion has the strongest demand?
 - What support burden is acceptable?
+- Does enterprise service communication require Capsule Bus or simpler policies?
 
 ### Before Cloud
 
@@ -554,40 +942,57 @@ Ask:
 - Is Agent Gateway required?
 - Are billing and support workflows ready?
 - Is operational responsibility acceptable?
+- Are private agent security boundaries clear?
 
 ---
 
-## 21. Anti-Patterns
+## 27. Anti-Patterns
 
 Avoid these roadmap anti-patterns.
 
-### 21.1 Building all future editions at once
+### 27.1 Building all future editions at once
 
 This slows CE and makes the product unclear.
 
-### 21.2 CE as a broken demo
+### 27.2 CE as a broken demo
 
 CE should be genuinely useful.
 
-### 21.3 Agent expansion before Agent basics
+### 27.3 Agent expansion before Agent basics
 
 Embedded Agent should be stable before Sidecar/External Agent.
 
-### 21.4 Runtime expansion before Node.js is stable
+### 27.4 Runtime expansion before Node.js is stable
 
 More runtimes should not come before a validated governance contract.
 
-### 21.5 Commercial packaging before product value
+### 27.5 Commercial packaging before product value
 
 License and entitlement systems should not consume early engineering capacity.
 
-### 21.6 Observability platform before governance visibility
+### 27.6 Observability platform before governance visibility
 
 First make Agents, services, health, Commands, and AuditEvents visible.
 
+### 27.7 Service mesh by accident
+
+Lightweight service communication should not become Kubernetes, Istio, or a full service mesh.
+
+### 27.8 AI runtime inside Capsule core
+
+Capsule should manage AI runtime services, not become one.
+
+### 27.9 TaskFlow inside Capsule core
+
+TaskFlow, Gate, and task spiral belong to vieup-forge, not Capsule core.
+
+### 27.10 Bus before manifest
+
+Do not build Capsule Bus before service manifests, endpoint metadata, and service identity are clear.
+
 ---
 
-## 22. Summary Roadmap
+## 28. Summary Roadmap
 
 Recommended roadmap summary:
 
@@ -595,11 +1000,23 @@ Recommended roadmap summary:
 CE v0.1
   Build the lightweight governance loop with Node.js Embedded Agent.
 
-CE v0.2/v0.3
-  Stabilize CE, improve DX, UI, tests, packaging, and docs.
+CE v0.2
+  Stabilize CE, improve UI, error handling, SDK DX, tests, packaging, and release discipline.
+
+CE v0.3
+  Make the project AI-maintenance ready with maintenance guides, release automation guides, boundaries, and task templates.
+
+CE v0.4
+  Add lightweight service communication metadata through Service Manifest, endpoint visibility, capabilities, and internal URL conventions.
+
+CE v0.5
+  Define and optionally prototype Capsule Bus as a future internal service coordination layer.
 
 CE v1.0
   Publish a reliable open-source community edition.
+
+Private AI Stack Track
+  Integrate xtrape-hammers as an AI runtime service and vieup-forge as an automation/control-plane consumer.
 
 EE
   Add enterprise private-deployment capabilities based on real demand.
@@ -610,7 +1027,7 @@ Cloud
 
 ---
 
-## 23. Acceptance Criteria
+## 29. Acceptance Criteria
 
 This roadmap is acceptable when:
 
@@ -618,6 +1035,10 @@ This roadmap is acceptable when:
 - CE v0.1 non-goals are clear;
 - Node.js Embedded Agent is clearly first;
 - future Agent and runtime expansion is sequenced;
+- service communication is staged instead of overbuilt;
+- Capsule Bus is future-facing and optional;
+- xtrape-hammers is positioned as AI runtime, not Capsule core;
+- vieup-forge is positioned as TaskFlow automation/control plane, not Capsule core;
 - EE and Cloud are clearly future tracks;
 - roadmap guardrails prevent scope creep;
 - release and documentation directions are clear;
@@ -626,10 +1047,22 @@ This roadmap is acceptable when:
 
 ---
 
-## 24. Summary
+## 30. Summary
 
 The `xtrape-capsule` roadmap should prioritize a working, lightweight, open-source CE kernel before expanding into enterprise and SaaS editions.
 
+The roadmap now explicitly separates:
+
+```text
+Capsule governance
+Product maintenance automation
+Lightweight service communication
+Capsule Bus
+AI runtime integration
+TaskFlow automation
+Enterprise and Cloud packaging
+```
+
 The most important roadmap rule is:
 
-> Build the smallest complete governance loop first, then expand scale, runtime coverage, Agent modes, enterprise features, and Cloud hosting only after the kernel is proven.
+> Build the smallest complete governance loop first, then automate maintenance, then introduce lightweight service coordination, then integrate AI runtime and TaskFlow automation, and only then expand scale, runtime coverage, Agent modes, enterprise features, and Cloud hosting.
