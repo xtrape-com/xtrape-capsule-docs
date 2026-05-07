@@ -78,6 +78,27 @@ CE v0.1 should use:
 
 EE and Cloud are future tracks. They should guide extension-point design, but they must not expand the CE v0.1 implementation scope.
 
+## Current Planning Tracks
+
+Implementation focus:
+
+- `v0.1 Public Review / Public Preview readiness`
+
+Near-term planning:
+
+- `v0.2 Developer Experience & Runtime Maturity`
+
+Future roadmap:
+
+- `v0.3 Capsule Events and Capability Metadata`
+- `v0.4 Capsule Bus Experimental`
+- `v0.5 Capsule Catalog`
+- `v0.6 Capsule Registry`
+- `v0.7 Private Capsule Marketplace`
+- `v1.0 CE Stable and Ecosystem Foundation`
+
+These future roadmap items should guide extension-point design, but must not expand the current v0.1/v0.2 implementation scope unless explicitly promoted into an implementation issue.
+
 ---
 
 ## 2. Documentation Structure

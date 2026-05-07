@@ -2136,7 +2136,7 @@ components:
           pattern: '^svc_'
         type:
           type: string
-          enum: [ACTION_PREPARE, ACTION_EXECUTE, ACTION]
+          enum: [ACTION_PREPARE, ACTION_EXECUTE]
         actionName:
           type: string
         status:
