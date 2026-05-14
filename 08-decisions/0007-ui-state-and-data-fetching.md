@@ -2,10 +2,24 @@
 status: accepted
 audience: ai-coding-agents
 stability: stable
-last_reviewed: 2026-05-05
+last_reviewed: 2026-05-14
 ---
 
 # ADR 0007: CE v0.1 UI State and Data Fetching
+
+> **v0.2 conformance note (2026-05-14):** the file-layout intent of this ADR
+> (`apps/opstage-ui/src/{lib,pages,context,hooks,components}/`) is now fully
+> realised. `App.tsx` was split from 1193 → 124 lines across three incremental
+> commits on the `v0.2` branch:
+>
+> - `lib/` — `types.ts`, `list-helpers.ts`, `format.ts`, `metrics.ts`.
+> - `pages/` — one component per route, plus `LanguageSwitcher`.
+> - `pages/services/` — `helpers.tsx`, `SchemaPayloadFields`, `ActionResult`,
+>   `ServiceDrawer`, `ServicesPage`.
+>
+> Back-compat re-exports are preserved on `App.tsx` for the symbols still
+> imported by `action-result-list.test.tsx`. See
+> `10-implementation/18-v02-progress-log.md` for the full record.
 
 ## Status
 

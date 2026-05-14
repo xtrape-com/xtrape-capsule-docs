@@ -26,6 +26,18 @@ translation_status: draft-machine-assisted
 
 # ADR 0007: CE（社区版） v0.1 UI State and Data Fetching
 
+> **v0.2 一致性说明(2026-05-14):** 本 ADR 关于文件布局的意图
+> (`apps/opstage-ui/src/{lib,pages,context,hooks,components}/`)已在 v0.2 完整
+> 落地。`App.tsx` 在 `v0.2` 分支上经三次增量 commit 从 1193 行拆到 124 行:
+>
+> - `lib/` — `types.ts`、`list-helpers.ts`、`format.ts`、`metrics.ts`。
+> - `pages/` — 每条路由一个组件,加 `LanguageSwitcher`。
+> - `pages/services/` — `helpers.tsx`、`SchemaPayloadFields`、`ActionResult`、
+>   `ServiceDrawer`、`ServicesPage`。
+>
+> `App.tsx` 保留 `action-result-list.test.tsx` 引用符号的回向兼容重导出。
+> 完整记录见 `10-implementation/18-v02-progress-log.md`。
+
 ## Status
 
 Draft

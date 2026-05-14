@@ -535,6 +535,33 @@ Possible improvements:
 
 CE v0.2 should still avoid EE/Cloud scope.
 
+### 18.1 v0.2 actual delivery (2026-05-14)
+
+Status of the bullets above against what the `v0.2` branches actually carry. Full per-PR detail lives in `10-implementation/18-v02-progress-log.md`.
+
+| Roadmap intent | Status | Notes |
+| --- | --- | --- |
+| Better UI layout | **Done** | `App.tsx` split 1193 → 124 lines; ADR-0007 conformance complete (`lib/`, `pages/`, `pages/services/`). |
+| Better status / freshness explanation | **Done** | `effectiveStatus` folds agent state + heartbeat freshness; services responses also expose `storedStatus`. |
+| Better command lifecycle display | **Done** | `errorCode` / `errorMessage` lifted onto `commands` row; `durationMs` surfaced; UI columns rendered. |
+| Better SDK logs | **Done** | Optional `onLog` structured sink in `xtrape-capsule-agent-node` (additive, no break). |
+| Better retry / backoff behaviour | **Done** | Typed errors split retryable (`NetworkError`) from non-retryable (`RegistrationError`, `AgentAuthError`). |
+| Better troubleshooting docs | **Done** | New `docs/troubleshooting.md` on the site, plus version-compatibility matrix. |
+| Initial API reference | **Partial** | `/api/system/health`, `/api/system/version`, `/api/admin/metrics` documented in `concepts/management-contract.md`. Full OpenAPI publication still owed. |
+| Improved Docker Compose demo | **Deferred to v0.3** | Demo repo update did not ship in this cut. |
+| More test coverage | **Partial** | Agent SDK +2 new spec files (`errors`, `logger`); CE backend test count steady at 24. |
+| Improved quick start | **Deferred to v0.3** | Getting-started page unchanged. |
+| Better empty states / error messages / audit filtering | **Deferred to v0.3** | UI polish bucket not addressed in this cut. |
+
+Additionally shipped, not on the original v0.2 list:
+
+- System health + version endpoints fully implemented with OCI image labels.
+- Enriched `/api/admin/metrics` (p50/p95/topErrors/stale-agents).
+- Audit metadata redactor split (`redactAuditMetadata` value-based) — bug fix from review.
+- Agent token rotation on re-register — bug fix from review.
+- Ephemeral one-time-key cache (see ADR-0010 in `08-decisions/`).
+- `xtrape-capsule-contracts-node` `newId()` removed (intentional breaking change).
+
 ---
 
 ## 19. CE v0.3 Direction

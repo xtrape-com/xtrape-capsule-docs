@@ -555,6 +555,33 @@ Possible improvements:
 
 CE（社区版） v0.2 should still avoid EE（企业版）/Cloud（云版） scope.
 
+### 18.1 v0.2 实际交付情况（2026-05-14）
+
+以下是上面 roadmap 条目对照 `v0.2` 分支实际交付的状态。逐 PR 细节见 `10-implementation/18-v02-progress-log.md`。
+
+| Roadmap 意图 | 状态 | 备注 |
+| --- | --- | --- |
+| 更好的 UI 布局 | **已完成** | `App.tsx` 拆分 1193 → 124 行;ADR-0007 一致性达成(`lib/`、`pages/`、`pages/services/`)。 |
+| 更好的 status / 新鲜度解释 | **已完成** | `effectiveStatus` 折合 agent 状态 + 心跳新鲜度;service 响应同时暴露 `storedStatus`。 |
+| 更好的命令生命周期展示 | **已完成** | `errorCode` / `errorMessage` 抬到 `commands` 行;`durationMs` 浮出;UI 列已渲染。 |
+| 更好的 SDK 日志 | **已完成** | `xtrape-capsule-agent-node` 中可选 `onLog` 结构化 sink(增量,无破坏)。 |
+| 更好的重试 / 退避行为 | **已完成** | 类型化错误把可重试(`NetworkError`)与不可重试(`RegistrationError`、`AgentAuthError`)拆开。 |
+| 更好的 troubleshooting 文档 | **已完成** | 站点新增 `docs/troubleshooting.md`,以及 version-compatibility 矩阵。 |
+| 初步 API 参考 | **部分** | `/api/system/health`、`/api/system/version`、`/api/admin/metrics` 已在 `concepts/management-contract.md` 中文档化;完整 OpenAPI 发布仍待补。 |
+| 改进 Docker Compose demo | **推迟到 v0.3** | Demo 仓本次未上车。 |
+| 更多测试覆盖 | **部分** | Agent SDK 新增 `errors`、`logger` 两个 spec;CE backend 测试维持 24。 |
+| 改进 quick start | **推迟到 v0.3** | Getting-started 页未变化。 |
+| 更好的空状态 / 错误信息 / 审计筛选 | **推迟到 v0.3** | UI 打磨此次未触及。 |
+
+另外交付了 v0.2 原列表外的内容:
+
+- 系统 health + version 端点完整实现,Docker 镜像写入 OCI 标签。
+- 增强 `/api/admin/metrics`(p50/p95/topErrors/stale-agents)。
+- 审计元数据 redactor 拆分(`redactAuditMetadata` 基于值)—— review 阶段修出的 bug。
+- Agent token 在重注册时轮换 —— review 阶段修出的 bug。
+- 一次性密钥临时缓存(见 `08-decisions/` 下 ADR-0010)。
+- `xtrape-capsule-contracts-node` 删除 `newId()`(有意 breaking change)。
+
 ---
 
 ## 19. CE（社区版） v0.3 Direction
