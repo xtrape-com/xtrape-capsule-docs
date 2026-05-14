@@ -568,7 +568,7 @@ CE（社区版） v0.2 should still avoid EE（企业版）/Cloud（云版） sc
 | 更好的重试 / 退避行为 | **已完成** | 类型化错误把可重试(`NetworkError`)与不可重试(`RegistrationError`、`AgentAuthError`)拆开。 |
 | 更好的 troubleshooting 文档 | **已完成** | 站点新增 `docs/troubleshooting.md`,以及 version-compatibility 矩阵。 |
 | 初步 API 参考 | **部分** | `/api/system/health`、`/api/system/version`、`/api/admin/metrics` 已在 `concepts/management-contract.md` 中文档化;完整 OpenAPI 发布仍待补。 |
-| 改进 Docker Compose demo | **推迟到 v0.3** | Demo 仓本次未上车。 |
+| 改进 Docker Compose demo | **部分完成** | `xtrape-capsule-demo` 升至 `0.2.0-rc.1`([PR #14](https://github.com/xtrape-com/xtrape-capsule-demo/pull/14)),`failOnce` 改为结构化失败 + 新增 v0.2 smoke-test 指南。专门的 demo 镜像 Compose 路径仍推迟。 |
 | 更多测试覆盖 | **部分** | Agent SDK 新增 `errors`、`logger` 两个 spec;CE backend 测试维持 24。 |
 | 改进 quick start | **推迟到 v0.3** | Getting-started 页未变化。 |
 | 更好的空状态 / 错误信息 / 审计筛选 | **推迟到 v0.3** | UI 打磨此次未触及。 |

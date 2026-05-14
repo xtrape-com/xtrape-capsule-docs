@@ -20,6 +20,7 @@ translation: machine-assisted
 | `xtrape-capsule-agent-node` | `v0.2` | [#7](https://github.com/xtrape-com/xtrape-capsule-agent-node/pull/7) | open |
 | `xtrape-capsule-contracts-node` | `v0.2` | [#9](https://github.com/xtrape-com/xtrape-capsule-contracts-node/pull/9) | open |
 | `xtrape-capsule-site` | `v0.2` | [#6](https://github.com/xtrape-com/xtrape-capsule-site/pull/6) | open |
+| `xtrape-capsule-demo` | `v0.2` | [#14](https://github.com/xtrape-com/xtrape-capsule-demo/pull/14) | open |
 
 ## 已交付 surface
 
@@ -55,6 +56,27 @@ translation: machine-assisted
 - 新增 `docs/version-compatibility.md`(minor 版本固定矩阵)、`docs/troubleshooting.md`(失败 runbook)、`docs/agents/lifecycle.md`(register → heartbeat → token rotation → revoke)。
 - `docs/releases/v0.2.0.md` 草案 + Releases 导航重构。
 - v0.2 surface 文档新增:`node-embedded-agent.md` 加 `Typed errors` + `Structured logging` 章节,`concepts/management-contract.md` 加 system + metrics 端点规范,`opstage-ce/admin-ui.md` 加一次性 `generatedKey` 操作员段落。
+- 评审后 rc.1 一致性整理:release notes 横幅改 "(release candidate)",新增 "Not included in v0.2" 段;version-compatibility 开篇即写通用 "pin matching minors" 规则;Docker 安装文档对齐 `docker-publish.yml` 实际 tag 策略(无 `latest`)。
+
+### Demo(`xtrape-capsule-demo`)
+
+- 升至 `0.2.0-rc.1`。`agent-node` / `contracts-node` 依赖区间在 rc 窗口内保持已发布的 `0.1.0-public-review.0`,在 release-cut 提交时再升到 `^0.2.x`。
+- `failOnce` 从 `throw new Error(...)` 改为结构化 `{ success: false, error: { code: "DEMO_FAILURE", message } }` 返回 —— CE v0.2 的命令失败 surface(将 `errorCode` + `errorMessage` 直接抬到 commands 行)需要这个形状才能正确渲染。
+- 新增 `docs/v0.2-smoke-test.md`:v0.2 surface 完整 step-by-step 验证 —— effectiveStatus 状态转换(HEALTHY → STALE → OFFLINE)、命令 `durationMs`、结构化失败、`/health` + `/api/system/{health,version}`(并断言 dev 模式下不应出现 `0.1.0` 字面值)、增强后的 `/api/admin/metrics` 形状。
+- README v0.2 横幅 + Version Compatibility 段。
+
+## Review 驱动的 rc.1 修复(2026-05-14)
+
+依据 `12-prompts/019.xtrape-capsule-v0.2-commercial-review-conclusion.md`
+跨仓评审清单,以下 blocker 已在各仓 `v0.2` 分支落地:
+
+- **CE-1**:`deriveEffectiveStatus` —— 仓库存为 OFFLINE 的 agent 之前被映射为服务 `STALE`,现已修正为映射为服务 `OFFLINE`。新增 `effective-status.test.ts` 覆盖 8 种 agent 状态场景。
+- **CE-2**:`/api/system/health`、`/api/system/version`、`runtimeDiagnostics` 中的 `"0.1.0"` 字面回退替换为单一常量 `BACKEND_FALLBACK_VERSION = "0.2.0-dev"`;构建注入的 `OPSTAGE_VERSION` 仍优先。
+- **CE-3**:`docker-publish.yml` 顶部加注释块,记录已发布 tag 集合(edge / branch / semver / major.minor / sha-<long>),并明确不发布 `latest`。
+- **AGENT-1/2**:示例 service `version` 从 `"0.1.0"` 改为 `"0.2.0-example"` 并加注释;包升 `0.2.0-rc.1`。
+- **CONTRACTS-1/2**:README "ID Helpers" 段重写为 "ID generation",含可运行 `nanoid` 工厂示例;新增 "Breaking changes in 0.2.0" 段;CHANGELOG 加 `0.2.0-rc.1` entry;包升 `0.2.0-rc.1`。
+- **SITE-1/2/3**:release notes 逐条对照实际代码核实;无法验证的声明被确认或移到 "Not included in v0.2";version-compatibility 开篇即用 "pin matching minors" 通用规则;Docker 安装文档对齐 workflow tag 策略。
+- **Demo 对齐**(评审后追加):demo 升 `0.2.0-rc.1`,`failOnce` 改为结构化失败,新增 smoke-test 指南。
 
 ## 横切决策记录
 
@@ -67,13 +89,17 @@ translation: machine-assisted
 
 - **CE #13**(UI 的 `apiList` 改走 `apiFetch`)。本次切线之外,推迟到 v0.3。Release notes 已同步更新。
 - 新 v0.2 页面的 **zh-CN 站点翻译**。已 track,本次不交付。
+- **Quick-start 文档 / getting-started 打磨** —— 本次相对 v0.1 无变化。
+- **空状态 / 错误信息 / 审计筛选 UI 打磨。**
+- **`latest` Docker tag** —— workflow 刻意不发布;安装文档锁到 `0.2.0`。
 
 ## 日志记录时刻的验证
 
 ```
 xtrape-capsule-ce/apps/opstage-ui:        pnpm typecheck ✅  pnpm test 8/8 ✅  pnpm build ✅
-xtrape-capsule-ce/apps/opstage-backend:   pnpm test 24/24 ✅
+xtrape-capsule-ce/apps/opstage-backend:   pnpm test 32/32 ✅  (was 24, +8 effectiveStatus)
 xtrape-capsule-agent-node:                pnpm test 30/30 ✅
 xtrape-capsule-contracts-node:            pnpm test 33/33 ✅
 xtrape-capsule-site:                      pnpm docs:build ✅
+xtrape-capsule-demo:                      pnpm typecheck ✅  pnpm build ✅
 ```

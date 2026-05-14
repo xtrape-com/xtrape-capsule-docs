@@ -548,7 +548,7 @@ Status of the bullets above against what the `v0.2` branches actually carry. Ful
 | Better retry / backoff behaviour | **Done** | Typed errors split retryable (`NetworkError`) from non-retryable (`RegistrationError`, `AgentAuthError`). |
 | Better troubleshooting docs | **Done** | New `docs/troubleshooting.md` on the site, plus version-compatibility matrix. |
 | Initial API reference | **Partial** | `/api/system/health`, `/api/system/version`, `/api/admin/metrics` documented in `concepts/management-contract.md`. Full OpenAPI publication still owed. |
-| Improved Docker Compose demo | **Deferred to v0.3** | Demo repo update did not ship in this cut. |
+| Improved Docker Compose demo | **Partial** | `xtrape-capsule-demo` bumped to `0.2.0-rc.1` ([PR #14](https://github.com/xtrape-com/xtrape-capsule-demo/pull/14)) with structured `failOnce` + v0.2 smoke-test guide. A dedicated Docker Compose path for the demo image is still deferred. |
 | More test coverage | **Partial** | Agent SDK +2 new spec files (`errors`, `logger`); CE backend test count steady at 24. |
 | Improved quick start | **Deferred to v0.3** | Getting-started page unchanged. |
 | Better empty states / error messages / audit filtering | **Deferred to v0.3** | UI polish bucket not addressed in this cut. |

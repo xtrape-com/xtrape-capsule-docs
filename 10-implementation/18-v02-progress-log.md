@@ -19,6 +19,7 @@ This log records what was actually shipped on the `v0.2` branches of the four pu
 | `xtrape-capsule-agent-node` | `v0.2` | [#7](https://github.com/xtrape-com/xtrape-capsule-agent-node/pull/7) | open |
 | `xtrape-capsule-contracts-node` | `v0.2` | [#9](https://github.com/xtrape-com/xtrape-capsule-contracts-node/pull/9) | open |
 | `xtrape-capsule-site` | `v0.2` | [#6](https://github.com/xtrape-com/xtrape-capsule-site/pull/6) | open |
+| `xtrape-capsule-demo` | `v0.2` | [#14](https://github.com/xtrape-com/xtrape-capsule-demo/pull/14) | open |
 
 ## Shipped surfaces
 
@@ -54,6 +55,28 @@ This log records what was actually shipped on the `v0.2` branches of the four pu
 - New `docs/version-compatibility.md` (pinned-minor matrix), `docs/troubleshooting.md` (failure runbook), `docs/agents/lifecycle.md` (register → heartbeat → token rotation → revoke).
 - `docs/releases/v0.2.0.md` draft + Releases nav restructure.
 - v0.2 surface docs added: `Typed errors` + `Structured logging` sections in `node-embedded-agent.md`, system + metrics endpoint specs added to `concepts/management-contract.md`, one-time `generatedKey` operator paragraph added to `opstage-ce/admin-ui.md`.
+- Post-review consistency pass for rc.1: release-notes banner shifted to "(release candidate)", "Not included in v0.2" section added, version-compatibility opens with the general "pin matching minors" rule, Docker install docs aligned with the actual `docker-publish.yml` tag strategy (no `latest`).
+
+### Demo (`xtrape-capsule-demo`)
+
+- Bumped to `0.2.0-rc.1`. `agent-node` / `contracts-node` dep ranges held on the published `0.1.0-public-review.0` for the rc window; will graduate to `^0.2.x` at the release-cut commit.
+- `failOnce` refactored from `throw new Error(...)` to a structured `{ success: false, error: { code: "DEMO_FAILURE", message } }` return — the v0.2 command failure surface (CE lifts `errorCode` + `errorMessage` onto the commands row) needs that shape to render properly.
+- New `docs/v0.2-smoke-test.md`: full step-by-step verification of the v0.2 surface — effective-status transitions (HEALTHY → STALE → OFFLINE), command `durationMs`, structured failure, `/health` + `/api/system/{health,version}` (asserts no `0.1.0` fallback in dev mode), and the enriched `/api/admin/metrics` shape.
+- README v0.2 banner + Version Compatibility block.
+
+## Review-driven rc.1 fixes (2026-05-14)
+
+Per `12-prompts/019.xtrape-capsule-v0.2-commercial-review-conclusion.md`,
+the cross-repo review surfaced these blockers and they have been
+addressed on the `v0.2` branches:
+
+- **CE-1**: `deriveEffectiveStatus` — agent stored OFFLINE was mapping to service `STALE`. Tightened so stored OFFLINE → service `OFFLINE`. Added 8 unit tests in `effective-status.test.ts` covering the agent-state matrix.
+- **CE-2**: `0.1.0` literal fallback in `/api/system/health`, `/api/system/version`, `runtimeDiagnostics` replaced with a single `BACKEND_FALLBACK_VERSION = "0.2.0-dev"` constant. Build-injected `OPSTAGE_VERSION` still wins.
+- **CE-3**: `docker-publish.yml` gets a header comment block documenting the published tag set (edge / branch / semver / major.minor / sha-<long>) and that `latest` is intentionally NOT published.
+- **AGENT-1/2**: Example service versions bumped from `"0.1.0"` to `"0.2.0-example"` with clarifying comment; package bumped to `0.2.0-rc.1`.
+- **CONTRACTS-1/2**: README "ID Helpers" reworked to "ID generation" with runnable `nanoid` factory example, new "Breaking changes in 0.2.0" section. CHANGELOG `0.2.0-rc.1` entry. Package bumped to `0.2.0-rc.1`.
+- **SITE-1/2/3**: Release notes audited line-by-line against actual code; unverifiable claims either confirmed or moved to "Not included in v0.2". Version-compatibility opens with the general "pin matching minors" rule. Docker install docs aligned with workflow tag strategy.
+- **Demo alignment** (after the review): demo bumped to `0.2.0-rc.1`, `failOnce` returns structured failure, smoke-test guide added.
 
 ## Cross-cutting decisions captured
 
@@ -66,13 +89,17 @@ This log records what was actually shipped on the `v0.2` branches of the four pu
 
 - **CE #13** (route UI `apiList` through `apiFetch`). Out of scope for this cut; deferred to v0.3. Release notes updated to reflect this.
 - **zh-CN site translation** for the new v0.2 pages. Tracked, not delivered in this cut.
+- **Quick-start docs / getting-started polish** — unchanged from v0.1 in this cut.
+- **Empty-state / error-message / audit-filter UI polish.**
+- **`latest` Docker tag** — workflow intentionally does not publish it; install docs pin to `0.2.0`.
 
 ## Verification at log time
 
 ```
 xtrape-capsule-ce/apps/opstage-ui:        pnpm typecheck ✅  pnpm test 8/8 ✅  pnpm build ✅
-xtrape-capsule-ce/apps/opstage-backend:   pnpm test 24/24 ✅
+xtrape-capsule-ce/apps/opstage-backend:   pnpm test 32/32 ✅  (was 24, +8 effectiveStatus)
 xtrape-capsule-agent-node:                pnpm test 30/30 ✅
 xtrape-capsule-contracts-node:            pnpm test 33/33 ✅
+xtrape-capsule-demo:                      pnpm typecheck ✅  pnpm build ✅
 xtrape-capsule-site:                      pnpm docs:build ✅
 ```
