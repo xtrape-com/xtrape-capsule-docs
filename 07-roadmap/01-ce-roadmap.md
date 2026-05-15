@@ -66,7 +66,7 @@ CE should not feel like a broken trial of EE.
 
 The CE governance kernel is:
 
-```text
+``text
 Agent registration
     ↓
 Service report
@@ -566,21 +566,24 @@ Additionally shipped, not on the original v0.2 list:
 
 ## 19. CE v0.3 Direction
 
-CE v0.3 may add selected kernel improvements.
+CE v0.3 adds the experimental OpHub Runtime model and the metadata foundation for
+future Capsule Bus work.
 
-Possible improvements:
+Required improvements:
 
-- Command expiration cleanup;
-- simple health history if needed;
-- better system settings page;
-- improved dashboard summary;
-- improved SDK diagnostics;
-- explicit Agent disable/revoke if simple;
-- more robust migration process;
-- better release packaging;
-- optional experimental database adapter only if strongly justified.
+- distinguish `embedded` and `node` Agent modes;
+- allow Node Agent registration without requiring an embedded service at registration time;
+- support one Node Agent reporting one or more Capsule Services;
+- keep service identity stable by service `code`;
+- show the Agent -> managed services relationship in Opstage;
+- keep existing Embedded Agent integrations compatible;
+- accept capability metadata in service manifests/reports;
+- accept event metadata only as design-only metadata unless a real event runtime lands;
+- provide a demo Node Agent profile with two local services.
 
-CE v0.3 should remain lightweight.
+CE v0.3 should remain lightweight. It must not implement full Capsule Bus,
+workflow orchestration, service mesh behavior, Catalog, Registry, or Marketplace
+features.
 
 ---
 
