@@ -63,13 +63,15 @@ The roadmap follows this sequence:
 ```text
 1. CE v0.1 — prove the governance loop
 2. CE v0.2 — stabilize the CE kernel and productized release process
-3. CE v0.3 — improve DX, packaging, diagnostics, and AI-maintenance readiness
-4. CE v0.4 — introduce lightweight service communication metadata
-5. CE v0.5 — introduce early internal coordination and Capsule Bus planning
-6. CE v1.0 — publish a reliable community edition
-7. Private AI Stack Track — integrate xtrape-hammers and vieup-forge as managed services
-8. EE — add enterprise private-deployment capabilities
-9. Cloud — add hosted SaaS capabilities
+3. CE v0.3 — introduce experimental OpHub Runtime plus capability/event metadata
+4. CE v0.4 — introduce experimental Capsule Bus concepts
+5. CE v0.5 — introduce Capsule Catalog metadata and discovery
+6. CE v0.6 — introduce Capsule Registry metadata
+7. CE v0.7 — introduce Private Capsule Marketplace concepts
+8. CE v1.0 — publish a reliable community edition and ecosystem foundation
+9. Private AI Stack Track — integrate xtrape-hammers and vieup-forge as managed services
+10. EE — add enterprise private-deployment capabilities
+11. Cloud — add hosted SaaS capabilities
 ```
 
 Do not build EE or Cloud infrastructure before CE proves the product kernel.
@@ -325,32 +327,30 @@ CE v0.2 should not add Capsule Bus or AI runtime capabilities.
 
 ---
 
-## 11. CE v0.3 Direction — AI-Maintenance Readiness
+## 11. CE v0.3 Direction — OpHub Runtime, Capsule Events, and Capability Metadata
 
-CE v0.3 should make xtrape-capsule easier to maintain with AI-assisted workflows.
+CE v0.3 introduces **OpHub Runtime** as an experimental deployment mode and adds
+the metadata foundation needed for future Capsule Bus work.
 
-Possible focus areas:
+The two Agent modes are:
 
-- `AI_MAINTENANCE.md`;
-- `RELEASE_AUTOMATION.md`;
-- `PRODUCT_BOUNDARY.md`;
-- repository review checklist;
-- version synchronization checklist;
-- docs synchronization checklist;
-- standard AI task prompt templates;
-- standard release prompt templates;
-- standard issue triage prompt templates;
-- better demo service examples;
-- improved SDK logging and diagnostics;
-- improved local settings page;
-- better command lifecycle handling;
-- simple Command expiration cleanup;
-- simple health history if needed;
-- better release packaging.
+- **Embedded Agent** — one Capsule Service embeds the Node SDK and talks to Opstage directly.
+- **OpHub Runtime** — one OpHub process, sidecar, or base-image deployment represents one or more local Capsule Services.
 
-CE v0.3 should prepare the project to be managed by `vieup-forge-runtime`, but it should not depend on vieup-forge.
+Required v0.3 focus areas:
 
-The purpose of CE v0.3 is to reduce long-term maintainer burden before the product grows.
+- `AgentMode` contract with `embedded` and `ophub`;
+- OpHub registration semantics;
+- one OpHub reporting one or more Capsule Services;
+- stable service identity through OpHub reports;
+- command routing from OpHub to local service adapters;
+- capability metadata for service discovery;
+- event metadata marked design-only unless an actual event runtime is implemented;
+- demo profile showing OpHub-managed adapter mode with local services;
+- public documentation that keeps Capsule Bus future-facing.
+
+CE v0.3 should not implement full Capsule Bus, a workflow engine, or a service
+mesh. It reserves shape and validates the local runtime model.
 
 ---
 
