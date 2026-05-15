@@ -335,18 +335,18 @@ the metadata foundation needed for future Capsule Bus work.
 The two Agent modes are:
 
 - **Embedded Agent** — one Capsule Service embeds the Node SDK and talks to Opstage directly.
-- **OpHub Runtime** — one node-level, sidecar, or base-image Agent represents one or more local Capsule Services.
+- **OpHub Runtime** — one OpHub process, sidecar, or base-image deployment represents one or more local Capsule Services.
 
 Required v0.3 focus areas:
 
-- `AgentMode` contract with `embedded` and `node`;
-- Node Agent registration semantics;
-- one Agent reporting one or more Capsule Services;
-- stable service identity through Node Agent reports;
-- command routing from Node Agent to local service adapters;
+- `AgentMode` contract with `embedded` and `ophub`;
+- OpHub registration semantics;
+- one OpHub reporting one or more Capsule Services;
+- stable service identity through OpHub reports;
+- command routing from OpHub to local service adapters;
 - capability metadata for service discovery;
 - event metadata marked design-only unless an actual event runtime is implemented;
-- demo profile showing one Node Agent managing at least two local services;
+- demo profile showing OpHub-managed adapter mode with local services;
 - public documentation that keeps Capsule Bus future-facing.
 
 CE v0.3 should not implement full Capsule Bus, a workflow engine, or a service
