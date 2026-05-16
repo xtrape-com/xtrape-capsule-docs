@@ -354,23 +354,99 @@ mesh. It reserves shape and validates the local runtime model.
 
 ---
 
-## 12. CE v0.4 Direction — Lightweight Service Communication Metadata
+## 12. CE v0.4 Direction — Capsule Bus Experimental
 
-CE v0.4 may introduce lightweight service communication metadata if the governance kernel is stable.
+> **Direction change (2026-05-16).** v0.4 and v0.5 themes were swapped
+> compared to earlier drafts of this roadmap. The previous v0.5 plan
+> (Capsule Bus planning + early prototype) is brought forward into v0.4
+> because v0.3 (OpHub Runtime + Capsule Events + Capability Metadata)
+> already produced the event envelope and capability metadata that the
+> bus needs as input. Pushing service-manifest work to v0.5 lets the
+> bus prototype validate the routing model first; the manifest can
+> then be designed against real bus traffic instead of speculative
+> requirements. See §13 below for the new v0.5 scope.
 
-The goal is not to implement full service governance. The goal is to standardize how capsule-managed services describe their internal endpoints and capabilities.
+CE v0.4 introduces an **experimental, default-disabled Capsule Bus**
+that performs governed event-to-command routing inside a single
+Opstage CE instance.
 
-Possible focus areas:
+Capsule Bus v0.4 is **not** a workflow engine, service mesh,
+distributed transaction layer, or general-purpose message broker
+replacement.
 
-- Service Manifest v1;
-- internal endpoint metadata;
-- public/admin/internal endpoint visibility;
-- service capability metadata;
-- static internal URL documentation;
-- Docker Compose internal service naming convention;
-- environment variable injection convention;
+Recommended CE v0.4 scope:
+
+- define `BusRoutingRule`, `BusEventEnvelope`, and `BusCommandRequest`
+  schemas in `xtrape-capsule-contracts-node`;
+- store events and routes in CE SQLite;
+- evaluate enabled routes on `eventType` plus optional
+  `sourceServiceCode`;
+- emit an `ACTION_EXECUTE` command for each matched route (one
+  command per matched route in v0.4 — no fan-out);
+- offer a `DRY_RUN` route status that audits matches without creating
+  commands;
+- gate the entire feature behind `OPSTAGE_CAPSULE_BUS_ENABLED=true`
+  (default `false`);
+- ship a self-routing demo scenario (`demo-worker` emits
+  `demo.item.created`, route fires `demo-worker.notify`);
+- record audit events for every routing decision
+  (`bus.event.received` / `bus.route.matched` /
+  `bus.command.created` / `bus.route.failed` /
+  `bus.route.unmatched`);
+- enforce a hard max routing depth of 1 (a command's own completion
+  must not produce a new bus event that re-enters the router) to
+  eliminate loop risk programmatically;
+- rate-limit per-agent event ingestion (default 60 events/min);
+- add a CE admin UI page for route management + bus audit log.
+
+Capsule Bus v0.4 should still avoid:
+
+```text
+service mesh
+mTLS everywhere
+complex routing algorithms
+load balancing
+external message broker (Redis, RabbitMQ, NATS, Kafka)
+queue infrastructure requirement
+fan-out (commands-per-event > 1)
+non-Node OpHub runtime
+public marketplace or registry workflows
+```
+
+The detailed implementation plan lives at
+`10-implementation/v0.4-capsule-bus-implementation-plan.md` and the
+operator-facing concept page at
+`04-opstage/v0.4-capsule-bus-experimental.md`.
+
+---
+
+## 13. CE v0.5 Direction — Capsule Catalog (metadata + discovery)
+
+CE v0.5 introduces the **Capsule Catalog** — a centralised, lightweight
+view of every Capsule Service running against an Opstage instance, with
+the service-communication metadata needed for the v0.4 bus to address
+services symbolically (by `serviceCode` / `capability` rather than by
+hardcoded URL).
+
+The v0.4 bus shipped before this on purpose: the catalog can now be
+designed against real routing traffic instead of against speculative
+requirements.
+
+Recommended CE v0.5 scope:
+
+- Service Manifest v1 (describes a capsule-managed service's internal
+  endpoints, capabilities, and visibility);
+- internal endpoint metadata (`public` / `admin` / `internal`
+  visibility, static URLs, Docker Compose naming convention);
+- service capability metadata (canonical capability strings, e.g.
+  `llm.chat`, `task.plan`, `health.probe`);
 - basic service dependency metadata;
-- basic service topology view in Opstage if simple enough.
+- a Catalog page in Opstage UI listing services + their declared
+  endpoints/capabilities;
+- discovery-by-capability — bus routes and admin tooling can look up
+  a target service by capability rather than by raw `serviceCode`;
+- promote the v0.4 bus from experimental to stable if the routing
+  model has held up in real use.
 
 Example Service Manifest direction:
 
@@ -399,7 +475,7 @@ capabilities:
   - task.plan
 ```
 
-CE v0.4 should still avoid:
+CE v0.5 should still avoid:
 
 ```text
 service mesh
@@ -408,46 +484,12 @@ complex routing
 load balancing
 message broker requirement
 queue requirement
-Capsule Bus runtime
+public registry across Opstage instances (that is v0.6)
+marketplace workflows (that is v0.7)
 ```
 
----
-
-## 13. CE v0.5 Direction — Capsule Bus Planning and Early Coordination
-
-CE v0.5 may introduce early planning and limited prototypes for `Capsule Bus` if CE v0.4 proves the service metadata model.
-
-Capsule Bus is a planned internal communication layer for capsule-managed lightweight services.
-
-It aims to reduce direct service-to-service coupling in private and edge deployments by providing a lightweight bus-style communication model for commands, events, and request/reply interactions.
-
-Recommended CE v0.5 scope:
-
-- define Capsule Bus concept document;
-- define command/event/request-reply vocabulary;
-- define service identity requirements;
-- define bus message envelope;
-- define audit requirements;
-- define security boundaries;
-- optionally implement an experimental in-process or local prototype;
-- keep the prototype disabled by default.
-
-Capsule Bus should support these future communication modes:
-
-```text
-Command
-  service-a requests service-b to perform an operation.
-
-Event
-  service-a publishes a state change for interested services.
-
-Request/Reply
-  service-a asks service-b for a response without hardcoding direct endpoint details.
-```
-
-CE v0.5 should not require Redis, RabbitMQ, NATS, Kafka, or any external queue by default.
-
-Any bus implementation must remain optional until the product has strong evidence that it is needed.
+CE v0.5 must not require Redis, RabbitMQ, NATS, Kafka, or any
+external queue by default.
 
 ---
 
@@ -699,7 +741,7 @@ quick start guide
 release notes
 troubleshooting guide
 AI maintenance guide after CE v0.3
-service manifest examples after CE v0.4
+service manifest examples after CE v0.5
 ```
 
 Future Private AI Stack artifacts may include:
@@ -771,21 +813,26 @@ Add:
 
 Add:
 
-- service manifest guide;
-- endpoint visibility guide;
-- internal URL convention;
-- capability metadata guide;
-- lightweight service communication guide.
+- Capsule Bus experimental concept page;
+- bus message envelope (`BusEventEnvelope`) reference;
+- routing-rule (`BusRoutingRule`) reference;
+- service identity draft (how `sourceServiceCode` is verified);
+- audit-event reference (`bus.event.received`, `bus.route.matched`,
+  `bus.command.created`, `bus.route.failed`, `bus.route.unmatched`);
+- loop / storm safeguard guide (depth=1 hard limit, rate limit);
+- feature-flag operator guide (`OPSTAGE_CAPSULE_BUS_ENABLED`);
+- Capsule Bus v0.4 non-goals.
 
 ### CE v0.5 documentation
 
 Add:
 
-- Capsule Bus concept;
-- bus message envelope draft;
-- command/event/request-reply model;
-- service identity draft;
-- Capsule Bus non-goals.
+- service manifest guide;
+- endpoint visibility guide;
+- internal URL convention;
+- capability metadata guide;
+- discovery-by-capability guide for bus routes;
+- Capsule Catalog page reference.
 
 ### CE v1.0 documentation
 
@@ -886,20 +933,29 @@ Ask:
 
 Ask:
 
-- Are service manifests stable enough to extend?
-- Do users need internal service endpoint metadata?
-- Is there a real example service that needs internal communication?
-- Can static internal URLs and environment variables solve the current need?
+- Is v0.3 tagged + accepted (events + capability metadata stable)?
+- Is point-to-point service communication becoming a real pain?
+- Are command / event semantics clear enough to route on?
+- Is `sourceServiceCode` identity verifiable from the existing agent
+  token model?
+- Can the prototype stay disabled-by-default and gated by
+  `OPSTAGE_CAPSULE_BUS_ENABLED`?
+- Are loop / storm risks adequately bounded (`max routing depth = 1`,
+  per-agent rate limit)?
 
 ### Before CE v0.5
 
 Ask:
 
-- Is point-to-point service communication becoming a real pain?
-- Are command/event/request-reply semantics clear?
-- Is service identity clear enough?
-- Is an optional local prototype enough?
-- Can Capsule Bus remain optional?
+- Has the v0.4 experimental bus run long enough to surface the fields
+  a manifest must standardise?
+- Are service manifests stable enough to extend?
+- Do users need internal service endpoint metadata in addition to
+  capability metadata?
+- Should bus routes start resolving targets by capability rather than
+  by `serviceCode`?
+- Can the v0.4 bus be promoted from experimental to stable, or does
+  it need another minor of bake time?
 
 ### Before CE v1.0
 
@@ -986,9 +1042,21 @@ Capsule should manage AI runtime services, not become one.
 
 TaskFlow, Gate, and task spiral belong to vieup-forge, not Capsule core.
 
-### 27.10 Bus before manifest
+### 27.10 Bus before metadata, catalog before marketplace
 
-Do not build Capsule Bus before service manifests, endpoint metadata, and service identity are clear.
+Capsule Bus v0.4 ships **before** the full service-manifest /
+discovery-by-capability work in v0.5 on purpose — the bus is the
+real-traffic test for which fields the manifest must standardise.
+What this rule still forbids:
+
+- A bus that requires an external broker (Redis / Kafka / NATS) in
+  CE.
+- A bus that ships without service-identity verification on its
+  ingestion path.
+- Capsule Catalog (v0.5) before the v0.4 bus has surfaced the
+  routing-relevant fields.
+- Capsule Registry / Marketplace before Catalog has stabilised
+  capability strings.
 
 ---
 
@@ -1004,13 +1072,16 @@ CE v0.2
   Stabilize CE, improve UI, error handling, SDK DX, tests, packaging, and release discipline.
 
 CE v0.3
-  Make the project AI-maintenance ready with maintenance guides, release automation guides, boundaries, and task templates.
+  Introduce experimental OpHub Runtime plus Capsule Events and Capability Metadata.
 
 CE v0.4
-  Add lightweight service communication metadata through Service Manifest, endpoint visibility, capabilities, and internal URL conventions.
+  Introduce experimental Capsule Bus (governed event-to-command routing,
+  disabled by default, gated by OPSTAGE_CAPSULE_BUS_ENABLED).
 
 CE v0.5
-  Define and optionally prototype Capsule Bus as a future internal service coordination layer.
+  Introduce Capsule Catalog: Service Manifest, endpoint visibility,
+  capabilities, internal URL convention, discovery-by-capability for
+  bus routes; promote v0.4 bus from experimental to stable if proven.
 
 CE v1.0
   Publish a reliable open-source community edition.
